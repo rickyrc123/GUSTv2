@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  dev-env:
+    image: team-dev-env:ubuntu-22.04
+    build:
+    volumes:
+      - ./workspaces:/workspace
+    ports:
+      - "8080:8080"
+    tty: true
