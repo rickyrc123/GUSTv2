@@ -1,8 +1,8 @@
 version: "3.8"
 services:
   dev-env:
-    image: team-dev-env:ubuntu-22.04
     build:
+      context: .
     volumes:
       - ./workspaces:/workspace
     ports:
