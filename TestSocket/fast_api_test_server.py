@@ -35,11 +35,13 @@ async def generate_data():
         rand_long  =  random.uniform( -180,  180 )
         rand_lat   =  random.uniform(  -90,  90  )
         rand_alt   =  random.uniform(    0,  50  )
-
+        rand_dir   =  random.uniform(    0,  360 )
+ 
         position_array.append({
            "long"           : rand_long, 
            "lat"            : rand_lat,
-           "alt_meters"     : rand_alt
+           "alt_meters"     : rand_alt,
+           "direction"      : rand_dir
         })
     
     # convert to json payload
@@ -55,7 +57,7 @@ async def generate_data():
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World"}
+    return {"Page": "Homepage"}
 
 
 @app.get("/items/{item_id}")
