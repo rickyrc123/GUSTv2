@@ -13,7 +13,10 @@ RUN pip install \
     fastapi \
     folium \
     websockets \
-    uvicorn
+    uvicorn \
+    pydantic \
+    psycopg2-binary \
+    sqlalchemy 
     
 WORKDIR /workspace
 
