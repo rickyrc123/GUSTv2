@@ -17,4 +17,4 @@ RUN pip install \
     
 WORKDIR /workspace
 
-CMD ["bash"]
+COPY . .
