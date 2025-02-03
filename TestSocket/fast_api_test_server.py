@@ -2,6 +2,14 @@
 import random
 from typing import Union
 from fastapi import FastAPI
+from sqlalchemy import create_engine, inspect
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from db import models
+from db import schemas
+from db import database
+
+#db tables
 
 DRONE_TABLE = "drones"
 
@@ -31,7 +39,23 @@ STATES = {
     7 : ""
 }
 
+#the app
 app = FastAPI()
+
+engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
+
+def build():
+    models.Base.metadata.drop_all(engine)
+    models.Base.metadata.create_all(engine)
+
+#initializes db tables on startup
+@app.on_event("startup")
+async def startup():
+    build()
+
+
+#saves db on shutdown
+@app.on_event("shutdown")
 
 #sending stuff with the API
 @app.get("/test_data/get_generated_data")
@@ -69,22 +93,36 @@ async def generate_data():
 
     return payload
 
-@app.post("/{drone_id}/add_pos")
-async def post_drone_position(
-    drone_id : int,
-    lat      : float,
-    long     : float,
-    alt      : float,
-    name     : str,
-    bearing  : float,
+@app.get("/drones")
+async def post_drone_position():
+
+    drone_id : int = 1,
+    lat      : float = 23.5,
+    long     : float = 33.1,
+    alt      : float = 23.2,
+    name     : str = "test",
+    bearing  : float = 33.1,
     model    : str = "test", # TODO : Make these enums 
     state    : int = 0 #  here too
-):
-    return {"Adding" : "Drone {drone_id}, beep boop"}
+
+    data = {
+        'longitude' : 32,
+        'latitude'  : 32,
+        'altitude'  : 12,
+        'direction' : 11,
+        'model'     : models.DroneModels.model1
+
+    }
+
+    db = database.DatabaseServer()
+    db.create_drone(drone = schemas.CreateDrone(**data))
+
+    return {"Page" : db.get_all_drones()}
 
 @app.get("/")
 async def read_root():
-    return {"Page": "Homepage"}
+    inspector = inspect(engine)
+    return {"Page": inspector.get_table_names()}
 
 
 @app.get("/items/{item_id}")

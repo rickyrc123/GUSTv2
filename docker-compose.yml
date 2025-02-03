@@ -1,13 +1,5 @@
 version: "3.8"
 services:
-  dev-env:
-    build:
-      context: .
-    volumes:
-      - ./workspaces:/workspace
-    ports:
-      - "8080:8080"
-    tty: true
   fastapi:
     build: 
       context: ./TestSocket
@@ -17,9 +9,11 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASEURL=postgresql://user:pass@localhost:5432/postgres
+      - DATABASEURL=postgresql://postgres:postgres@db:5432/postgres
     networks:
       - backend
+    volumes:
+      - ./db:/workspace/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
   db:
     image: postgres:13
@@ -29,8 +23,11 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - backend
+
 networks:
   backend:
     driver: bridge
