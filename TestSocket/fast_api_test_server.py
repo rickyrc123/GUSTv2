@@ -3,6 +3,8 @@ import random
 from typing import Union
 from fastapi import FastAPI
 
+DRONE_TABLE = "drones"
+
 # fake drone list
 DRONE_IDS = [
     1,
@@ -16,6 +18,18 @@ DRONE_IDS = [
     9,
     10
 ]
+
+#states?
+STATES = {
+   -1 : "UNKNOWN",
+    1 : "f",
+    2 : "a",
+    3 : " ",
+    4 : "",
+    5 : "",
+    6 : "",
+    7 : ""
+}
 
 app = FastAPI()
 
@@ -54,6 +68,19 @@ async def generate_data():
     }
 
     return payload
+
+@app.post("/{drone_id}/add_pos")
+async def post_drone_position(
+    drone_id : int,
+    lat      : float,
+    long     : float,
+    alt      : float,
+    name     : str,
+    bearing  : float,
+    model    : str = "test", # TODO : Make these enums 
+    state    : int = 0 #  here too
+):
+    return {"Adding" : "Drone {drone_id}, beep boop"}
 
 @app.get("/")
 async def read_root():
