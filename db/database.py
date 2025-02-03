@@ -1,14 +1,15 @@
 from sqlalchemy import create_engine, insert, select, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import json
 
-import models
-import schemas
+from db import models
+from db import schemas
 
 #TODO: connect drone to swarm, update drone, rename drone, diconnect from swarm, swarm programs vs drone programs
 
 class DatabaseServer:
-  DATABASE_URL = 'postgresql+psycopg2://@localhost/fastapi'
+  DATABASE_URL = 'postgresql+psycopg2://postgres:postgres@db:5432/postgres'
 
   def __init__(self):
     engine = create_engine(self.DATABASE_URL)
@@ -49,7 +50,24 @@ class DatabaseServer:
     with self.Session.begin() as session:
       result = session.execute(select(text('drones')).where(models.Drone.name==name)).scalar()
     
+    print(result)
     return result
+  
+  def get_all_drones(self):
+    with self.Session.begin() as session:
+      
+      #this returns a weird type that fastapi doesnt like
+      #TODO : properly parse this so it can get passed to the api server....
+      results = session.execute(text('SELECT * FROM drones;')).fetchall() 
+      strings = []
+
+      for row in results:
+          strings.append(str(row))
+      
+      payload = {
+        "data" : strings
+      }
+      return json.dumps(payload)
 
   def get_drone_by_position(self, pos: tuple[float, float, float], return_name=False):
     with self.Session.begin() as session:

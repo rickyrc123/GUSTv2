@@ -3,7 +3,10 @@
 from sqlalchemy import create_engine
 from models import *
 
-engine = create_engine('postgresql+psycopg2://GUSTv2:password@localhost/GUSTv2')
+def build():
+    engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
-Base.metadata.drop_all(engine)
-Base.metadata.create_all(engine)
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+
+build()

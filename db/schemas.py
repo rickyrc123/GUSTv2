@@ -1,4 +1,4 @@
-from models import DroneModels
+from db.models import DroneModels
 from pydantic import BaseModel
 
 class PostBase(BaseModel):
