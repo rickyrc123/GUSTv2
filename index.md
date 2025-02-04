@@ -24,6 +24,8 @@ GUSTv2 aims to function as an all in one ground station for planning and control
 ## Meet the Team
 The GUST dev team consists of five seniors at the University of Alabama. We are partnered with the Laboratory for Autonomy, GNC, and Estimation Research (LAGER) on campus.
 
-| ![Nick](images/nick.jpg) | ![Jacob](images/jcob_Senior_Pic.jpg) |
+| <img src="images/nick.jpg" width="200" height="300" alt="Team Headshot">
+ | <img src="images/jcob_Senior_Pic.jpg" width="200" height="300" alt="Team Headshot">
+|
 | :---: | :---: |
 | Backend | Frontend |
