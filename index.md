@@ -28,4 +28,5 @@ The GUST dev team consists of five seniors at the University of Alabama. We are 
   <img src="images/nick.jpg" width="300" height="300" alt="Team Headshot">
   <img src="images/jcob_Senior_Pic.jpg" width="200" height="300" alt="Team Headshot">
   <img src="images/ricardo.jpeg" width="200" height="300" alt="Team Headshot"> 
+  <img src="images/james.jpg" width="200" height="300" alt="Team Headshot">
 </div>
