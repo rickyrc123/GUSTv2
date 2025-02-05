@@ -17,10 +17,17 @@ class DroneBase(BaseModel):
   latitude: float
   altitude: float
   direction: float
-  model: DroneModels
+  model: str
 
   class Config:
     from_attributes = True
+
+class CreatePosition(DroneBase):
+  drone_id: int
+  timestamp: str
+
+  class Config:
+    form_attributes = True
 
 class CreateDrone(DroneBase):
   class Config:

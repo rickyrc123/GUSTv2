@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine, insert, select, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import json
+import json, time
+import datetime
 
 from db import models
 from db import schemas
@@ -32,13 +33,21 @@ class DatabaseServer:
       else:
         self.next_program_id += 1
 
-  def create_drone(self, drone:schemas.CreateDrone):
+  def create_drone(self, **kwargs):
     drone_id = self.next_drone_id
-    new_drone = models.Drone(**drone.model_dump())
-    new_drone.id = drone_id
-    
-    if new_drone.name == None:
-      new_drone.name = f'Drone{drone_id:06}'
+    new_drone = models.Drone(
+
+      id         = drone_id,
+      name       = f'Drone{drone_id:06}',
+      last_long  = kwargs.get("longitude"),
+      last_lat   = kwargs.get("latitude"),
+      last_alt   = kwargs.get('altitude'),
+      last_dir   = kwargs.get('direction'),
+      model      = kwargs.get('model'),
+      state      = 0,
+      created_at = datetime.datetime.utcnow()
+
+    )
 
     with self.Session.begin() as session:
       session.add(new_drone)
@@ -50,7 +59,6 @@ class DatabaseServer:
     with self.Session.begin() as session:
       result = session.execute(select(text('drones')).where(models.Drone.name==name)).scalar()
     
-    print(result)
     return result
   
   def get_all_drones(self):
@@ -60,7 +68,7 @@ class DatabaseServer:
       #TODO : properly parse this so it can get passed to the api server....
       results = session.execute(text('SELECT * FROM drones;')).fetchall() 
       strings = []
-
+      
       for row in results:
           strings.append(str(row))
       
@@ -72,5 +80,21 @@ class DatabaseServer:
   def get_drone_by_position(self, pos: tuple[float, float, float], return_name=False):
     with self.Session.begin() as session:
       result = session.execute(select(models.Drone.id, models.Drone.name).where(models))  
+      session.close()
 
+  def add_position(self,**kwargs):
+    
+    new_position = models.DronePositions(
+      id          = kwargs.get("id"),
+      longitude   = kwargs.get("longitude"),
+      latitude    = kwargs.get("latitude"),
+      altitude    = kwargs.get("altitude"),
+      direction   = kwargs.get("direction"),
+      timestamp   = datetime.datetime.utcnow()
+    )
 
+    with self.Session.begin() as session:
+      session.add(new_position)
+      session.commit()
+      session.close()
+    

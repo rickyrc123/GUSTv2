@@ -56,6 +56,7 @@ async def startup():
 
 #saves db on shutdown
 @app.on_event("shutdown")
+    
 
 #sending stuff with the API
 @app.get("/test_data/get_generated_data")
@@ -94,30 +95,61 @@ async def generate_data():
     return payload
 
 @app.get("/drones")
-async def post_drone_position():
+async def get_all_drones():
+    db = database.DatabaseServer()
+    return {"Drones" : db.get_all_drones()}
 
-    drone_id : int = 1,
-    lat      : float = 23.5,
+@app.get("/drones/create")
+async def create_drone(
+    lat      : float = 23.5, #pos may be removed for this part
     long     : float = 33.1,
     alt      : float = 23.2,
-    name     : str = "test",
     bearing  : float = 33.1,
-    model    : str = "test", # TODO : Make these enums 
-    state    : int = 0 #  here too
-
+    name     : str = "test",
+    model    : str = "TestDrone", # TODO : Make these enums 
+):
     data = {
-        'longitude' : 32,
-        'latitude'  : 32,
-        'altitude'  : 12,
-        'direction' : 11,
-        'model'     : models.DroneModels.model1
-
+        'longitude' : long,
+        'latitude'  : lat,
+        'altitude'  : alt,
+        'direction' : bearing,
+        'model'     : model,
+        'name'      : name
     }
 
     db = database.DatabaseServer()
-    db.create_drone(drone = schemas.CreateDrone(**data))
 
-    return {"Page" : db.get_all_drones()}
+    #try:
+    db.create_drone(drone = schemas.CreateDrone(**data))
+    #except:
+    #    return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
+    return {"Status" : "200 - Success"}
+
+
+@app.get("/drones/{drone_id}/post_position")
+async def add_drone_position(
+    drone_id,
+    long     : float = 12.1,
+    lat      : float = 21.2,
+    alt      : float = 10.2,
+    bearing  : float = 2.1,
+    name     : str = "test",
+    model    : str = "test", 
+):
+    data = {
+        "id"        : drone_id,
+        "longitude" : long,
+        "latitude"  : lat,
+        "altitude"  : alt,
+        "direction" : bearing
+    }
+
+    db = database.DatabaseServer()
+
+    
+    db.add_position(**data)
+    
+    return {"Status" : "200 - Success"}
 
 @app.get("/")
 async def read_root():
