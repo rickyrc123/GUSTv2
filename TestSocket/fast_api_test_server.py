@@ -45,8 +45,13 @@ app = FastAPI()
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
 def build():
-    models.Base.metadata.drop_all(engine)
-    models.Base.metadata.create_all(engine)
+    inspector = inspect(engine)
+    tables    = inspector.get_table_names() 
+
+    #checks if new db to init the tables, is pretty bad
+    if 'drones' not in tables:
+        models.Base.metadata.drop_all(engine)
+        models.Base.metadata.create_all(engine)
 
 #initializes db tables on startup
 @app.on_event("startup")
@@ -54,7 +59,7 @@ async def startup():
     build()
 
 
-#saves db on shutdown
+#does things, eventually...
 @app.on_event("shutdown")
     
 
@@ -119,17 +124,21 @@ async def create_drone(
 
     db = database.DatabaseServer()
 
-    #try:
-    db.create_drone(drone = schemas.CreateDrone(**data))
-    #except:
-    #    return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
-    return {"Status" : "200 - Success"}
+    try:
+        db.create_drone(drone = schemas.CreateDrone(**data))
+    except:
+        return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
+    return get_all_drones()
 
+@app.get("/drones/{drone_id}/view_position")
+async def view_positions(drone_id):
+    db = database.DatabaseServer()
+    return db.get_positions_by_drone(drone_id=drone_id, num_positions=100)
 
 @app.get("/drones/{drone_id}/post_position")
 async def add_drone_position(
     drone_id,
-    long     : float = 12.1,
+    long     : float = 12.1, #will change this soon....
     lat      : float = 21.2,
     alt      : float = 10.2,
     bearing  : float = 2.1,
@@ -146,9 +155,10 @@ async def add_drone_position(
 
     db = database.DatabaseServer()
 
-    
-    db.add_position(**data)
-    
+    try:
+        db.add_position(**data)
+    except:
+        return{"Failure" : "500 - Failed to add position"}
     return {"Status" : "200 - Success"}
 
 @app.get("/")

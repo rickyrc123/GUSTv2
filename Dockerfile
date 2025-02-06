@@ -17,6 +17,6 @@ RUN pip install \
     pydantic \
     psycopg2-binary \
     sqlalchemy
-WORKDIR /workspace
-
+    
 COPY . .
+

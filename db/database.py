@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import json, time
 import datetime
+import os
 
 from db import models
 from db import schemas
@@ -10,7 +11,7 @@ from db import schemas
 #TODO: connect drone to swarm, update drone, rename drone, diconnect from swarm, swarm programs vs drone programs
 
 class DatabaseServer:
-  DATABASE_URL = 'postgresql+psycopg2://postgres:postgres@db:5432/postgres'
+  DATABASE_URL = os.getenv("DATABASE_URL")
 
   def __init__(self):
     engine = create_engine(self.DATABASE_URL)
@@ -98,3 +99,22 @@ class DatabaseServer:
       session.commit()
       session.close()
     
+  def get_positions_by_drone(self, drone_id, num_positions): 
+      query = text("""
+                      SELECT * 
+                      FROM positions 
+                      WHERE id = :drone_id
+                      ORDER BY timestamp DESC 
+                      LIMIT :num_positions
+                  """)
+      with self.Session.begin() as session:
+        result = session.execute(query, {'drone_id' : drone_id, 'num_positions' : num_positions})
+      
+      strings = []
+      for row in result:
+        strings.append(str(row))
+      
+      payload = {
+        "data" : strings
+      }
+      return json.dumps(payload)
