@@ -83,7 +83,7 @@ class DatabaseServer:
       result = session.execute(select(models.Drone.id, models.Drone.name).where(models))  
       session.close()
 
-  def add_position(self,**kwargs):
+  def add_position(self,**kwargs): #kwargs is a dict of params btw
     
     new_position = models.DronePositions(
       id          = kwargs.get("id"),
@@ -98,8 +98,8 @@ class DatabaseServer:
       session.add(new_position)
       session.commit()
       session.close()
-    
-  def get_positions_by_drone(self, drone_id, num_positions): 
+  
+  def get_positions_by_drone(self, drone_id, num_positions : int = 50): 
       query = text("""
                       SELECT * 
                       FROM positions 
@@ -118,3 +118,28 @@ class DatabaseServer:
         "data" : strings
       }
       return json.dumps(payload)
+  
+  #updates drone table last positions
+  def update_drone_table_position(
+      self, 
+      drone_id,
+      **kwargs
+  ):
+    query = text("""
+      UPDATE drones
+      SET last_lat  = :lat,
+          last_long = :long,
+          last_alt  = :alt,
+          last_dir  = :dir 
+      WHERE id = :drone_id;
+    """)
+
+    with self.Session.begin() as session:
+      session.execute(query, {
+            'drone_id' : drone_id, 
+            'lat'      : kwargs.get("latitude"),
+            'long'     : kwargs.get("longitude"),
+            'alt'      : kwargs.get("altitude"),
+            'dir'      : kwargs.get("direction")})
+      
+      session.commit()

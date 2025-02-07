@@ -128,7 +128,8 @@ async def create_drone(
         db.create_drone(drone = schemas.CreateDrone(**data))
     except:
         return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
-    return get_all_drones()
+    
+    return await get_all_drones()
 
 @app.get("/drones/{drone_id}/view_position")
 async def view_positions(drone_id):
@@ -155,17 +156,17 @@ async def add_drone_position(
 
     db = database.DatabaseServer()
 
+    db.update_drone_table_position(drone_id=drone_id, **data)
     try:
         db.add_position(**data)
     except:
-        return{"Failure" : "500 - Failed to add position"}
-    return {"Status" : "200 - Success"}
+        return {"Failure" : "500 - Failed to add position"}
+    return db.get_positions_by_drone(drone_id=drone_id)
 
 @app.get("/")
 async def read_root():
     inspector = inspect(engine)
     return {"Page": inspector.get_table_names()}
-
 
 @app.get("/items/{item_id}")
 async def read_item(item_id: int, q: Union[str, None] = None):
