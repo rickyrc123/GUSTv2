@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import json, time
 import datetime
+import os
 
 from db import models
 from db import schemas
@@ -10,7 +11,7 @@ from db import schemas
 #TODO: connect drone to swarm, update drone, rename drone, diconnect from swarm, swarm programs vs drone programs
 
 class DatabaseServer:
-  DATABASE_URL = 'postgresql+psycopg2://postgres:postgres@db:5432/postgres'
+  DATABASE_URL = os.getenv("DATABASE_URL")
 
   def __init__(self):
     engine = create_engine(self.DATABASE_URL)
@@ -82,7 +83,7 @@ class DatabaseServer:
       result = session.execute(select(models.Drone.id, models.Drone.name).where(models))  
       session.close()
 
-  def add_position(self,**kwargs):
+  def add_position(self,**kwargs): #kwargs is a dict of params btw
     
     new_position = models.DronePositions(
       id          = kwargs.get("id"),
@@ -97,4 +98,48 @@ class DatabaseServer:
       session.add(new_position)
       session.commit()
       session.close()
-    
+  
+  def get_positions_by_drone(self, drone_id, num_positions : int = 50): 
+      query = text("""
+                      SELECT * 
+                      FROM positions 
+                      WHERE id = :drone_id
+                      ORDER BY timestamp DESC 
+                      LIMIT :num_positions
+                  """)
+      with self.Session.begin() as session:
+        result = session.execute(query, {'drone_id' : drone_id, 'num_positions' : num_positions})
+      
+      strings = []
+      for row in result:
+        strings.append(str(row))
+      
+      payload = {
+        "data" : strings
+      }
+      return json.dumps(payload)
+  
+  #updates drone table last positions
+  def update_drone_table_position(
+      self, 
+      drone_id,
+      **kwargs
+  ):
+    query = text("""
+      UPDATE drones
+      SET last_lat  = :lat,
+          last_long = :long,
+          last_alt  = :alt,
+          last_dir  = :dir 
+      WHERE id = :drone_id;
+    """)
+
+    with self.Session.begin() as session:
+      session.execute(query, {
+            'drone_id' : drone_id, 
+            'lat'      : kwargs.get("latitude"),
+            'long'     : kwargs.get("longitude"),
+            'alt'      : kwargs.get("altitude"),
+            'dir'      : kwargs.get("direction")})
+      
+      session.commit()

@@ -23,25 +23,25 @@ class Post(Base):
 class Drone(Base):
   __tablename__ = 'drones'
 
-  id        = Column(Integer, primary_key=True, nullable=False        )
-  name      = Column(String, unique=True                              )
-  last_long = Column(Double, nullable=True                            )
-  last_lat  = Column(Double, nullable=True                            )
-  last_alt  = Column(Double, nullable=True                            )
-  last_dir  = Column(Double, nullable=True                            )
-  model     = Column(String, nullable=True                            )
-  state     = Column(Integer, nullable=False,  server_default="0"     )
-  created_at= Column(DateTime, nullable=False, server_default='now()' )
+  id        = Column(Integer,  primary_key=True, nullable=False        )
+  name      = Column(String,   unique=True                             )
+  last_long = Column(Double,   nullable=True                           )
+  last_lat  = Column(Double,   nullable=True                           )
+  last_alt  = Column(Double,   nullable=True                           )
+  last_dir  = Column(Double,   nullable=True                           )
+  model     = Column(String,   nullable=True                           )
+  state     = Column(Integer,  nullable=False,  server_default="0"     )
+  created_at= Column(DateTime, nullable=False, server_default='now()'  )
 
 class DronePositions(Base):
   __tablename__ = 'positions'
   
-  id        = Column(Integer, primary_key=True, nullable=False                          )
-  longitude = Column(Double, nullable=False                                             )
-  latitude  = Column(Double, nullable=False                                             )
-  altitude  = Column(Double, nullable=False                                             )
-  direction = Column(Double, nullable=False                                             )
-  timestamp = Column(DateTime, primary_key=True, nullable=False, server_default='now()' )
+  id        = Column(Integer, primary_key=True, nullable=False         )
+  longitude = Column(Double, nullable=False                                                     )
+  latitude  = Column(Double, nullable=False                                                     )
+  altitude  = Column(Double, nullable=False                                                     )
+  direction = Column(Double, nullable=False                                                     )
+  timestamp = Column(DateTime, primary_key=True, nullable=False, server_default='now()'         )
 
 
 class Swarm(Base):
