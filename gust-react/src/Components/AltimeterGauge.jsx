@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Gauge } from 'react-gauge-component';
 
 const AltimeterGauge = ({ droneID }) => {
@@ -33,3 +34,9 @@ const AltimeterGauge = ({ droneID }) => {
         </div>
     );
 }
+
+AltimeterGauge.propTypes = {
+    droneID: PropTypes.string.isRequired,
+}
+
+export default AltimeterGauge;
