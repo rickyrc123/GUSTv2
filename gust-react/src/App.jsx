@@ -1,5 +1,7 @@
 import React from "react";
 import MapComponent from "./Components/MapComponent.jsx";
+import DroneList from "./ListComponent";
+
 
 function App() {
   return (
@@ -10,8 +12,11 @@ function App() {
       height: "100vh",
       width: "100vw",
     }}>
-      <MapComponent />
+      
+    <MapComponent />
+    <DroneList />
     </div>
+    
   );
 }
 
