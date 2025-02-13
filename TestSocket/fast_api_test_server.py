@@ -5,6 +5,11 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from api_models import DronePositionRequest         as DronePositionRequest
+from api_models import PositionResponse             as PositionResponse
+from api_models import MultiPositionResponse        as ViewPosReponse
+
 from db import models
 from db import schemas
 from db import database
@@ -26,7 +31,6 @@ DRONE_IDS = [
     9,
     10
 ]
-
 #states?
 STATES = {
    -1 : "UNKNOWN",
@@ -104,7 +108,7 @@ async def get_all_drones():
     db = database.DatabaseServer()
     return {"Drones" : db.get_all_drones()}
 
-@app.get("/drones/create")
+@app.get("/drones/create") #change this to post
 async def create_drone(
     lat      : float = 23.5, #pos may be removed for this part
     long     : float = 33.1,
@@ -131,27 +135,32 @@ async def create_drone(
     
     return await get_all_drones()
 
-@app.get("/drones/{drone_id}/view_position")
-async def view_positions(drone_id):
-    db = database.DatabaseServer()
-    return db.get_positions_by_drone(drone_id=drone_id, num_positions=100)
 
-@app.get("/drones/{drone_id}/post_position")
+@app.get("/drones/{drone_id}/view_position", 
+         response_model=ViewPosReponse, 
+         response_description = """
+            Returns the last 50 positions of the drone_id given.
+        """)
+async def view_positions(drone_id : int):
+    db = database.DatabaseServer()
+    return db.get_positions_by_drone(drone_id=drone_id)
+
+
+@app.get("/drones/{drone_id}/post_position", 
+         response_model=PositionResponse,
+         response_description = """
+            Adds point to database and updates the drones last position.
+            """)
 async def add_drone_position(
-    drone_id,
-    long     : float = 12.1, #will change this soon....
-    lat      : float = 21.2,
-    alt      : float = 10.2,
-    bearing  : float = 2.1,
-    name     : str = "test",
-    model    : str = "test", 
+    drone_id : int,
+    position : DronePositionRequest 
 ):
     data = {
         "id"        : drone_id,
-        "longitude" : long,
-        "latitude"  : lat,
-        "altitude"  : alt,
-        "direction" : bearing
+        "longitude" : position.long,
+        "latitude"  : position.lat,
+        "altitude"  : position.alt,
+        "direction" : position.bearing
     }
 
     db = database.DatabaseServer()
@@ -161,13 +170,13 @@ async def add_drone_position(
         db.add_position(**data)
     except:
         return {"Failure" : "500 - Failed to add position"}
+    
+    #THIS IS WHERE THE MAGIC WILL HAPPEN
+
     return db.get_positions_by_drone(drone_id=drone_id)
 
+#simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
 async def read_root():
     inspector = inspect(engine)
-    return {"Page": inspector.get_table_names()}
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+    return {"Page": inspector.get_table_names()}    
