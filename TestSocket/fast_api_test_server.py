@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from api_models import DronePositionRequest         as DronePositionRequest
 from api_models import PositionResponse             as PositionResponse
 from api_models import MultiPositionResponse        as ViewPosReponse
+from api_models import DroneCreateRequest           as DroneCreate
 
 from db import models
 from db import schemas
@@ -108,22 +109,17 @@ async def get_all_drones():
     db = database.DatabaseServer()
     return {"Drones" : db.get_all_drones()}
 
-@app.get("/drones/create") #change this to post
+@app.get("/drones/create", response_model = DroneCreate) #change this to post
 async def create_drone(
-    lat      : float = 23.5, #pos may be removed for this part
-    long     : float = 33.1,
-    alt      : float = 23.2,
-    bearing  : float = 33.1,
-    name     : str = "test",
-    model    : str = "TestDrone", # TODO : Make these enums 
+    drone : DroneCreate
 ):
     data = {
-        'longitude' : long,
-        'latitude'  : lat,
-        'altitude'  : alt,
-        'direction' : bearing,
-        'model'     : model,
-        'name'      : name
+        'longitude' : drone.long,
+        'latitude'  : drone.lat,
+        'altitude'  : drone.alt,
+        'direction' : drone.bearing,
+        'model'     : drone.model,
+        'name'      : drone.name
     }
 
     db = database.DatabaseServer()
@@ -150,7 +146,8 @@ async def view_positions(drone_id : int):
          response_model=PositionResponse,
          response_description = """
             Adds point to database and updates the drones last position.
-            """)
+         """
+)
 async def add_drone_position(
     drone_id : int,
     position : DronePositionRequest 
