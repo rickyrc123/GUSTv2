@@ -8,9 +8,14 @@ const DroneList = ({ apiEndpoint, height = 300, width = 300, itemSize = 35 })=> 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(apiEndpoint);
+
+                const response = await fetch("http://localhost:8000/drones", {
+                    
+                });
                 const data = await response.json();
-                setItems(data);
+                console.log("API Response", data)
+                const drones = JSON.parse(data.Drones).data;
+                setItems(drones);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -22,13 +27,24 @@ const DroneList = ({ apiEndpoint, height = 300, width = 300, itemSize = 35 })=> 
 
     
     const renderRow = ({index, style}) => (
-        <div style={}>
-            {items[index]}
+        <div style={{ 
+            ...style, 
+            padding: "10px", 
+            borderBottom: "1px solid #ccc",
+            backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#fff" 
+        }}>
+            {items[index].name}
+            
         </div>
     );
 
     return(
-        <div style={}>
+        <div style={{ 
+            border: "1px solid #ddd", 
+            borderRadius: "8px", 
+            overflow: "hidden",
+            width: `${width}px`
+        }}>
             <List
                 itemSize={itemSize}
                 itemCount={items.length}
