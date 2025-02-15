@@ -40,26 +40,56 @@ while True:
             break
 
     time.sleep(1)
+    
+print("⏳ Waiting for GPS lock...")
+while True:
+    msg = master.recv_match(type='GPS_RAW_INT', blocking=True)
+    if msg.fix_type >= 3:  # 3D Fix (GPS available)
+        print("✅ GPS lock acquired!")
+        break
+    time.sleep(1)
 # Set movement parameters
-vx = 1  # Move forward at 1 m/s (velocity in X direction)
-vy = 0
-vz = 0
-yaw_rate = 0
 
-duration = 5
-rate = 10
-for _ in range(duration * rate):
-    master.mav.set_position_target_local_ned_send(
-        0, master.target_system, master.target_component,
-        mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-        0b0000111111000111,  # Mask (only velocity control enabled)
-        0, 0, 0,  # Position (not used)
-        vx, vy, vz,  # Velocity (Forward in X direction)
-        0, 0, 0,  # Acceleration (not used)
-        0,
-        yaw_rate  # Yaw rate
-    )
-    time.sleep(1 / rate)  # Wait before sending next command
+# Convert latitude & longitude to integer format (scaled by 1E7)
+lat_int = int(37.61961021 * 1E7)
+lon_int = int(-122.37671605 * 1E7)
+alt_m = 15  # Altitude in meters
+
+# Send position target command
+master.mav.set_position_target_global_int_send(
+    0, master.target_system, master.target_component,
+    mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,  # Relative to home altitude
+    0b0000111111111000,  # Position mask (only lat/lon/alt active)
+    lat_int, lon_int, alt_m,
+    0, 0, 0,  # No velocity control
+    0, 0, 0,  # No acceleration control
+    0,  # No yaw control
+    0   # No yaw rate control
+)
+print("📍 Moving to waypoint...")
+
+while True:
+    # Receive position updates
+    msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+    if msg:
+        current_lat = msg.lat / 1E7  # Convert to decimal degrees
+        current_lon = msg.lon / 1E7  # Convert to decimal degrees
+        current_alt = msg.relative_alt / 1000.0  # Convert mm to meters
+
+        # Print status
+        print(f"📡 Current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
+
+        # Check if drone is close to target
+        lat_reached = abs(current_lat - (lat_int / 1E7)) < 0.00005  # ~5m tolerance
+        lon_reached = abs(current_lon - (lon_int / 1E7)) < 0.00005  # ~5m tolerance
+        alt_reached = abs(current_alt - alt_m) < 1  # 1m altitude tolerance
+
+        if lat_reached and lon_reached and alt_reached:
+            print("✅ Reached waypoint!")
+            break
+
+    time.sleep(1)  # Check position every second
+time.sleep(1)  # Wait before sending next command
 
 # Stop movement by sending zero velocity
 print("🛑 Stopping movement.")
