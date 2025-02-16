@@ -1,6 +1,22 @@
-version: "3.8"
 services:
+  dev:
+    container_name: dev
+    build:
+      context: ./db
+      dockerfile: ../Dockerfile
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+    networks:
+      - backend
+    volumes:
+      - ./db:/db
+    init: true
+    stdin_open: true
+    tty: true
   fastapi:
+    container_name: fastapi
     build: 
       context: ./TestSocket
       dockerfile: ../Dockerfile
