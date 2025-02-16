@@ -3,7 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "src/electron.js",
   "scripts": {
+    "start": "react-scripts start",
+    "electron": "electron . --no-sandbox",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -21,6 +24,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^34.2.0",
     "eslint": "^9.20.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
