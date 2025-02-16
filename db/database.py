@@ -1,14 +1,30 @@
-from sqlalchemy import create_engine, insert, select, text
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, select, update
 from sqlalchemy.orm import sessionmaker
-import json, time
 import datetime
 import os
 
-from db import models
-from db import schemas
+import models
+import schemas
 
-#TODO: connect drone to swarm, update drone, rename drone, diconnect from swarm, swarm programs vs drone programs
+def _new_drone(drone : schemas.Drone):
+  drone_info = models.DroneInfo(
+    name=drone.name,
+    model=drone.model,
+    created_at=datetime.datetime.utcnow(),
+    updated_at=datetime.datetime.utcnow()
+  )
+
+  drone_location = models.DroneLocation(
+    current_long = drone.current_long,
+    current_lat = drone.current_lat,
+    current_alt = drone.current_alt,
+    current_yaw = drone.current_yaw
+  )
+
+  return drone_info, drone_location
+
+def _drone(info: models.DroneInfo, location: models.DroneLocation):
+  return schemas.Drone.model_validate(info.__dict__ | location.__dict__)
 
 class DatabaseServer:
   DATABASE_URL = os.getenv("DATABASE_URL")
@@ -18,128 +34,47 @@ class DatabaseServer:
     Session = sessionmaker(engine)
     self.Session = Session
 
-    # Obtain last used id's for continuity
-    with Session.begin() as session:
-      self.next_drone_id = session.execute(select(models.Drone.id).order_by(models.Drone.id.desc()).limit(1)).scalar()
-      self.next_program_id = session.execute(select(models.Program.id).order_by(models.Program.id.desc()).limit(1)).scalar()
+  def create_drone(self, drone : schemas.Drone):
+    try:
+      drone_info, drone_location = _new_drone(drone)
+
+      with self.Session.begin() as session:
+        session.add(drone_info)
+        session.flush()
+
+        if drone_info == None:
+          drone_info.name = f"Drone{drone_info.id:06}"
+
+        session.execute(
+          update(models.DroneInfo)
+          .where(models.DroneInfo.id == drone_info.id)
+          .values(name=drone_info.name)
+          )
       
-        
-      if self.next_drone_id == None:
-        self.next_drone_id = 1
-      else:
-        self.next_drone_id += 1
-      
-      if self.next_program_id == None:
-        self.next_program_id = 1
-      else:
-        self.next_program_id += 1
+        drone_location.drone_id = drone_info.id
 
-  def create_drone(self, **kwargs):
-    drone_id = self.next_drone_id
-    new_drone = models.Drone(
-
-      id         = drone_id,
-      name       = f'Drone{drone_id:06}',
-      last_long  = kwargs.get("longitude"),
-      last_lat   = kwargs.get("latitude"),
-      last_alt   = kwargs.get('altitude'),
-      last_dir   = kwargs.get('direction'),
-      model      = kwargs.get('model'),
-      state      = 0,
-      created_at = datetime.datetime.utcnow()
-
-    )
-
-    with self.Session.begin() as session:
-      session.add(new_drone)
-      session.commit()
-    
-    self.next_drone_id += 1
-  
-  def get_drone_by_name(self, name:str) -> int:
-    with self.Session.begin() as session:
-      result = session.execute(select(text('drones')).where(models.Drone.name==name)).scalar()
-    
-    return result
+        session.add(drone_location)
+        session.commit()
+    except:
+      print("Drone with same name is already defined.")
   
   def get_all_drones(self):
     with self.Session.begin() as session:
-      
-      #this returns a weird type that fastapi doesnt like
-      #TODO : properly parse this so it can get passed to the api server....
-      results = session.execute(text('SELECT * FROM drones;')).fetchall() 
-      strings = []
-      
-      for row in results:
-          strings.append(str(row))
-      
-      payload = {
-        "data" : strings
-      }
-      return json.dumps(payload)
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+      ).all()
 
-  def get_drone_by_position(self, pos: tuple[float, float, float], return_name=False):
-    with self.Session.begin() as session:
-      result = session.execute(select(models.Drone.id, models.Drone.name).where(models))  
-      session.close()
+      drones = [_drone(*drone.tuple()) for drone in result]
 
-  def add_position(self,**kwargs): #kwargs is a dict of params btw
-    
-    new_position = models.DronePositions(
-      id          = kwargs.get("id"),
-      longitude   = kwargs.get("longitude"),
-      latitude    = kwargs.get("latitude"),
-      altitude    = kwargs.get("altitude"),
-      direction   = kwargs.get("direction"),
-      timestamp   = datetime.datetime.utcnow()
-    )
-
-    with self.Session.begin() as session:
-      session.add(new_position)
-      session.commit()
-      session.close()
+    return drones
   
-  def get_positions_by_drone(self, drone_id, num_positions : int = 50): 
-      query = text("""
-                      SELECT * 
-                      FROM positions 
-                      WHERE id = :drone_id
-                      ORDER BY timestamp DESC 
-                      LIMIT :num_positions
-                  """)
-      with self.Session.begin() as session:
-        result = session.execute(query, {'drone_id' : drone_id, 'num_positions' : num_positions})
-      
-      strings = []
-      for row in result:
-        strings.append(str(row))
-      
-      payload = {
-        "data" : strings
-      }
-      return json.dumps(payload)
-  
-  #updates drone table last positions
-  def update_drone_table_position(
-      self, 
-      drone_id,
-      **kwargs
-  ):
-    query = text("""
-      UPDATE drones
-      SET last_lat  = :lat,
-          last_long = :long,
-          last_alt  = :alt,
-          last_dir  = :dir 
-      WHERE id = :drone_id;
-    """)
-
+  def get_drone_by_name(self, name : str):
     with self.Session.begin() as session:
-      session.execute(query, {
-            'drone_id' : drone_id, 
-            'lat'      : kwargs.get("latitude"),
-            'long'     : kwargs.get("longitude"),
-            'alt'      : kwargs.get("altitude"),
-            'dir'      : kwargs.get("direction")})
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+        .where(models.DroneInfo.name==name)
+        ).first()
       
-      session.commit()
+      return _drone(*result)
