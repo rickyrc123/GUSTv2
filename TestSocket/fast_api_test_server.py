@@ -5,9 +5,17 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+from api_models import DronePositionRequest         as DronePositionRequest
+from api_models import PositionResponse             as PositionResponse
+from api_models import MultiPositionResponse        as ViewPosReponse
+from api_models import DroneCreateRequest           as DroneCreate
+
 from db import models
 from db import schemas
 from db import database
+
+import db
 
 #db tables
 
@@ -26,7 +34,6 @@ DRONE_IDS = [
     9,
     10
 ]
-
 #states?
 STATES = {
    -1 : "UNKNOWN",
@@ -44,18 +51,15 @@ app = FastAPI()
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
-def build():
-    models.Base.metadata.drop_all(engine)
-    models.Base.metadata.create_all(engine)
-
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
-    build()
+    db.build()
 
 
-#saves db on shutdown
+#does things, eventually...
 @app.on_event("shutdown")
+    
 
 #sending stuff with the API
 @app.get("/test_data/get_generated_data")
@@ -94,37 +98,75 @@ async def generate_data():
     return payload
 
 @app.get("/drones")
-async def post_drone_position():
+async def get_all_drones():
+    db = database.DatabaseServer()
+    return {"Drones" : db.get_all_drones()}
 
-    drone_id : int = 1,
-    lat      : float = 23.5,
-    long     : float = 33.1,
-    alt      : float = 23.2,
-    name     : str = "test",
-    bearing  : float = 33.1,
-    model    : str = "test", # TODO : Make these enums 
-    state    : int = 0 #  here too
-
+@app.get("/drones/create", response_model = DroneCreate) #change this to post
+async def create_drone(
+    drone : DroneCreate
+):
     data = {
-        'longitude' : 32,
-        'latitude'  : 32,
-        'altitude'  : 12,
-        'direction' : 11,
-        'model'     : models.DroneModels.model1
-
+        'longitude' : drone.long,
+        'latitude'  : drone.lat,
+        'altitude'  : drone.alt,
+        'direction' : drone.bearing,
+        'model'     : drone.model,
+        'name'      : drone.name
     }
 
     db = database.DatabaseServer()
-    db.create_drone(drone = schemas.CreateDrone(**data))
 
-    return {"Page" : db.get_all_drones()}
+    try:
+        db.create_drone(drone = schemas.CreateDrone(**data))
+    except:
+        return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
+    
+    return await get_all_drones()
 
+
+@app.get("/drones/{drone_id}/view_position", 
+         response_model=ViewPosReponse, 
+         response_description = """
+            Returns the last 50 positions of the drone_id given.
+        """)
+async def view_positions(drone_id : int):
+    db = database.DatabaseServer()
+    return db.get_positions_by_drone(drone_id=drone_id)
+
+
+@app.get("/drones/{drone_id}/post_position", 
+         response_model=PositionResponse,
+         response_description = """
+            Adds point to database and updates the drones last position.
+         """
+)
+async def add_drone_position(
+    drone_id : int,
+    position : DronePositionRequest 
+):
+    data = {
+        "id"        : drone_id,
+        "longitude" : position.long,
+        "latitude"  : position.lat,
+        "altitude"  : position.alt,
+        "direction" : position.bearing
+    }
+
+    db = database.DatabaseServer()
+
+    db.update_drone_table_position(drone_id=drone_id, **data)
+    try:
+        db.add_position(**data)
+    except:
+        return {"Failure" : "500 - Failed to add position"}
+    
+    #THIS IS WHERE THE MAGIC WILL HAPPEN
+
+    return db.get_positions_by_drone(drone_id=drone_id)
+
+#simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
 async def read_root():
     inspector = inspect(engine)
-    return {"Page": inspector.get_table_names()}
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+    return {"Page": inspector.get_table_names()}    

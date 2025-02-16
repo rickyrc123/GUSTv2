@@ -1,6 +1,22 @@
-version: "3.8"
 services:
+  dev:
+    container_name: dev
+    build:
+      context: ./db
+      dockerfile: ../Dockerfile
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+    networks:
+      - backend
+    volumes:
+      - ./db:/db
+    init: true
+    stdin_open: true
+    tty: true
   fastapi:
+    container_name: fastapi
     build: 
       context: ./TestSocket
       dockerfile: ../Dockerfile
@@ -9,18 +25,21 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASEURL=postgresql://postgres:postgres@db:5432/postgres
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
     networks:
       - backend
     volumes:
-      - ./db:/workspace/db
+      - ./db:/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
   db:
-    image: postgres:13
+    image: postgres
+    container_name: postgres_db
+    restart: always
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres_data
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -33,4 +52,4 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data: 
+  postgres_data:
