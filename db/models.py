@@ -79,7 +79,7 @@ class Program_Drone_Swarm(Base):
                     depending on the swarm it is in, a null value means the program is for the
                     drone on its own with no swarm relation 
   """
-  __tablename__ = 'droneswarms'
+  __tablename__ = 'program_drone_swarms'
 
   drone_id   = Column(Integer, ForeignKey('drone_info.id'), primary_key=True, nullable=False)
   program_id = Column(Integer, ForeignKey('programs.id'),   nullable=True)

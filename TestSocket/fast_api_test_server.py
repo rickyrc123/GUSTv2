@@ -5,9 +5,9 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from db import models
 from db import schemas
 from db import database
+import db
 
 #db tables
 
@@ -44,19 +44,10 @@ app = FastAPI()
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
-def build():
-    inspector = inspect(engine)
-    tables    = inspector.get_table_names() 
-
-    #checks if new db to init the tables, is pretty bad
-    if 'drones' not in tables:
-        models.Base.metadata.drop_all(engine)
-        models.Base.metadata.create_all(engine)
-
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
-    build()
+    db.build()
 
 
 #does things, eventually...

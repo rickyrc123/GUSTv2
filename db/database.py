@@ -3,8 +3,8 @@ from sqlalchemy.orm import sessionmaker
 import datetime
 import os
 
-import models
-import schemas
+from . import models
+from . import schemas
 
 def _new_drone(drone : schemas.Drone):
   drone_info = models.DroneInfo(

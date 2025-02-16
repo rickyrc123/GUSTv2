@@ -1,4 +1,5 @@
 from .database import DatabaseServer
+from .setup import build
 from .schemas import (
   Drone,
   DroneInSwarm,
@@ -16,6 +17,8 @@ from .schemas import (
 __all__ = [
   # Main database class
   'DatabaseServer',
+
+  'build',
   
   # Schemas (external data models)
   'Drone',
