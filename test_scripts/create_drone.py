@@ -11,14 +11,14 @@ def create_drone(longitude, latitude, altitude, bearing, name, model):
         "model": model
     }
 
-    response = requests.get(url, params=params)
+    response = requests.post(url, params=params)
     return response.json()
 
 if __name__ == "__main__":
-    long_example = 45.123
-    lat_example = -93.456
-    alt_example = 100.0
-    bearing_example = 90
+    long_example = 0
+    lat_example = 0
+    alt_example = 0
+    bearing_example = 0
     name_example = "TestDrone"
     model_example = "ModelX"
 

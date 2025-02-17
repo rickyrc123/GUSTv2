@@ -102,7 +102,7 @@ async def get_all_drones():
     db = database.DatabaseServer()
     return {"Drones" : db.get_all_drones()}
 
-@app.get("/drones/create", response_model = DroneCreate) #change this to post
+@app.post("/drones/create", response_model = DroneCreate) #change this to post
 async def create_drone(
     drone : DroneCreate
 ):
