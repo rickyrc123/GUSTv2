@@ -64,7 +64,7 @@ class Swarm(Base):
   __tablename__ = 'swarms'
 
   id         = Column(Integer,  primary_key=True, autoincrement=True)
-  name       = Column(String,   unique=True, nullable=False)
+  name       = Column(String,   unique=True, nullable=True)
   created_at = Column(DateTime, nullable=False, server_default='now()')
   updated_at = Column(DateTime, nullable=False, server_default='now()')
 
@@ -114,7 +114,7 @@ class Program(Base):
   __tablename__ = 'programs'
 
   id            = Column(Integer, primary_key=True, nullable=False)
-  name          = Column(String, nullable=False)
+  name          = Column(String, unique=True, nullable=True)
   content       = Column(String, nullable=False)
   created_at    = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
   last_updated  = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
