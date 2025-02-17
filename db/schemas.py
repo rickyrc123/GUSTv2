@@ -55,6 +55,7 @@ class CreateDrone(Drone):
     name (Optional[str]): Display name of the drone. If None, will be auto-generated as 'Drone{id:06}'.
     All other attributes inherited from DroneBase.
   """
+  _id: int | None
   name: Annotated[str | None, Field(default=None, description="Display name of the drone. If None, will be auto-generated as 'Drone{id:06}'")]
 
 class Swarm(BaseModel):
