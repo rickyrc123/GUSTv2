@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select, update
+from sqlalchemy import and_, create_engine, delete, select, update
 from sqlalchemy.orm import sessionmaker
 import datetime
 import os
@@ -24,7 +24,9 @@ def _new_drone(drone : schemas.Drone):
   return drone_info, drone_location
 
 def _drone(info: models.DroneInfo, location: models.DroneLocation):
-  return schemas.Drone.model_validate(info.__dict__ | location.__dict__)
+  drone = schemas.Drone.model_validate(info.__dict__ | location.__dict__)
+  drone._id = info.id
+  return drone
 
 class DatabaseServer:
   DATABASE_URL = os.getenv("DATABASE_URL")
@@ -78,3 +80,57 @@ class DatabaseServer:
         ).first()
       
       return _drone(*result)
+
+  def get_drone_by_location(self, long: float, lat: float, alt: float):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+        .where(
+          and_(models.DroneLocation.current_long==long,
+               models.DroneLocation.current_lat == lat,
+               models.DroneLocation.current_alt == alt)
+        )
+        ).first()
+      
+      return _drone(*result)
+
+  def update_drone_location(self, drone: schemas.Drone):
+    with self.Session.begin() as session:
+      session.execute(
+        update(models.DroneLocation)
+        .where(models.DroneLocation.drone_id==drone._id)
+        .values(
+          current_long=drone.current_long,
+          current_lat=drone.current_lat,
+          current_alt=drone.current_alt,
+          current_yaw=drone.current_yaw
+        )
+      )
+      session.commit()
+
+  def update_drone_info(self, drone: schemas.Drone):
+    with self.Session.begin() as session:
+      session.execute(
+        update(models.DroneInfo)
+        .where(models.DroneInfo.drone_id==drone._id)
+        .values(
+          name=drone.name,
+          model=drone.model,
+          state=drone.state,
+          updated_at=datetime.datetime.utcnow()
+        )
+      )
+      session.commit()
+  
+  def delete_drone(self, drone: schemas.Drone):
+    with self.Session.begin() as session:
+      session.execute(
+        delete(models.DroneLocation)
+        .where(models.DroneLocation.drone_id==drone._id)
+      )
+      session.execute(
+        delete(models.DroneInfo)
+        .where(models.DroneInfo.id==drone._id)
+      )
+      session.commit()

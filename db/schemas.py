@@ -37,6 +37,7 @@ class Drone(BaseModel):
     current_alt (float): Current altitude in meters
     current_yaw (float): Current yaw angle in degrees
   """
+  _id: Annotated[int, Field(description="Drone id (internal use only)")]
   name: Annotated[str, Field(description="Display name of the drone")]
   model: Annotated[str, Field(description="Model/type identifier of the drone")]
   current_long: Annotated[float, Field(description="Current longitude position")]
