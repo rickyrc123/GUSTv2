@@ -4,7 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     python3 \
-    python3-pip
+    python3-pip \
+    git
 
 RUN pip install \
     numpy \
@@ -17,6 +18,6 @@ RUN pip install \
     pydantic \
     psycopg2-binary \
     sqlalchemy
-WORKDIR /workspace
-
+    
 COPY . .
+
