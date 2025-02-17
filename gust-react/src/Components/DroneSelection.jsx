@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { FixedSizeList as List } from "react-window";
 
-const DroneList = ({ apiEndpoint, height = 300, width = 300, itemSize = 35 })=> {
+const DroneList = ({ apiEndpoint, height = 575, width = 180, itemSize = 35 })=> {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
