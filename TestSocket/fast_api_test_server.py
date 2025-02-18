@@ -124,7 +124,7 @@ async def view_positions(drone_id : int):
     return db.get_positions_by_drone(drone_id=drone_id)
 
 
-@app.get("/drones/{drone_id}/post_position", 
+@app.post("/drones/{drone_id}/post_position", 
          response_model=PositionResponse,
          response_description = """
             Adds point to database and updates the drones last position.
