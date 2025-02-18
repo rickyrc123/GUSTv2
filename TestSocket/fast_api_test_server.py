@@ -114,7 +114,13 @@ async def create_drone(
         return {f"Status" : "500 - Failed to create drone"} 
     return True
 
-@app.get("/drones/{drone_id}/view_position", 
+@app.post("/drones/{drone_name}/delete")
+async def delete_drone(drone_name : str):
+    db = database.DatabaseServer()
+    return db.delete_drone_by_name(name=drone_name)
+
+
+@app.get("/drones/{drone_id}/positions", 
          response_model=ViewPosReponse, 
          response_description = """
             Returns the last 50 positions of the drone_id given.

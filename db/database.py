@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select, update
+from sqlalchemy import create_engine, select, update, delete
 from sqlalchemy.orm import sessionmaker
 import datetime
 import os
@@ -78,3 +78,10 @@ class DatabaseServer:
         ).first()
       
       return _drone(*result)
+  
+  #Simple delete
+  def delete_drone_by_name(self, name :  str):
+    with self.Session.begin() as session:
+      session.delete(models.DroneInfo).where(models.DroneInfo.name==name).first()
+    return True
+      

@@ -4,7 +4,7 @@ import requests
 def main():
     
     data = {
-        "name": "bob",
+        "name": "boberto",
         "model": "string",
         "current_long": 0.0,
         "current_lat": 0.0,
@@ -13,6 +13,12 @@ def main():
     }
 
     response = requests.post(url="http://127.0.0.1:8000/drones/create", json=data)
+    response.raise_for_status()
+
+    print(response.text)
+
+    name = data["name"]
+    response = requests.post(url=f"http://127.0.0.1:8000/drones/{name}/delete")
     response.raise_for_status()
 
     print(response.text)
