@@ -2,8 +2,8 @@ services:
   dev:
     container_name: dev
     build:
-      context: ./db
-      dockerfile: ../Dockerfile
+      context: .
+      dockerfile: Dockerfile.dev
     depends_on:
       - db
     environment:
@@ -19,12 +19,12 @@ services:
     container_name: fastapi
     build: 
       context: ./TestSocket
-      dockerfile: ../Dockerfile
+      dockerfile: ../Dockerfile.fastapi
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - dev
+      db:
+        condition: service_completed_successfully
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
     networks:
