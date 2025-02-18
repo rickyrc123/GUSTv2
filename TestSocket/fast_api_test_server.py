@@ -102,28 +102,17 @@ async def get_all_drones():
     db = database.DatabaseServer()
     return {"Drones" : db.get_all_drones()}
 
-@app.get("/drones/create", response_model = DroneCreate) #change this to post
+@app.post("/drones/create") #change this to post
 async def create_drone(
-    drone : DroneCreate
+    drone : schemas.Drone
 ):
-    data = {
-        'longitude' : drone.long,
-        'latitude'  : drone.lat,
-        'altitude'  : drone.alt,
-        'direction' : drone.bearing,
-        'model'     : drone.model,
-        'name'      : drone.name
-    }
-
     db = database.DatabaseServer()
 
     try:
-        db.create_drone(drone = schemas.CreateDrone(**data))
+        db.create_drone(drone=drone)
     except:
-        return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
-    
-    return await get_all_drones()
-
+        return {f"Status" : "500 - Failed to create drone"} 
+    return True
 
 @app.get("/drones/{drone_id}/view_position", 
          response_model=ViewPosReponse, 
