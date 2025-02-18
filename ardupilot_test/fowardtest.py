@@ -7,6 +7,17 @@ print("waiting for heartbeat")
 master.wait_heartbeat()
 print("Heartbeat received!")
 
+#ask for how many corrdinates are required
+numInputs = int(input("Enter number of inputs"))
+print("Enter ccoordinates")
+lat = []
+lon = []
+for i in range(numInputs):
+   num = float(input("Enter latitude"))
+   lat.append(num)
+   num = float(input("Enter longitude"))
+   lon.append(num)
+# turn drone t guided mode 
 mode = 'GUIDED'
 mode_id = master.mode_mapping()[mode]
 master.set_mode(mode_id)
@@ -50,46 +61,48 @@ while True:
     time.sleep(1)
 # Set movement parameters
 
-# Convert latitude & longitude to integer format (scaled by 1E7)
-lat_int = int(37.61961021 * 1E7)
-lon_int = int(-122.37671605 * 1E7)
+
+
 alt_m = 15  # Altitude in meters
-
+for i in range(numInputs):
+    # Convert latitude & longitude to integer format (scaled by 1E7)
+    lat_int = int(lat[i] * 1E7)
+    lon_int = int(lon[i] * 1E7)
 # Send position target command
-master.mav.set_position_target_global_int_send(
-    0, master.target_system, master.target_component,
-    mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,  # Relative to home altitude
-    0b0000111111111000,  # Position mask (only lat/lon/alt active)
-    lat_int, lon_int, alt_m,
-    0, 0, 0,  # No velocity control
-    0, 0, 0,  # No acceleration control
-    0,  # No yaw control
-    0   # No yaw rate control
-)
-print("📍 Moving to waypoint...")
+    master.mav.set_position_target_global_int_send(
+        0, master.target_system, master.target_component,
+        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,
+        0b0000111111111000,  # Position mask (only lat/lon/alt active)
+        lat_int, lon_int, alt_m,
+        0, 0, 0,  # No velocity control
+        0, 0, 0,  # No acceleration control
+        0,  # No yaw control
+        0   # No yaw rate control
+        )
+    print("📍 Moving to waypoint...")
 
-while True:
-    # Receive position updates
-    msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
-    if msg:
-        current_lat = msg.lat / 1E7  # Convert to decimal degrees
-        current_lon = msg.lon / 1E7  # Convert to decimal degrees
-        current_alt = msg.relative_alt / 1000.0  # Convert mm to meters
+    while True:
+        # Receive position updates
+        msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+        if msg:
+            current_lat = msg.lat / 1E7  # Convert to decimal degrees
+            current_lon = msg.lon / 1E7  # Convert to decimal degrees
+            current_alt = msg.relative_alt / 1000.0  # Convert mm to meters
 
-        # Print status
-        print(f"📡 Current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
+            # Print status
+            print(f"📡 Current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
 
-        # Check if drone is close to target
-        lat_reached = abs(current_lat - (lat_int / 1E7)) < 0.00005  # ~5m tolerance
-        lon_reached = abs(current_lon - (lon_int / 1E7)) < 0.00005  # ~5m tolerance
-        alt_reached = abs(current_alt - alt_m) < 1  # 1m altitude tolerance
+            # Check if drone is close to target
+            lat_reached = abs(current_lat - (lat[i])) < 0.00005  # ~5m tolerance
+            lon_reached = abs(current_lon - (lon[i])) < 0.00005  # ~5m tolerance
+            alt_reached = abs(current_alt - alt_m) < 1  # 1m altitude tolerance
 
-        if lat_reached and lon_reached and alt_reached:
-            print("✅ Reached waypoint!")
-            break
+            if lat_reached and lon_reached and alt_reached:
+                print("✅ Reached waypoint!")
+                break
 
-    time.sleep(1)  # Check position every second
-time.sleep(1)  # Wait before sending next command
+        time.sleep(1)  # Check position every second
+    time.sleep(1)  # Wait before sending next command
 
 # Stop movement by sending zero velocity
 print("🛑 Stopping movement.")
