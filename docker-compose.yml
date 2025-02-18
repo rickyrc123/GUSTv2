@@ -1,4 +1,26 @@
 services:
+  db:
+    image: postgres
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres_data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
   dev:
     container_name: dev
     build:
@@ -23,8 +45,9 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - dev
+      db:
+        condition: service_healthy
+        restart: true
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
     networks:
@@ -32,21 +55,6 @@ services:
     volumes:
       - ./db:/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
-  db:
-    image: postgres
-    container_name: postgres_db
-    restart: always
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      PGDATA: /data/postgres_data
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - backend
 
 networks:
   backend:
