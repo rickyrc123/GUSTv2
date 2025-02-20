@@ -62,6 +62,7 @@ async def startup():
     
 
 #sending stuff with the API
+#DEPRECIATED
 @app.get("/test_data/get_generated_data")
 async def generate_data():
     position_array = []
@@ -102,7 +103,7 @@ async def get_all_drones():
     db = database.DatabaseServer()
     return {"Drones" : db.get_all_drones()}
 
-@app.post("/drones/create") #change this to post
+@app.post("/drones/create")
 async def create_drone(
     drone : schemas.Drone
 ):
@@ -110,14 +111,17 @@ async def create_drone(
 
     try:
         db.create_drone(drone=drone)
-    except:
-        return {f"Status" : "500 - Failed to create drone"} 
-    return True
+    except Exception as e:
+        return {"Status" : f"db.create_drone failed! \n\n\n {e}"} 
+    
+    return {"Status" : "Success!"}
 
 @app.post("/drones/{drone_name}/delete")
 async def delete_drone(drone_name : str):
     db = database.DatabaseServer()
-    return db.delete_drone_by_name(name=drone_name)
+    db.delete_drone_by_name(name=drone_name)
+
+    return {"Status" : "Success!"}
 
 
 @app.get("/drones/{drone_id}/positions", 
@@ -127,7 +131,7 @@ async def delete_drone(drone_name : str):
         """)
 async def view_positions(drone_id : int):
     db = database.DatabaseServer()
-    return db.get_positions_by_drone(drone_id=drone_id)
+    return {"Positions" : db.get_positions_by_drone(drone_id=drone_id)} 
 
 
 @app.post("/drones/{drone_id}/post_position", 
@@ -138,23 +142,14 @@ async def view_positions(drone_id : int):
 )
 async def add_drone_position(
     drone_id : int,
-    position : DronePositionRequest 
+    position : schemas.DroneUpdate 
 ):
-    data = {
-        "id"        : drone_id,
-        "longitude" : position.long,
-        "latitude"  : position.lat,
-        "altitude"  : position.alt,
-        "direction" : position.bearing
-    }
-
     db = database.DatabaseServer()
 
-    db.update_drone_table_position(drone_id=drone_id, **data)
     try:
-        db.add_position(**data)
-    except:
-        return {"Failure" : "500 - Failed to add position"}
+        db.add_position(position)
+    except Exception as e:
+        return {"Failure" : f"db.add_position failed \n\n\n {e}"}
     
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 

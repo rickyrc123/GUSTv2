@@ -49,7 +49,7 @@ class DatabaseServer:
           update(models.DroneInfo)
           .where(models.DroneInfo.id == drone_info.id)
           .values(name=drone_info.name)
-          )
+        )
       
         drone_location.drone_id = drone_info.id
 
@@ -80,8 +80,20 @@ class DatabaseServer:
       return _drone(*result)
   
   #Simple delete
+  #TODO: Make it fancy
   def delete_drone_by_name(self, name :  str):
     with self.Session.begin() as session:
-      session.delete(models.DroneInfo).where(models.DroneInfo.name==name).first()
+      session.execute(
+        delete(models.DroneInfo)
+        .where(models.DroneInfo.name==name)
+      )
     return True
+  
+  #Add Position
+  def add_position(
+      self,
+      data : schemas.DroneUpdate
+  ):
+    
+    print("stuff")
       
