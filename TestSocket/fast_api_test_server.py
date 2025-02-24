@@ -135,13 +135,11 @@ async def view_positions(drone_id : int):
 
 
 @app.post("/drones/{drone_id}/post_position", 
-         response_model=PositionResponse,
          response_description = """
             Adds point to database and updates the drones last position.
          """
 )
 async def add_drone_position(
-    drone_id : int,
     position : schemas.DroneUpdate 
 ):
     db = database.DatabaseServer()
@@ -153,7 +151,7 @@ async def add_drone_position(
     
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 
-    return db.get_positions_by_drone(drone_id=drone_id)
+    return db.get_positions_by_drone(drone_id=position.name)
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")

@@ -70,6 +70,7 @@ class DatabaseServer:
     return drones
   
   def get_drone_by_name(self, name : str):
+    
     with self.Session.begin() as session:
       result = session.execute(
         select(models.DroneInfo, models.DroneLocation)
@@ -83,10 +84,14 @@ class DatabaseServer:
   #TODO: Make it fancy
   def delete_drone_by_name(self, name :  str):
     with self.Session.begin() as session:
-      session.execute(
-        delete(models.DroneInfo)
-        .where(models.DroneInfo.name==name)
-      )
+      try:
+        session.execute(
+          delete(models.DroneInfo)
+          .where(models.DroneInfo.name==name)
+        )
+      except Exception as e:
+        print(f"ERROR: Failed to Delete Drone {name}, perhaps the name is wrong? {e}")
+        return False
     return True
   
   #Add Position
@@ -94,6 +99,8 @@ class DatabaseServer:
       self,
       data : schemas.DroneUpdate
   ):
-    
+    with self.Session.begin() as session:
+      session.add(data)
+      session.commit()
     print("stuff")
       

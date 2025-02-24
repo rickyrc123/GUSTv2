@@ -33,5 +33,16 @@ def main():
     response = requests.post(url=f"http://127.0.0.1:8000/drones/{name}/delete")
     response.raise_for_status()
 
+    data = {
+     "name" : "boberto1",
+     "model": "t",
+     "current_long"  : 32.1,
+     "current_lat"  : 21.2,
+     "current_alt"  : 22.1,
+     "current_yaw"  : 5.2
+    }
+
+    response = requests.post(url=f"http://127.0.0.1:8000/drones/{data["name"]}/post_position", json=data)
+
     print(response.text)
 main()
