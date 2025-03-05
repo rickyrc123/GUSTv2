@@ -40,7 +40,7 @@ services:
   fastapi:
     container_name: fastapi
     build: 
-      context: ./TestSocket
+      context: ./FastAPI
       dockerfile: ../Dockerfile
     ports:
       - "8000:8000"

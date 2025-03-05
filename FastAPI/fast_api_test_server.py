@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from pymavlink import mavutil
 
 from api_models import DronePositionRequest         as DronePositionRequest
 from api_models import PositionResponse             as PositionResponse
@@ -51,10 +52,22 @@ app = FastAPI()
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
+
+
+def _mavlink_init():
+    # Connect to ArduPilot SITL
+    master = mavutil.mavlink_connection('udp:127.0.0.1:14550')
+    print("waiting for heartbeat")
+    master.wait_heartbeat()
+    print("Heartbeat received!")
+    return master
+
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
     db.build()
+    ## ESTABLISH MAVLINK CONNECTION
+    
 
 
 #does things, eventually...
@@ -124,14 +137,14 @@ async def delete_drone(drone_name : str):
     return {"Status" : "Success!"}
 
 
-@app.get("/drones/{drone_id}/positions", 
+@app.get("/drones/positions", 
          response_model=ViewPosReponse, 
          response_description = """
             Returns the last 50 positions of the drone_id given.
         """)
 async def view_positions(drone_id : int):
     db = database.DatabaseServer()
-    return {"Positions" : db.get_positions_by_drone(drone_id=drone_id)} 
+    return {"Positions" : db.get_drone_position_history()} 
 
 
 @app.post("/drones/{drone_id}/post_position", 
@@ -151,7 +164,7 @@ async def add_drone_position(
     
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 
-    return db.get_positions_by_drone(drone_id=position.name)
+    return {"Status" : "Success"}
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")

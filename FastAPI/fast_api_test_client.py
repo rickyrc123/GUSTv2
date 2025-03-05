@@ -1,5 +1,4 @@
 import requests
-
 #gettin stuff from the API
 def main():
     
@@ -45,4 +44,6 @@ def main():
     response = requests.post(url=f"http://127.0.0.1:8000/drones/{data["name"]}/post_position", json=data)
 
     print(response.text)
+
+    response = requests.get(url=f"http://127.0.0.1:8000/drones/{data["name"]}/post_position", json=data)
 main()

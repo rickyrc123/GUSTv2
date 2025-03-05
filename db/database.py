@@ -70,7 +70,7 @@ class DatabaseServer:
     return drones
   
   def get_drone_by_name(self, name : str):
-    
+
     with self.Session.begin() as session:
       result = session.execute(
         select(models.DroneInfo, models.DroneLocation)
@@ -100,7 +100,24 @@ class DatabaseServer:
       data : schemas.DroneUpdate
   ):
     with self.Session.begin() as session:
-      session.add(data)
-      session.commit()
+      try:
+        session.add(data)
+        session.commit()
+      except Exception as e:
+        print(f"Error added drone positions {e}")
     print("stuff")
-      
+  
+  def get_drone_position_history(
+      self, 
+      name : str, 
+      limit : int):
+    
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+      ).all()
+
+      positions = [_drone(*drone.tuple()) for drone in result]
+
+    return positions
