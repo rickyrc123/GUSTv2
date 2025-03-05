@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, select, update
+from sqlalchemy import create_engine, select, update, delete
 from sqlalchemy.orm import sessionmaker
 import datetime
 import os
@@ -49,7 +49,7 @@ class DatabaseServer:
           update(models.DroneInfo)
           .where(models.DroneInfo.id == drone_info.id)
           .values(name=drone_info.name)
-          )
+        )
       
         drone_location.drone_id = drone_info.id
 
@@ -70,6 +70,7 @@ class DatabaseServer:
     return drones
   
   def get_drone_by_name(self, name : str):
+
     with self.Session.begin() as session:
       result = session.execute(
         select(models.DroneInfo, models.DroneLocation)
@@ -78,3 +79,45 @@ class DatabaseServer:
         ).first()
       
       return _drone(*result)
+  
+  #Simple delete
+  #TODO: Make it fancy
+  def delete_drone_by_name(self, name :  str):
+    with self.Session.begin() as session:
+      try:
+        session.execute(
+          delete(models.DroneInfo)
+          .where(models.DroneInfo.name==name)
+        )
+      except Exception as e:
+        print(f"ERROR: Failed to Delete Drone {name}, perhaps the name is wrong? {e}")
+        return False
+    return True
+  
+  #Add Position
+  def add_position(
+      self,
+      data : schemas.DroneUpdate
+  ):
+    with self.Session.begin() as session:
+      try:
+        session.add(data)
+        session.commit()
+      except Exception as e:
+        print(f"Error added drone positions {e}")
+    print("stuff")
+  
+  def get_drone_position_history(
+      self, 
+      name : str, 
+      limit : int):
+    
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+      ).all()
+
+      positions = [_drone(*drone.tuple()) for drone in result]
+
+    return positions

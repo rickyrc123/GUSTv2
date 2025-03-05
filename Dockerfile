@@ -16,7 +16,8 @@ RUN pip install \
     uvicorn \
     pydantic \
     psycopg2-binary \
-    sqlalchemy
+    sqlalchemy \
+    pymavlink
     
 COPY . .
 
