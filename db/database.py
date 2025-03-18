@@ -55,7 +55,7 @@ class DatabaseServer:
           update(models.DroneInfo)
           .where(models.DroneInfo.id == drone_info.id)
           .values(name=drone_info.name)
-          )
+        )
       
         drone_location.drone_id = drone_info.id
 
@@ -82,6 +82,7 @@ class DatabaseServer:
     return drone_names
   
   def get_drone_by_name(self, name : str):
+
     with self.Session.begin() as session:
       result = session.execute(
         select(models.DroneInfo, models.DroneLocation)

@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, Column, DateTime, Double, ForeignKey, Integer, Sequence, String, TIMESTAMP, text
+from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -32,6 +33,10 @@ class DroneInfo(Base):
   state      = Column(String,   nullable=False, server_default="0")
   created_at = Column(DateTime, nullable=False, server_default='now()')
   updated_at = Column(DateTime, nullable=False, server_default='now()')
+  locations  = relationship(
+    "DroneLocation", 
+    cascade="all, delete", 
+    passive_deletes=True)
 
 class DroneLocation(Base):
   """Model representing the current location of a drone.
@@ -45,7 +50,7 @@ class DroneLocation(Base):
   """
   __tablename__ = 'drone_locations'
 
-  drone_id     = Column(Integer, ForeignKey('drone_info.id'), primary_key=True)
+  drone_id     = Column(Integer, ForeignKey('drone_info.id', ondelete='CASCADE'), primary_key=True)
   current_long = Column(Double,   nullable=True)
   current_lat  = Column(Double,   nullable=True)
   current_alt  = Column(Double,   nullable=True)
