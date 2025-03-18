@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from pymavlink import mavutil
 
 from api_models import DronePositionRequest         as DronePositionRequest
 from api_models import PositionResponse             as PositionResponse
@@ -51,10 +52,22 @@ app = FastAPI()
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
+
+
+def _mavlink_init():
+    # Connect to ArduPilot SITL
+    master = mavutil.mavlink_connection('udp:127.0.0.1:14550')
+    print("waiting for heartbeat")
+    master.wait_heartbeat()
+    print("Heartbeat received!")
+    return master
+
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
     db.build()
+    ## ESTABLISH MAVLINK CONNECTION
+    
 
 
 #does things, eventually...
@@ -62,6 +75,7 @@ async def startup():
     
 
 #sending stuff with the API
+#DEPRECIATED
 @app.get("/test_data/get_generated_data")
 async def generate_data():
     position_array = []
@@ -103,67 +117,55 @@ async def get_all_drones():
     return {"Drones" : db.get_all_drones()}
 
 @app.post("/drones/create", response_model = DroneCreate) #change this to post
+@app.post("/drones/create")
 async def create_drone(
-    drone : DroneCreate
+    drone : schemas.Drone
 ):
-    data = {
-        'longitude' : drone.long,
-        'latitude'  : drone.lat,
-        'altitude'  : drone.alt,
-        'direction' : drone.bearing,
-        'model'     : drone.model,
-        'name'      : drone.name
-    }
-
     db = database.DatabaseServer()
 
     try:
-        db.create_drone(drone = schemas.CreateDrone(**data))
-    except:
-        return {f"Status" : "500 - Failed to create drone with id {drone_id}"}
+        db.create_drone(drone=drone)
+    except Exception as e:
+        return {"Status" : f"db.create_drone failed! \n\n\n {e}"} 
     
-    return await get_all_drones()
+    return {"Status" : "Success!"}
+
+@app.post("/drones/{drone_name}/delete")
+async def delete_drone(drone_name : str):
+    db = database.DatabaseServer()
+    db.delete_drone_by_name(name=drone_name)
+
+    return {"Status" : "Success!"}
 
 
-@app.get("/drones/{drone_id}/view_position", 
+@app.get("/drones/positions", 
          response_model=ViewPosReponse, 
          response_description = """
             Returns the last 50 positions of the drone_id given.
         """)
 async def view_positions(drone_id : int):
     db = database.DatabaseServer()
-    return db.get_positions_by_drone(drone_id=drone_id)
+    return {"Positions" : db.get_drone_position_history()} 
 
 
-@app.get("/drones/{drone_id}/post_position", 
-         response_model=PositionResponse,
+@app.post("/drones/{drone_id}/post_position", 
          response_description = """
             Adds point to database and updates the drones last position.
          """
 )
 async def add_drone_position(
-    drone_id : int,
-    position : DronePositionRequest 
+    position : schemas.DroneUpdate 
 ):
-    data = {
-        "id"        : drone_id,
-        "longitude" : position.long,
-        "latitude"  : position.lat,
-        "altitude"  : position.alt,
-        "direction" : position.bearing
-    }
-
     db = database.DatabaseServer()
 
-    db.update_drone_table_position(drone_id=drone_id, **data)
     try:
-        db.add_position(**data)
-    except:
-        return {"Failure" : "500 - Failed to add position"}
+        db.add_position(position)
+    except Exception as e:
+        return {"Failure" : f"db.add_position failed \n\n\n {e}"}
     
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 
-    return db.get_positions_by_drone(drone_id=drone_id)
+    return {"Status" : "Success"}
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
