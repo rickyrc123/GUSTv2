@@ -61,11 +61,11 @@ class CreateSwarm(Swarm):
   """Schema for creating a new swarm.
   
   Attributes:
-    name (Optional[str]): Display name of the swarm. If None, must be provided.
+    name (Optional[str]): Display name of the swarm. If None, will be auto-generated as 'Swarm{id:06}'.
     All other attributes inherited from SwarmBase.
   """
   _id: int | None
-  name: Annotated[str | None, Field(default=None, description="Display name of the swarm. If None, must be provided.")]
+  name: Annotated[str | None, Field(default=None, description="Display name of the swarm. If None, will be auto-generated as 'Swarm{id:06}'")]
 
 class Waypoint(BaseModel):
   """Represents a single waypoint in 3D space.
@@ -111,8 +111,8 @@ class CreateProgram(Program):
   """Schema for creating a new program.
   
   Attributes:
-    name (Optional[str]): Display name of the program. If None, must be provided.
+    name (Optional[str]): Display name of the program. If None, will be auto-generated as 'Program{id:06}'.
     All other attributes inherited from Program.
   """
   _id: int | None
-  name: Annotated[str | None, Field(default=None, description="Display name of the program. If None, must be provided.")]
+  name: Annotated[str | None, Field(default=None, description="Display name of the program. If None, will be auto-generated as 'Program{id:06}'")]

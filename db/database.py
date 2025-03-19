@@ -166,7 +166,7 @@ class DatabaseServer:
         session.flush()
 
         if new_swarm.name == None:
-          new_swarm.name = f"Drone{new_swarm.id:06}"
+          new_swarm.name = f"Swarm{new_swarm.id:06}"
 
         session.execute(
           update(models.Swarm)
@@ -261,4 +261,84 @@ class DatabaseServer:
         delete(models.Swarm)
         .where(models.Swarm.id==swarm._id)
       )
+      session.commit()
+
+  # Program Services
+  def create_program(self, program : schemas.CreateProgram):
+    try:
+      new_program = models.Program(
+        name=program.name,
+        created_at=datetime.datetime.utcnow(),
+        updated_at=datetime.datetime.utcnow()
+      )
+
+      with self.Session.begin() as session:
+        session.add(new_program)
+        session.flush()
+        
+        if new_program == None:
+          new_program.name = f"Program{new_program.id:06}"
+
+        session.execute(
+          update(models.Program)
+          .where(models.Program.id == new_program.id)
+          .values(name=new_program.name)
+        )
+
+        session.commit()
+    except:
+      print("Program with same name is already defined")
+  
+  def update_program_name(self, program: schemas.Program):
+    with self.Session.begin() as session:
+      session.execute(
+        update(models.Program)
+        .where(models.Swarm.id==program._id)
+        .values(name=program.name)
+      )
+  
+  def update_program_content(self, program: schemas.Program):
+    with self.Session.begin() as session:
+      session.execute(
+        update(models.Program)
+        .where(models.Swarm.id==program._id)
+        .values(content=program.content)
+      )
+
+      session.commit()
+
+  def delete_program(self, program: schemas.Program):
+    with self.Session.begin() as session:
+      session.execute(
+        delete(models.Program_Drone_Swarm)
+        .where(models.Program_Drone_Swarm.program_id==program._id)
+      )
+      session.execute(
+        delete(models.Program_Drone_Swarm)
+        .where(models.Program.id==program._id)
+      )
+
+      session.commit()
+  
+  def assign_program_to_drone(self, drone : schemas.Drone, program : schemas.Program, swarm : schemas.Swarm = None):
+    with self.Session.begin() as session:
+      if swarm is None:
+        session.execute(
+          update(models.Program_Drone_Swarm)
+          .where(
+            and_(models.Program_Drone_Swarm.drone_id==drone._id,
+                 models.Program_Drone_Swarm.swarm_id.is_(None))
+          )
+          .values(models.Program_Drone_Swarm.program_id==program._id)
+        )
+      else:
+        session.execute(
+          update(models.Program_Drone_Swarm)
+          .where(
+            and_(models.Program_Drone_Swarm.drone_id==drone._id,
+                 models.Program_Drone_Swarm.swarm_id==swarm._id)
+          )
+          .values(models.Program_Drone_Swarm.program_id==program._id)
+        )
+      
       session.commit()
