@@ -7,10 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from pymavlink import mavutil
 
-from api_models import DronePositionRequest         as DronePositionRequest
-from api_models import PositionResponse             as PositionResponse
-from api_models import MultiPositionResponse        as ViewPosReponse
-from api_models import DroneCreateRequest           as DroneCreate
+import mavlink
 
 from db import models
 from db import schemas
@@ -50,25 +47,17 @@ STATES = {
 #the app
 app = FastAPI()
 
+swarm = None
+
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
-
-
-
-def _mavlink_init():
-    # Connect to ArduPilot SITL
-    master = mavutil.mavlink_connection('udp:127.0.0.1:14550')
-    print("waiting for heartbeat")
-    master.wait_heartbeat()
-    print("Heartbeat received!")
-    return master
 
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
     db.build()
-    ## ESTABLISH MAVLINK CONNECTION
+    ## ESTABLISH MAVLINK CONNECTIONS
+    swarm = mavlink.mavlink_swarm()
     
-
 
 #does things, eventually...
 @app.on_event("shutdown")
@@ -137,14 +126,15 @@ async def delete_drone(drone_name : str):
     return {"Status" : "Success!"}
 
 
-@app.get("/drones/positions", 
-         response_model=ViewPosReponse, 
+@app.get("/drones/positions",  
          response_description = """
             Returns the last 50 positions of the drone_id given.
         """)
-async def view_positions(drone_id : int):
+async def view_positions():
     db = database.DatabaseServer()
-    return {"Positions" : db.get_drone_position_history()} 
+    return {
+        "Positions" : db.get_drone_position_history(name="boberto")
+    } 
 
 
 @app.post("/drones/{drone_id}/post_position", 
@@ -166,7 +156,15 @@ async def add_drone_position(
 
     return {"Status" : "Success"}
 
+#seeks to the 
+@app.post("/drones/{drone_id}/seek")
+async def seek_pos(
+    pos : schemas.Waypoint,
+    drone_id : int
+):
+    print(f"drone {drone_id} seeking {pos.long} {pos.lat} {pos.alt}")
 #simply gives all the tables in the db, ensures it is properly setup
+
 @app.get("/")
 async def read_root():
     inspector = inspect(engine)

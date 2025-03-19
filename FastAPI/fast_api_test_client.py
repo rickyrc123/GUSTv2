@@ -18,6 +18,13 @@ def main():
         "current_alt": 0.0,
         "current_yaw": 0.0
     }
+
+    data2 = {
+        "alt"  : 1.5,
+        "lat"  : 47.434353535,
+        "long" : 97.231231
+    }
+
     response = requests.post(url="http://127.0.0.1:8000/drones/create", json=data)
     response.raise_for_status()
 
@@ -27,7 +34,7 @@ def main():
     response.raise_for_status()
 
     print(response.text)
-
+    
     name = data["name"]
     response = requests.post(url=f"http://127.0.0.1:8000/drones/{name}/delete")
     response.raise_for_status()

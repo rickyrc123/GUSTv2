@@ -21,6 +21,40 @@ services:
       - "5432:5432"
     networks:
       - backend
+  ardupilot-sitl:
+    image: radarku/ardupilot-sitl
+    platform: linux/amd64
+    ports:
+      - "5760:5760"  # Expose SITL UDP port 5760 to the host
+    environment:
+      - DISPLAY=${DISPLAY}  # To ensure X11 display forwarding if needed
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw  # Allow the container to access your X11 display (if using a GUI)
+    tty: true
+    networks:
+      - backend
+    command: >
+      /ardupilot/Tools/autotest/run_in_terminal_window.sh
+      "ArduCopter"
+      "/ardupilot/build/sitl/bin/arducopter"
+      "-S"
+      "-I0"
+      "--home" "42.3898,-71.1476,14,270"
+      "-w"
+      "--model" "+"
+      "--speedup" "1"
+      "--defaults" "/ardupilot/Tools/autotest/default_params/copter.parm"
+  mavproxy:
+    image: sitin/mavproxy:latest
+    depends_on:
+      - ardupilot-sitl
+    ports:
+      - "14550:14550"  # Expose UDP port 14550 for MAVProxy to communicate with QGroundControl (optional)
+    command: >
+      "--master=tcp:ardupilot-sitl:5760"
+    networks:
+      - backend
+    tty: true
   dev:
     container_name: dev
     build:
@@ -55,10 +89,8 @@ services:
     volumes:
       - ./db:/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
-
 networks:
   backend:
     driver: bridge
-
 volumes:
   postgres_data:

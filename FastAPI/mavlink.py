@@ -12,6 +12,7 @@ class mavlink_drone:
     
     master = None
     drone_id = None
+    mavlink_address = None
 
     def __init__(self):
         self._init_mavlink()
@@ -20,9 +21,9 @@ class mavlink_drone:
         pass
     
     #Step 1: initialize and verify mavlink connection
-    def _init_mavlink(self):
+    def _init_mavlink(self, addr):
         #connect to mavlink at given IP address
-        self.master = mavutil.mavlink_connection(MAVLINK_ADR)
+        self.master = mavutil.mavlink_connection(addr)
 
         # wait for heartbeat to ensure proper startup
         print("waiting for heartbeat")
@@ -67,7 +68,7 @@ class mavlink_drone:
         print("Drone takingoff!")
         while True:
             msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
-            requests.post(url=)
+            requests.post(url=f"{FASTAPI_URI}/drones/post_position")
             if msg:
                 altitude = msg.relative_alt / 1000.0  # Convert mm to meters
                 print(f"🔼 Current Altitude: {altitude:.1f}m")
@@ -150,3 +151,15 @@ class mavlink_drone:
             time.sleep(0.1)  # Small delay
 
         print("✅ Done.")
+
+class mavlink_swarm:
+    drones = {}
+    swarm_id = None
+
+    def __init__(self, drones):
+        self.drones = drones
+        pass
+
+    def add_drone(self, drone : mavlink_drone):
+        self.drones.append(drone)
+        print("added :)")
