@@ -1,5 +1,5 @@
-from sqlalchemy import Boolean, Column, DateTime, Double, ForeignKey, Integer, Sequence, String, TIMESTAMP, text
-from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy import Boolean, Column, DateTime, Double, ForeignKey, Integer, PickleType, String, TIMESTAMP, text
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -33,7 +33,7 @@ class DroneInfo(Base):
   state      = Column(String,   nullable=False, server_default="0")
   created_at = Column(DateTime, nullable=False, server_default='now()')
   updated_at = Column(DateTime, nullable=False, server_default='now()')
-  locations  = relationship(
+  location  = relationship(
     "DroneLocation", 
     cascade="all, delete", 
     passive_deletes=True)
@@ -50,8 +50,7 @@ class DroneLocation(Base):
   """
   __tablename__ = 'drone_locations'
 
-  id           = Column(Integer, primary_key=True, autoincrement=True)
-  drone_id     = Column(Integer, ForeignKey('drone_info.id', ondelete='CASCADE'))
+  drone_id     = Column(Integer, ForeignKey('drone_info.id', ondelete='CASCADE'), primary_key=True)
   current_long = Column(Double,   nullable=True)
   current_lat  = Column(Double,   nullable=True)
   current_alt  = Column(Double,   nullable=True)
@@ -70,7 +69,7 @@ class Swarm(Base):
   __tablename__ = 'swarms'
 
   id         = Column(Integer,  primary_key=True, autoincrement=True)
-  name       = Column(String,   unique=True, nullable=False)
+  name       = Column(String,   unique=True, nullable=True)
   created_at = Column(DateTime, nullable=False, server_default='now()')
   updated_at = Column(DateTime, nullable=False, server_default='now()')
 
@@ -79,11 +78,8 @@ class Program_Drone_Swarm(Base):
 
   Attributes:
     drone_id (int): Only non nullable key, relates the specific drone that is running the program
-    program_id (int): nullable, if this value is null this means that the drone does not have any
-                      specific program related to it
-    swarm_id (int): relates the drone to a swarm allowing one drone to have different programs
-                    depending on the swarm it is in, a null value means the program is for the
-                    drone on its own with no swarm relation 
+    program_id (int): nullable, if this value is null this means that the drone does not have any specific program related to it
+    swarm_id (int): relates the drone to a swarm allowing one drone to have different programs depending on the swarm it is in, a null value means the program is for the drone on its own with no swarm relation 
   """
   __tablename__ = 'program_drone_swarms'
 
@@ -120,7 +116,7 @@ class Program(Base):
   __tablename__ = 'programs'
 
   id            = Column(Integer, primary_key=True, nullable=False)
-  name          = Column(String, nullable=False)
-  content       = Column(String, nullable=False)
+  name          = Column(String, unique=True, nullable=True)
+  content       = Column(PickleType, nullable=False)
   created_at    = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
   last_updated  = Column(TIMESTAMP(timezone=True), server_default=text('now()'))

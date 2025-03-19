@@ -1,9 +1,11 @@
 
 import random
 from typing import Union
+import db.database
 from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
 from pymavlink import mavutil
 
@@ -15,6 +17,8 @@ from api_models import DroneCreateRequest           as DroneCreate
 from db import models
 from db import schemas
 from db import database
+
+from db.database import DatabaseServer
 
 import db
 
@@ -50,6 +54,22 @@ STATES = {
 #the app
 app = FastAPI()
 
+origins = [
+        "http://localhost:8000",
+        ### ADD REACT ADDRESS HERE ###
+    ]
+
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+)
+
+#the data
+db = DatabaseServer
+
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
 
@@ -65,15 +85,16 @@ def _mavlink_init():
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
-    db.build()
+    print("starting up")
     ## ESTABLISH MAVLINK CONNECTION
     
 
 
 #does things, eventually...
 @app.on_event("shutdown")
-    
-
+async def shutdown():
+    #do stuff 
+    print("Shutting down")
 #sending stuff with the API
 #DEPRECIATED
 @app.get("/test_data/get_generated_data")
@@ -154,7 +175,7 @@ async def view_positions(drone_id : int):
          """
 )
 async def add_drone_position(
-    position : schemas.DroneUpdate 
+    position : schemas.Waypoint
 ):
     db = database.DatabaseServer()
 
