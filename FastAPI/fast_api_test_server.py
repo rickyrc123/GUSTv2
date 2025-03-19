@@ -153,7 +153,7 @@ async def view_positions(drone_id : int):
          """
 )
 async def add_drone_position(
-    position : schemas.DroneUpdate 
+    position : schemas.Waypoint
 ):
     db = database.DatabaseServer()
 

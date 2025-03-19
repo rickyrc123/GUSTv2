@@ -2,16 +2,13 @@ from .database import DatabaseServer
 from .setup import build
 from .schemas import (
   Drone,
-  DroneInSwarm,
   CreateDrone,
   Swarm,
   CreateSwarm,
   Waypoint,
   CreateWaypoint,
   Program,
-  CreateProgram,
-  DroneUpdate,
-  WaypointUpdate
+  CreateProgram
 )
 
 __all__ = [
@@ -23,13 +20,10 @@ __all__ = [
   # Schemas (external data models)
   'Drone',
   'CreateDrone',
-  'DroneInSwarm',
   'Swarm',
   'CreateSwarm',
   'Waypoint',
   'CreateWaypoint',
   'Program',
-  'CreateProgram',
-  'DroneUpdate',
-  'WaypointUpdate'
+  'CreateProgram'
 ]
