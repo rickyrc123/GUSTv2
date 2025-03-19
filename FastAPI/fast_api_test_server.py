@@ -5,6 +5,7 @@ import db.database
 from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
 from pymavlink import mavutil
 
@@ -52,6 +53,19 @@ STATES = {
 
 #the app
 app = FastAPI()
+
+origins = [
+        "http://localhost:8000",
+        ### ADD REACT ADDRESS HERE ###
+    ]
+
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+)
 
 #the data
 db = DatabaseServer
