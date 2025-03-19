@@ -14,8 +14,6 @@ from .schemas import (
 __all__ = [
   # Main database class
   'DatabaseServer',
-
-  'build',
   
   # Schemas (external data models)
   'Drone',
