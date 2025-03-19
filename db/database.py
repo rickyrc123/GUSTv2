@@ -77,7 +77,7 @@ class DatabaseServer:
         select(models.DroneInfo)
       ).all()
 
-      drone_names = [drone.name for drone in result]
+      drone_names = [drone[0].name for drone in result]
 
     return drone_names
   
