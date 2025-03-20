@@ -55,8 +55,7 @@ STATES = {
 app = FastAPI()
 
 origins = [
-        "http://localhost:8000",
-        ### ADD REACT ADDRESS HERE ###
+        "http://localhost:5173",
     ]
 
 app.add_middleware(
@@ -137,6 +136,7 @@ async def get_all_drones():
     db = database.DatabaseServer()
     return {"Drones" : db.get_all_drones()}
 
+@app.post("/drones/create", response_model = DroneCreate) #change this to post
 @app.post("/drones/create")
 async def create_drone(
     drone : schemas.Drone
