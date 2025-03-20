@@ -8,14 +8,12 @@ from .schemas import (
   Waypoint,
   CreateWaypoint,
   Program,
-  CreateProgram,
+  CreateProgram
 )
 
 __all__ = [
   # Main database class
   'DatabaseServer',
-
-  'build',
   
   # Schemas (external data models)
   'Drone',
@@ -25,5 +23,5 @@ __all__ = [
   'Waypoint',
   'CreateWaypoint',
   'Program',
-  'CreateProgram',
+  'CreateProgram'
 ]

@@ -1,9 +1,11 @@
 
 import random
 from typing import Union
+import db.database
 from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import sessionmaker
 from pymavlink import mavutil
 
@@ -46,6 +48,23 @@ STATES = {
 #the app
 app = FastAPI()
 
+##TODO ADD VALIDATION
+origins = [
+        "http://localhost:8000",
+        "http://localhost:5173"
+    ]
+
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+)
+
+#the data
+db = DatabaseServer
+
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
 database = db.DatabaseServer()
@@ -68,6 +87,7 @@ async def startup():
     drone_list = database.get_all_drones()
     for drone in drone_list:
         drone_dict[drone.name] = drone
+    print("starting up")
     ## ESTABLISH MAVLINK CONNECTION
     
 
@@ -78,7 +98,6 @@ async def shutdown():
     for _, drone in drone_dict.items():
         database.update_drone_info(drone=drone)
         database.update_drone_location(drone=drone)
-
 #sending stuff with the API
 #DEPRECIATED
 @app.get("/test_data/get_generated_data")
@@ -120,7 +139,7 @@ async def generate_data():
 async def get_all_drones():
     return {"Drones" : drone_dict.keys()}
 
-@app.post("/drones/create")
+@app.post("/drones/create", response_model = DroneCreate) #change this to post
 async def create_drone(
     drone : db.Drone
 ):
