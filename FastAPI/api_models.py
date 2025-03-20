@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import List
 
+#USED FOR API DOCS
+
 class DronePositionRequest(BaseModel):
     long: float
     lat: float

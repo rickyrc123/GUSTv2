@@ -55,7 +55,22 @@ services:
     volumes:
       - ./db:/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
-
+  ardupilot_simulation:
+    image: ardupilot/ardupilot  # ArduPilot Docker image
+    container_name: ardupilot_simulation
+    environment:
+      - SITL=1
+      - MAVLINK_ADDRESS=udp://:14550  # MAVLink UDP port
+    volumes:
+      - ./ardupilot:/root/ardupilot  # Mount your local ArduPilot directory if you have specific configurations or code
+    ports:
+      - "14550:14550/udp"  # Expose MAVLink port for communication
+    command: >
+      sh -c "
+        cd /root/ardupilot;
+        ./waf configure --board sitl && ./waf --targets=sitl gazebo
+      "
+    restart: always
 networks:
   backend:
     driver: bridge

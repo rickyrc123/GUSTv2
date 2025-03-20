@@ -174,12 +174,13 @@ async def view_positions(drone_id : int):
          """
 )
 async def add_drone_position(
-    position : schemas.Waypoint
+    position : schemas.Waypoint,
+    drone_name : str
 ):
     db = database.DatabaseServer()
 
     try:
-        db.add_position(position)
+        db.update_drone_location()
     except Exception as e:
         return {"Failure" : f"db.add_position failed \n\n\n {e}"}
     
