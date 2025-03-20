@@ -12,10 +12,6 @@ from api_models import PositionResponse             as PositionResponse
 from api_models import MultiPositionResponse        as ViewPosReponse
 from api_models import DroneCreateRequest           as DroneCreate
 
-from db import models
-from db import schemas
-from db import database
-
 import db
 
 #db tables
@@ -52,6 +48,7 @@ app = FastAPI()
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
+database = db.DatabaseServer()
 
 
 def _mavlink_init():
@@ -101,7 +98,7 @@ async def generate_data():
         })
     
     # convert to json payload
-    # websocket messages must be btyes or strings
+    # websocket messages must be bytes or strings
 
     payload = {
         "coordinates" : position_array,
@@ -118,12 +115,10 @@ async def get_all_drones():
 
 @app.post("/drones/create")
 async def create_drone(
-    drone : schemas.Drone
+    drone : db.Drone
 ):
-    db = database.DatabaseServer()
-
     try:
-        db.create_drone(drone=drone)
+        database.create_drone(drone=drone)
     except Exception as e:
         return {"Status" : f"db.create_drone failed! \n\n\n {e}"} 
     
@@ -137,26 +132,15 @@ async def delete_drone(drone_name : str):
     return {"Status" : "Success!"}
 
 
-@app.get("/drones/positions", 
-         response_model=ViewPosReponse, 
+# get data from mavlink
+@app.post("/drones/{drone_name}/update_position", 
          response_description = """
-            Returns the last 50 positions of the drone_id given.
-        """)
-async def view_positions(drone_id : int):
-    db = database.DatabaseServer()
-    return {"Positions" : db.get_drone_position_history()} 
-
-
-@app.post("/drones/{drone_id}/post_position", 
-         response_description = """
-            Adds point to database and updates the drones last position.
+            Updates the drones last position.
          """
 )
-async def add_drone_position(
-    position : schemas.DroneUpdate 
+async def update_drone_position(
+    drone_name : str
 ):
-    db = database.DatabaseServer()
-
     try:
         db.add_position(position)
     except Exception as e:
