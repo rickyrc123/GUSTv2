@@ -55,8 +55,7 @@ STATES = {
 app = FastAPI()
 
 origins = [
-        "http://localhost:8000",
-        ### ADD REACT ADDRESS HERE ###
+        "http://localhost:5173",
     ]
 
 app.add_middleware(
