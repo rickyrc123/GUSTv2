@@ -54,8 +54,10 @@ STATES = {
 #the app
 app = FastAPI()
 
+##TODO ADD VALIDATION
 origins = [
-        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://localhost:5173"
     ]
 
 app.add_middleware(
@@ -137,7 +139,6 @@ async def get_all_drones():
     return {"Drones" : db.get_all_drones()}
 
 @app.post("/drones/create", response_model = DroneCreate) #change this to post
-@app.post("/drones/create")
 async def create_drone(
     drone : schemas.Drone
 ):
