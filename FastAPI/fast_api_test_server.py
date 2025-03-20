@@ -50,6 +50,8 @@ engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres
 
 database = db.DatabaseServer()
 
+# Hashmap of drones
+drone_dict = {}
 
 def _mavlink_init():
     # Connect to ArduPilot SITL
@@ -63,13 +65,19 @@ def _mavlink_init():
 @app.on_event("startup")
 async def startup():
     db.build()
+    drone_list = database.get_all_drones()
+    for drone in drone_list:
+        drone_dict[drone.name] = drone
     ## ESTABLISH MAVLINK CONNECTION
     
 
 
 #does things, eventually...
 @app.on_event("shutdown")
-    
+async def shutdown():
+    for _, drone in drone_dict.items():
+        database.update_drone_info(drone=drone)
+        database.update_drone_location(drone=drone)
 
 #sending stuff with the API
 #DEPRECIATED
@@ -110,8 +118,7 @@ async def generate_data():
 
 @app.get("/drones")
 async def get_all_drones():
-    db = database.DatabaseServer()
-    return {"Drones" : db.get_all_drones()}
+    return {"Drones" : drone_dict.keys()}
 
 @app.post("/drones/create")
 async def create_drone(
@@ -122,12 +129,14 @@ async def create_drone(
     except Exception as e:
         return {"Status" : f"db.create_drone failed! \n\n\n {e}"} 
     
+    drone_dict[drone.name] = drone
     return {"Status" : "Success!"}
 
 @app.post("/drones/{drone_name}/delete")
 async def delete_drone(drone_name : str):
-    db = database.DatabaseServer()
-    db.delete_drone_by_name(name=drone_name)
+    database.delete_drone(drone=drone_dict[drone_name])
+    
+    del drone_dict[drone_name]
 
     return {"Status" : "Success!"}
 
@@ -142,9 +151,9 @@ async def update_drone_position(
     drone_name : str
 ):
     try:
-        db.add_position(position)
+        db.update_drone(drone_dict[drone_name])
     except Exception as e:
-        return {"Failure" : f"db.add_position failed \n\n\n {e}"}
+        return {"Failure" : f"db.update_position failed \n\n\n {e}"}
     
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 

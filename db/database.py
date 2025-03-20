@@ -71,13 +71,24 @@ class DatabaseServer:
     except:
       raise Exception("Drone with same name is already defined.")
   
-  def get_all_drones(self) -> List[str]:
+  def get_all_drones(self) -> List[schemas.Drone]:
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+      ).all()
+
+      drone_list = [_drone(*drone) for drone in result]
+
+    return drone_list
+  
+  def get_all_drone_names(self) -> List[str]:
     with self.Session.begin() as session:
       result = session.execute(
         select(models.DroneInfo)
       ).all()
 
-      drone_names = [drone.name for drone in result]
+      drone_names = [drone[0].name for drone in result]
 
     return drone_names
   
