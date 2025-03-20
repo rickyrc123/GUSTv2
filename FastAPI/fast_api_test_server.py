@@ -14,12 +14,6 @@ from api_models import PositionResponse             as PositionResponse
 from api_models import MultiPositionResponse        as ViewPosReponse
 from api_models import DroneCreateRequest           as DroneCreate
 
-from db import models
-from db import schemas
-from db import database
-
-from db.database import DatabaseServer
-
 import db
 
 #db tables
@@ -73,7 +67,10 @@ db = DatabaseServer
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
+database = db.DatabaseServer()
 
+# Hashmap of drones
+drone_dict = {}
 
 def _mavlink_init():
     # Connect to ArduPilot SITL
@@ -86,6 +83,10 @@ def _mavlink_init():
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
+    db.build()
+    drone_list = database.get_all_drones()
+    for drone in drone_list:
+        drone_dict[drone.name] = drone
     print("starting up")
     ## ESTABLISH MAVLINK CONNECTION
     
@@ -94,8 +95,9 @@ async def startup():
 #does things, eventually...
 @app.on_event("shutdown")
 async def shutdown():
-    #do stuff 
-    print("Shutting down")
+    for _, drone in drone_dict.items():
+        database.update_drone_info(drone=drone)
+        database.update_drone_location(drone=drone)
 #sending stuff with the API
 #DEPRECIATED
 @app.get("/test_data/get_generated_data")
@@ -123,7 +125,7 @@ async def generate_data():
         })
     
     # convert to json payload
-    # websocket messages must be btyes or strings
+    # websocket messages must be bytes or strings
 
     payload = {
         "coordinates" : position_array,
@@ -135,54 +137,42 @@ async def generate_data():
 
 @app.get("/drones")
 async def get_all_drones():
-    db = database.DatabaseServer()
-    return {"Drones" : db.get_all_drones()}
+    return {"Drones" : drone_dict.keys()}
 
 @app.post("/drones/create", response_model = DroneCreate) #change this to post
 async def create_drone(
-    drone : schemas.Drone
+    drone : db.Drone
 ):
-    db = database.DatabaseServer()
-
     try:
-        db.create_drone(drone=drone)
+        database.create_drone(drone=drone)
     except Exception as e:
         return {"Status" : f"db.create_drone failed! \n\n\n {e}"} 
     
+    drone_dict[drone.name] = drone
     return {"Status" : "Success!"}
 
 @app.post("/drones/{drone_name}/delete")
 async def delete_drone(drone_name : str):
-    db = database.DatabaseServer()
-    db.delete_drone_by_name(name=drone_name)
+    database.delete_drone(drone=drone_dict[drone_name])
+    
+    del drone_dict[drone_name]
 
     return {"Status" : "Success!"}
 
 
-@app.get("/drones/positions", 
-         response_model=ViewPosReponse, 
+# get data from mavlink
+@app.post("/drones/{drone_name}/update_position", 
          response_description = """
-            Returns the last 50 positions of the drone_id given.
-        """)
-async def view_positions(drone_id : int):
-    db = database.DatabaseServer()
-    return {"Positions" : db.get_drone_position_history()} 
-
-
-@app.post("/drones/{drone_id}/post_position", 
-         response_description = """
-            Adds point to database and updates the drones last position.
+            Updates the drones last position.
          """
 )
-async def add_drone_position(
-    position : schemas.Waypoint
+async def update_drone_position(
+    drone_name : str
 ):
-    db = database.DatabaseServer()
-
     try:
-        db.add_position(position)
+        db.update_drone(drone_dict[drone_name])
     except Exception as e:
-        return {"Failure" : f"db.add_position failed \n\n\n {e}"}
+        return {"Failure" : f"db.update_position failed \n\n\n {e}"}
     
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 
