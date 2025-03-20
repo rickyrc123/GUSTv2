@@ -11,7 +11,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
 
                 const response = await fetch("http://localhost:8000/drones");
                 const data = await response.json();
-                
+                console.log("Drone:", data.Dones)
                 
                 setItems(data.Drones);
             } catch (error) {
@@ -21,16 +21,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
 
         fetchData();
 
-    }); 
-
-    //hold before we get the CORS conenction
-    const test = [
-        { name: 'Item 1', action: 'Action 1' },
-        { name: 'Item 2', action: 'Action 2' },
-        { name: 'Item 3', action: 'Action 3' },
-        { name: 'Item 4', action: 'Action 4' },
-        { name: 'Item 5', action: 'Action 5' },
-      ];
+    });
     
     const Row = ({ index }) => {
         const handleClick = () => {
@@ -46,7 +37,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
                 marginBottom: '15px'
             }}>    
                 <button style={{width: '90%'}} onClick={handleClick}>
-                    {test[index].name}
+                    {items[index]}
                 </button>
             </div>
         );
@@ -61,7 +52,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
         }}>
             <List
                 itemSize={itemSize}
-                itemCount={test.length}
+                itemCount={items.length}
                 height={height}
                 width={width}
             >
