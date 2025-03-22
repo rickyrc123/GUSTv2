@@ -6,22 +6,24 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
+            const fetchData = async () => {
+                try {
 
-                const response = await fetch("http://localhost:8000/drones");
-                const data = await response.json();
-                console.log("Drone:", data.Dones)
-                
-                setItems(data.Drones);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
+                    const response = await fetch("http://localhost:8000/drones");
+                    const data = await response.json();
+                    console.log("Drone:", data.Dones)
+                    
+                    setItems(data.Drones);
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            };
 
-        fetchData();
+            fetchData();
+            const interval = setInterval(fetchData, 500);
+            return () => clearInterval(interval);
 
-    });
+    }, []);
     
     const Row = ({ index }) => {
         const handleClick = () => {
