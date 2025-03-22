@@ -51,7 +51,7 @@ function PlanningWidget() {
   };
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div style={{ width: '60%', height: '50%' }}>
       <VehicleList onSelectVehicle={setSelectedVehicleID} />
       <MapContainer
         center={[51.505, -0.09]}
