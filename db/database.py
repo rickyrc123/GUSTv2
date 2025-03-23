@@ -69,9 +69,20 @@ class DatabaseServer:
 
         session.commit()
     except:
-      print("Drone with same name is already defined.")
+      raise Exception("Drone with same name is already defined.")
   
-  def get_all_drones(self) -> List[str]:
+  def get_all_drones(self) -> List[schemas.Drone]:
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.DroneInfo, models.DroneLocation)
+        .join(models.DroneLocation, models.DroneInfo.id == models.DroneLocation.drone_id)
+      ).all()
+
+      drone_list = [_drone(*drone) for drone in result]
+
+    return drone_list
+  
+  def get_all_drone_names(self) -> List[str]:
     with self.Session.begin() as session:
       result = session.execute(
         select(models.DroneInfo)
@@ -184,7 +195,7 @@ class DatabaseServer:
 
         session.commit()
     except:
-      print("Swarm with same name is already defined.")
+      raise Exception("Swarm with same name is already defined.")
 
   # Currently all swarms are returned with drone lists empty but the name
   # can be used for getting that info
@@ -287,7 +298,7 @@ class DatabaseServer:
 
         session.commit()
     except:
-      print("Program with same name is already defined")
+      raise Exception("Program with same name is already defined")
   
   def update_program_name(self, program: schemas.Program):
     with self.Session.begin() as session:
