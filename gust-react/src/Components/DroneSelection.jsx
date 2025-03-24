@@ -9,25 +9,24 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
             const fetchData = async () => {
                 try {
 
-                    const response = await fetch("http://localhost:8000/drones");
-                    const data = await response.json();
-                    console.log("Drone:", data.Dones)
-                    
-                    setItems(data.Drones);
-                } catch (error) {
-                    console.error("Error fetching data:", error);
-                }
-            };
+                const response = await fetch("http://localhost:8000/drones");
+                const data = await response.json();
+                console.log("Drone:", data.Drones)
+                
+                setItems(data.Drones);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
 
-            fetchData();
-            const interval = setInterval(fetchData, 500);
-            return () => clearInterval(interval);
-
+        fetchData();
+        const interval = setInterval(fetchData, 1000);
+        return () => clearInterval(interval);
     }, []);
     
     const Row = ({ index }) => {
         const handleClick = () => {
-            alert(`You clicked on: ${items[index].action}`);
+            alert(`You clicked on: ${items[index].name}`);
         };
 
         //First div style is how the buttons fit in the list
@@ -39,7 +38,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
                 marginBottom: '15px'
             }}>    
                 <button style={{width: '90%'}} onClick={handleClick}>
-                    {items[index]}
+                    {items[index].name}
                 </button>
             </div>
         );
