@@ -60,6 +60,8 @@ services:
       context: ./gust-react
     ports:
       - "5173:5173"
+    depends_on:
+      - fastapi
 networks:
   backend:
     driver: bridge

@@ -20,12 +20,13 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
         };
 
         fetchData();
-
-    });
+        const interval = setInterval(fetchData, 1000);
+        return () => clearInterval(interval);
+    }, []);
     
     const Row = ({ index }) => {
         const handleClick = () => {
-            alert(`You clicked on: ${items[index].action}`);
+            alert(`You clicked on: ${items[index].name}`);
         };
 
         //First div style is how the buttons fit in the list
