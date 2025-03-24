@@ -20,13 +20,21 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
         };
 
         fetchData();
+
+        //refresh every 1 second (1000ms)
         const interval = setInterval(fetchData, 1000);
         return () => clearInterval(interval);
     }, []);
     
     const Row = ({ index }) => {
         const handleClick = () => {
-            alert(`You clicked on: ${items[index].name}`);
+            alert(`Name:  ${items[index].name}          \n
+                    lat:  ${items[index].current_long}  \n
+                   long:  ${items[index].current_lat}   \n
+                    alt:  ${items[index].current_alt}   \n
+                    yaw:  ${items[index].current_yaw}   \n`);
+
+            //TODO highlight clicked drone on map
         };
 
         //First div style is how the buttons fit in the list
