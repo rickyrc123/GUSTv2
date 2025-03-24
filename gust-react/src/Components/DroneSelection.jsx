@@ -11,7 +11,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
 
                 const response = await fetch("http://localhost:8000/drones");
                 const data = await response.json();
-                console.log("Drone:", data.Dones)
+                console.log("Drone:", data.Drones)
                 
                 setItems(data.Drones);
             } catch (error) {
@@ -37,7 +37,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
                 marginBottom: '15px'
             }}>    
                 <button style={{width: '90%'}} onClick={handleClick}>
-                    {items[index]}
+                    {items[index].name}
                 </button>
             </div>
         );

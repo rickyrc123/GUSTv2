@@ -62,9 +62,6 @@ app.add_middleware(
         allow_headers=["*"],
 )
 
-#the data
-db = DatabaseServer
-
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
 database = db.DatabaseServer()
@@ -137,7 +134,7 @@ async def generate_data():
 
 @app.get("/drones")
 async def get_all_drones():
-    return {"Drones" : drone_dict.keys()}
+    return {"Drones" : list(drone_dict.values())}
 
 @app.post("/drones/create", response_model = DroneCreate) #change this to post
 async def create_drone(
