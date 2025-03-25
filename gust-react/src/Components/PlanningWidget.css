@@ -31,19 +31,19 @@
   li {
     padding: 8px 12px;
     margin-bottom: 5px;
-    background: #fff;
+    background: #2196f3;
     border: 1px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
   }
   
   li.selected {
-    background: #e3f2fd;
+    background: #78def7;
     border-color: #2196f3;
   }
   
   li:hover {
-    background: #f0f0f0;
+    background: #78def7;
   }
   
   input[type="text"] {
@@ -55,9 +55,6 @@
   }
   
   button {
-    padding: 8px 16px;
-    margin-right: 10px;
-    margin-bottom: 10px;
     background: #2196f3;
     color: white;
     border: none;

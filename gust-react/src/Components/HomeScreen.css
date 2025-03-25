@@ -10,7 +10,6 @@
 
 /* All three containers share these styles */
 .drone-list-container,
-.map-container,
 .gauges-container {
     height: 80vh;
     display: flex;
@@ -26,12 +25,6 @@
     justify-content: right;
 }
 
-/* Map (center) */
-.map-container {
-    width: 55vw;
-    order: 2;
-    justify-content: left;
-}
 
 /* Gauges (right) */
 .gauges-container {

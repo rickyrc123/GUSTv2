@@ -1,7 +1,6 @@
 import MapComponent from "./MapComponent.jsx";
 import DroneList from "./DroneSelection.jsx";
 import AltimeterGauge from "./AltimeterGauge.jsx";
-import './HomeScreen.css';
 import { useState, useEffect } from "react";
 
 function HomeScreen() {
@@ -31,14 +30,34 @@ function HomeScreen() {
     };
 
     return (
-        <div className="HomeScreen">
-            <div className='drone-list-container'>
+        <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+            <div style={{
+                position: "absolute",
+                left: "20%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                borderRadius: "8px",
+            }}>
                 <DroneList drones={drones} onDroneSelect={handleDroneSelect}/>
             </div>
-            <div className="map-container">
+            <div className="map-container" style = {{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                width: "100vw",
+            }}>
                 <MapComponent drones={drones} selectedDrone={selectedDrone}/>
             </div>
-            <div className="gauges-container">
+            <div className="gauges-container" style={{
+                position: "absolute",
+                left: "82%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                borderRadius: "8px",
+            }}>
                 <AltimeterGauge selectedDrone={selectedDrone}/>
             </div>
         </div>
