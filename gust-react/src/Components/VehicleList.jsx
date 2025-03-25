@@ -13,7 +13,8 @@ const VehicleList = ({ onSelectVehicle }) => {
         const response = await fetch('http://localhost:8000/drones');
         if (!response.ok) throw new Error('Failed to fetch vehicles');
         const data = await response.json();
-        setVehicles(data);
+        setVehicles(data.Drones);
+        console.log(data);
         console.log('got them drones!');
       } catch (err) {
         setError(err.message);
@@ -27,7 +28,7 @@ const VehicleList = ({ onSelectVehicle }) => {
 
   const handleSelectVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
-    onSelectVehicle(vehicle.vehicleID);
+    onSelectVehicle(vehicle.name);
   };
 
   return (
@@ -42,12 +43,12 @@ const VehicleList = ({ onSelectVehicle }) => {
         <ul>
           {vehicles.map(vehicle => (
             <li
-              key={vehicle.vehicleID}
-              className={selectedVehicle?.vehicleID === vehicle.vehicleID ? 'selected' : ''}
+              key={vehicle.name}
+              className={selectedVehicle?.name === vehicle.name ? 'selected' : ''}
               onClick={() => handleSelectVehicle(vehicle)}
             >
-              {vehicle.name} (ID: {vehicle.vehicleID})
-              {vehicle.type && <span> - {vehicle.type}</span>}
+              {vehicle.name} (ID: {vehicle.name})
+              {vehicle.model && <span> - {vehicle.model}</span>}
             </li>
           ))}
         </ul>
