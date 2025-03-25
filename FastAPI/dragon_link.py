@@ -141,7 +141,7 @@ def main():
 
         #take off
         thing = input("Press Enter to Takeoff")
-        takeoff(dl, 2)
+        takeoff(dl, 3)
 
 
         #land
