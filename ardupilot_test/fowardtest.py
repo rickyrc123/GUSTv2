@@ -60,7 +60,7 @@ def gainAltitude():
                 print("✅ Reached target altitude!")
                 break
 
-        time.sleep(5)
+        time.sleep(1)
     return target_altitude
 def moveDrone(numInputs,lat,lon,alt_m):
     for i in range(numInputs):
@@ -152,15 +152,15 @@ def landDrone():
                 print("✅ Landed successfully!")
                 break
 
-        time.sleep(5)
+        time.sleep(1)
     print("Stopping drone!")
 lat = []
 lon = []
 
 
 #ask for how many corrdinates are required
-numInputs = getInputNum()
-lat, lon = getCoords(numInputs)
+#numInputs = getInputNum()
+#lat, lon = getCoords(numInputs)
 # turn drone t guided mode 
 enterGuided()
 
@@ -169,14 +169,14 @@ droneArm()
 
 # Move drone
 alt_m=gainAltitude()  # Altitude in meters
-
+ 
 
 # Set movement parameters
-findGps()
+#findGps()
 
 
 #alt_m = 15  
-moveDrone(numInputs,lat,lon,alt_m)
+#moveDrone(numInputs,lat,lon,alt_m)
 
 # Stop movement by sending zero velocity
 stopDrone()
