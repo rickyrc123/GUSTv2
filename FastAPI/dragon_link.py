@@ -134,7 +134,6 @@ def main():
         dl = connect_to_dragonlink(args.port, args.baud)
         
         arm_vehicle(dl)
-        time.sleep(1)
         
         # Example commands (modify as needed)
         set_flight_mode(dl, 'LOITER')
