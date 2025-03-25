@@ -8,43 +8,34 @@ const AltimeterGauge = ({ selectedDrone }) => {
     if(selectedDrone){
         altitude = selectedDrone.current_alt;
     }
+
+    const addFt = (value) => {
+        return value + ' ft.'
+    }
+
     return (
-        <div style={{ width: 300, margin: '0 auto'}}>
-            <GaugeComponent
-                arc={{
-                    subArcs: [
-                      {
-                        limit: 200,
-                        showTick: true
-                      },
-                      {
-                        limit: 400,
-                        showTick: true
-                      },
-                      {
-                        limit: 600,
-                        showTick: true
-                      },
-                      {
-                        limit: 800,
-                        showTick: true
-                      },
-                      {
-                        limit: 1000,
-                        showTick: true
-                      },
-                    ]
-                }}
-                value={altitude}
-                minValue={0}
-                maxValue={1000}
-                label="Altitude"
-                color="#FF5722"
-                backgroundColor="#ECECEC"
-                height={250}
-                width={250}
-            />
-        </div>
+        <GaugeComponent
+            arc={{
+                width: 0.2,
+                colorArray: ["#2196f3"],
+                subArcs: [{ limit: 200, showTick: true}, {limit: 400, showTick: true}, {limit: 600, showTick: true}, {limit: 800, showTick: true}, {limit: 1000, showTick: true},],
+            }}
+            value={altitude}
+            valueFormatter={(value) => `${value} ft.`}
+            minValue={0}
+            maxValue={1000}
+            style={{
+                width: 400
+            }}
+            labels={{
+                valueLabel: {
+                    style: {fontSize: 40},
+                    formatTextValue: addFt
+                    }
+            }}
+            color="#2196f3"
+            backgroundColor="#2196f3"
+        />
     );
 }
 

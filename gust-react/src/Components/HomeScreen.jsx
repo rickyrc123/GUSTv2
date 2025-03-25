@@ -41,7 +41,7 @@ function HomeScreen() {
             }}>
                 <DroneList drones={drones} onDroneSelect={handleDroneSelect}/>
             </div>
-            <div style = {{
+            <div className="map-container" style = {{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -50,12 +50,13 @@ function HomeScreen() {
             }}>
                 <MapComponent drones={drones} selectedDrone={selectedDrone}/>
             </div>
-            <div style = {{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh",
-                width: "100vw",
+            <div className="gauges-container" style={{
+                position: "absolute",
+                left: "82%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                borderRadius: "8px",
             }}>
                 <AltimeterGauge selectedDrone={selectedDrone}/>
             </div>
