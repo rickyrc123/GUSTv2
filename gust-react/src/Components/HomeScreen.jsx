@@ -1,31 +1,33 @@
 import MapComponent from "./MapComponent.jsx";
 import DroneList from "./DroneSelection.jsx";
 import AltimeterGauge from "./AltimeterGauge.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function HomeScreen() {
-    const [selectedDroneId, setSelectedDroneId] = useState(null);
+    const [selectedDrone, setSelectedDrone] = useState(null);
+    const [drones, setDrones] = useState([]);
 
-    const handleDroneSelect = (droneId) => {
-        setSelectedDroneId(droneId);
+    
+  
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch("http://localhost:8000/drones");
+                const data = await response.json();
+                setDrones(data.Drones || []);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchData();
+        const interval = setInterval(fetchData, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleDroneSelect = (drone) => {
+        setSelectedDrone(drone);
     };
-  
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const response = await fetch("http://localhost:8000/drones");
-    //             const data = await response.json();
-    //             console.log("Drone:", response.Dones);          
-    //             setItems(data.Drones);
-    //         } catch (error) {
-    //             console.error("Error fetching data:", error);
-    //         }
-    // };
-    //           fetchData();
-    //           const interval = setInterval(fetchData, 500);
-    //           return () => clearInterval(interval);
-  
-    // }, []);
 
     return (
         <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
@@ -37,7 +39,7 @@ function HomeScreen() {
                 padding: "20px",
                 borderRadius: "8px",
             }}>
-                <DroneList onDroneSelect={handleDroneSelect}/>
+                <DroneList drones={drones} onDroneSelect={handleDroneSelect}/>
             </div>
             <div style = {{
                 display: "flex",
@@ -46,7 +48,7 @@ function HomeScreen() {
                 height: "100vh",
                 width: "100vw",
             }}>
-                <MapComponent />
+                <MapComponent drones={drones} selectedDrone={selectedDrone}/>
             </div>
             <div style = {{
                 display: "flex",
@@ -55,7 +57,7 @@ function HomeScreen() {
                 height: "100vh",
                 width: "100vw",
             }}>
-                <AltimeterGauge droneId={selectedDroneId}/>
+                <AltimeterGauge selectedDrone={selectedDrone}/>
             </div>
         </div>
     );

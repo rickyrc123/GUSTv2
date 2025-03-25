@@ -1,49 +1,59 @@
-import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import PropTypes from "prop-types";
 
-const MapComponent = () => {
-  const [positions, setPositions] = useState([
-    { "latitude": 51.505, "longitude": -0.09, "name": "Location 1" },
-    { "latitude": 51.51, "longitude": -0.1, "name": "Location 2" },
-    { "latitude": 0.51, "longitude": -0.1, "name": "Location 2" }
-  ]);
+const MapComponent = ({drones = [], selectedDrone }) => {
+ 
+	//Sets the center to the first returned pos or defaults to UA
+	let center = [33.215, -87.538];
 
-  // useEffect(() => {
-  //   // Fetch data from your API
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch('https://your-api-endpoint.com/positions');
-  //       const data = await response.json();
-  //       setPositions(data); // Assuming the API returns an array of positions
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   };
+	// If selectedDrone is valid, center on that drone’s coordinates
+	if (selectedDrone) {
+		center = [selectedDrone.current_lat, selectedDrone.current_long];
+	} else if (drones.length > 0) {
+		center = [drones[0].current_lat, drones[0].current_long];
+	}
 
-  //   fetchData();
-  // }, []);
-  
-  //Sets the center to the first returned pos or defaults to UA
-  const center = positions.length > 0 ? [positions[0].latitude, positions[0].longitude] : [33.215, -87.538];
+  	console.log("Length:", drones.length);
 
-  //Returning the MapContainer with Open Street map cred and the positions mapped
-  return (
-    <MapContainer center={center} zoom={13} style={{ height: "575px", width: "45%" }}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      {positions.map((position, index) => (
-        <Marker key={index} position={[position.latitude, position.longitude]}>
-          <Popup>
-            <strong>{position.name}</strong> <br />
-            Lat: {position.latitude}, Lng: {position.longitude}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
-  );
+  	//Returning the MapContainer with Open Street map cred and the positions mapped
+  	return (
+		<MapContainer key={`${center[0]}-${center[1]}`} center={center} zoom={13} style={{ height: "575px", width: "45%" }}>
+		<TileLayer
+			url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+			attribution="&copy; OpenStreetMap contributors"
+		/>
+		{drones.map((drone, index) => (
+			<Marker key={index} position={[drone.current_lat, drone.current_long]}>
+			<Popup>
+				<strong>{drone.name}</strong> <br />
+				Lat: {drone.current_lat}, Lng: {drone.current_long}
+			</Popup>
+			</Marker>
+		))}
+		</MapContainer>
+	);
+};
+
+MapComponent.propTypes = {
+  	drones: PropTypes.arrayOf(
+		PropTypes.shape({
+			name: PropTypes.string,
+			model: PropTypes.string,
+			current_lat: PropTypes.number,
+			current_long: PropTypes.number,
+			current_alt: PropTypes.number,
+			current_yaw: PropTypes.number
+		})
+  ),
+  	selectedDrone: PropTypes.shape({
+		name: PropTypes.string,
+		model: PropTypes.string,
+		current_lat: PropTypes.number,
+		current_long: PropTypes.number,
+		current_alt: PropTypes.number,
+		current_yaw: PropTypes.number
+	}),
 };
 
 export default MapComponent;
