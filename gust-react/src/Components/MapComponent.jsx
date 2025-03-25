@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import PropTypes from "prop-types";
 
+
 const MapComponent = ({drones = [], selectedDrone }) => {
  
 	//Sets the center to the first returned pos or defaults to UA
@@ -55,5 +56,6 @@ MapComponent.propTypes = {
 		current_yaw: PropTypes.number
 	}),
 };
+
 
 export default MapComponent;
