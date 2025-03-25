@@ -24,8 +24,8 @@ services:
   dev:
     container_name: dev
     build:
-      context: ./db
-      dockerfile: ../Dockerfile
+      context: .
+      dockerfile: Dockerfile.dev
     depends_on:
       - db
     environment:
@@ -45,11 +45,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - dev
       db:
         condition: service_healthy
-        restart: true
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
     networks:
