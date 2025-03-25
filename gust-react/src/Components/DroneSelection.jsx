@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { FixedSizeList as List } from "react-window";
 
-const DroneList = ({ drones = [], height = 575, width = 180, itemSize = 75, onDroneSelect })=> {
+const DroneList = ({ drones = [], height = 700, width = 180, itemSize = 75, onDroneSelect })=> {
     
     const Row = ({ index }) => {
         const handleClick = () => {

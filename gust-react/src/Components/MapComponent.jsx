@@ -18,7 +18,7 @@ const MapComponent = ({drones = [], selectedDrone }) => {
 
   	//Returning the MapContainer with Open Street map cred and the positions mapped
   	return (
-		<MapContainer key={`${center[0]}-${center[1]}`} center={center} zoom={13} style={{ height: "575px", width: "45%" }}>
+		<MapContainer key={`${center[0]}-${center[1]}`} center={center} zoom={13} style={{ height: '85%', width: '75%' }}>
 		<TileLayer
 			url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			attribution="&copy; OpenStreetMap contributors"
