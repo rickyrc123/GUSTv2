@@ -136,7 +136,7 @@ async def generate_data():
 async def get_all_drones():
     return {"Drones" : list(drone_dict.values())}
 
-@app.post("/drones/create", response_model = DroneCreate) #change this to post
+@app.post("/drones/create")
 async def create_drone(
     drone : db.Drone
 ):

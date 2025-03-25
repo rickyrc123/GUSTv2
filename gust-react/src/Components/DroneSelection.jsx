@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { FixedSizeList as List } from "react-window";
 
-const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
+const DroneList = ({ height = 575, width = 180, itemSize = 75, onDroneSelect })=> {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
@@ -26,7 +26,7 @@ const DroneList = ({ height = 575, width = 180, itemSize = 75 })=> {
     
     const Row = ({ index }) => {
         const handleClick = () => {
-            alert(`You clicked on: ${items[index].name}`);
+            onDroneSelect(items[index]);
         };
 
         //First div style is how the buttons fit in the list
@@ -67,8 +67,7 @@ DroneList.propTypes = {
     height: PropTypes.number,
     width: PropTypes.number,
     itemSize: PropTypes.number,
-    index: PropTypes.any,
-    style: PropTypes.any
+    onDroneSelect: PropTypes.func.isRequired
 };
 
 export default DroneList;

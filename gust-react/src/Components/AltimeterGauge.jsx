@@ -1,5 +1,6 @@
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import { Gauge } from 'react-gauge-component';
+import { GaugeComponent } from 'react-gauge-component';
 
 const AltimeterGauge = ({ droneID }) => {
     const [altitude, setAltitude] = useState(0);
@@ -9,7 +10,7 @@ const AltimeterGauge = ({ droneID }) => {
 
         const fetchAltitude = async () => {
             try {
-                const response = await fetch(`/info?droneID=${droneID}`);
+                const response = await fetch(`http://localhost:8000/drones/positions?drone_id=${droneID}`);
                 const data = await response.json();
                 setAltitude(data.altitude || 0);
             } catch (error) {
@@ -18,10 +19,14 @@ const AltimeterGauge = ({ droneID }) => {
         }
 
         fetchAltitude();
+        const interval = setInterval(fetchData, 500);
+        return () => clearInterval(interval);
+
     }, [droneID]);
+
     return (
         <div style={{ width: 300, margin: '0 auto'}}>
-            <Gauge
+            <GaugeComponent
                 value={altitude}
                 max={5000}
                 label="Altitude"
@@ -33,3 +38,9 @@ const AltimeterGauge = ({ droneID }) => {
         </div>
     );
 }
+
+AltimeterGauge.propTypes = {
+    droneID: PropTypes.string
+};
+
+export default AltimeterGauge;

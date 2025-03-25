@@ -1,9 +1,14 @@
 import MapComponent from "./MapComponent.jsx";
 import DroneList from "./DroneSelection.jsx";
-//import { useState, useEffect } from "react";
+import AltimeterGauge from "./AltimeterGauge.jsx";
+import { useState } from "react";
 
 function HomeScreen() {
-    // const [items, setItems] = useState([]);
+    const [selectedDroneId, setSelectedDroneId] = useState(null);
+
+    const handleDroneSelect = (droneId) => {
+        setSelectedDroneId(droneId);
+    };
   
     // useEffect(() => {
     //     const fetchData = async () => {
@@ -32,7 +37,7 @@ function HomeScreen() {
                 padding: "20px",
                 borderRadius: "8px",
             }}>
-                <DroneList />
+                <DroneList onDroneSelect={handleDroneSelect}/>
             </div>
             <div style = {{
                 display: "flex",
@@ -42,6 +47,15 @@ function HomeScreen() {
                 width: "100vw",
             }}>
                 <MapComponent />
+            </div>
+            <div style = {{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                width: "100vw",
+            }}>
+                <AltimeterGauge droneId={selectedDroneId}/>
             </div>
         </div>
     );

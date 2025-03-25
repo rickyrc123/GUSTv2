@@ -1,2 +1,4 @@
 db/__pycache__/
 package-lock.json
+gust-react/package-lock.json
+gust-react/package.json
