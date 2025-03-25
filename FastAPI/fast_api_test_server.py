@@ -138,7 +138,7 @@ async def get_all_drones():
 
 @app.post("/drones/create") #change this to post
 async def create_drone(
-    drone : db.Drone
+    drone : db.CreateDrone
 ):
     try:
         database.create_drone(drone=drone)
@@ -147,6 +147,13 @@ async def create_drone(
     
     drone_dict[drone.name] = drone
     return {"Status" : "Success!"}
+
+@app.get("/drones/{drone_name}")
+async def get_drone(
+    drone_name : str
+):
+    drone = drone_dict[drone_name]
+    return {"Drone" : drone}
 
 
 @app.post("/drones/{drone_name}/delete")
@@ -175,6 +182,30 @@ async def update_drone_position(
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 
     return {"Status" : "Success"}
+
+@app.get("/swarms")
+async def get_all_swarms():
+    return {"Swarms" : database.get_all_swarms()}
+
+@app.post("/swarms/create")
+async def create_swarm(
+    swarm : db.CreateSwarm
+):
+    try:
+        database.create_swarm(swarm=swarm)
+    except Exception as e:
+        return {"Status" : f"db.create_swarm failed! \n\n\n {e}"}
+    
+    return {"Status" : "Success!"}
+
+@app.get("/swarms/{swarm_name}")
+async def get_swarm(
+    swarm_name : str
+):
+    swarm = database.get_swarm_by_name(swarm_name)
+    return {"Swarm" : swarm}
+
+@app.post("/swarms/{swarm_name}/delete")
 
 @app.get("/manuvers")
 async def get_manuvers():

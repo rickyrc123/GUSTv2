@@ -31,6 +31,11 @@ def _drone(info: models.DroneInfo, location: models.DroneLocation):
   drone._id = info.id
   return drone
 
+def _swarm(swarm: models.Swarm):
+  new_swarm = schemas.Swarm.model_validate(swarm.__dict__)
+  new_swarm._id = swarm.id
+  return new_swarm
+
 class DatabaseServer:
   DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -201,11 +206,22 @@ class DatabaseServer:
   # can be used for getting that info
   def get_all_swarms(self) -> List[str]:
     with self.Session.begin() as session:
-      result = session.execute(select(models.Swarm)).all()
+      result = session.execute(
+        select(models.Swarm)
+        ).all()
 
-      swarms = [swarm.name for swarm in result]
+      swarms = [swarm[0].name for swarm in result]
     
     return swarms
+  
+  def get_swarm_by_name(self, name : str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Swarm)
+        .where(models.Swarm.name==name)
+      ).first()
+
+      return _swarm(*result)
   
   def get_drones_in_swarm(self, swarm: schemas.Swarm) -> List[str]:
     drones = []
@@ -237,6 +253,7 @@ class DatabaseServer:
       )
 
       session.commit()
+    return swarm
   
   def remove_drone_from_swarm(self, swarm: schemas.Swarm, drone: schemas.Drone):
     swarm.drones.remove(drone.name)

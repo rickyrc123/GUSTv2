@@ -16,8 +16,7 @@ RUN pip install \
     uvicorn \
     pydantic \
     psycopg2-binary \
-    sqlalchemy \
-    pymavlink
+    sqlalchemy 
     
 COPY . /home/GUSTv2
 
