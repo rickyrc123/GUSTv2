@@ -305,7 +305,7 @@ class DatabaseServer:
         .where(models.Program.name==name)
         ).first()
       
-      return result
+      return result[0]
 
   def update_program_name(self, program: schemas.Program):
     with self.Session.begin() as session:
@@ -316,14 +316,23 @@ class DatabaseServer:
       )
   
   def update_program_content(self, program: schemas.Program):
-    with self.Session.begin() as session:
-      session.execute(
-        update(models.Program)
-        .where(models.Swarm.id==program._id)
-        .values(content=program.content)
-      )
+     with self.Session.begin() as session:
+        # Get the program within the same session
+        db_program = session.execute(
+            select(models.Program)
+            .where(models.Program.name == program.name)
+        ).scalar_one_or_none()
+        
+        if db_program:
+            
+            updated_content = db_program.content + program.content
 
-      session.commit()
+            session.execute(
+                update(models.Program)
+                .where(models.Program.id == db_program.id)
+                .values(content=updated_content)
+            )
+        # Session will auto-commit when exiting the context
 
   def delete_program(self, program: schemas.Program):
     with self.Session.begin() as session:

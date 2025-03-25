@@ -214,6 +214,20 @@ async def assign_path_to_drone(
     
     return {"Success" : "Yay!"}
 
+@app.post("/manuvers/update_path")
+async def update_path(
+    program_name,
+    paths
+):
+    program = db.Program(name="temp", content=[])
+    program.content.append(paths)
+    program.name = program_name
+    print(program.content)
+    database.update_program_content(
+        program
+    )
+    return {"Success" : "Yay!"}
+
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
 async def read_root():
