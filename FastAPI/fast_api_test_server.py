@@ -38,7 +38,7 @@ STATES = {
    -1 : "UNKNOWN",
     1 : "f",
     2 : "a",
-    3 : " ",
+    3 : "",
     4 : "",
     5 : "",
     6 : "",
@@ -59,11 +59,8 @@ app.add_middleware(
         allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"],
+        allow_headers=["*"]
 )
-
-#the data
-db = DatabaseServer
 
 engine = create_engine('postgresql+psycopg2://postgres:postgres@db:5432/postgres')
 
@@ -137,9 +134,9 @@ async def generate_data():
 
 @app.get("/drones")
 async def get_all_drones():
-    return {"Drones" : drone_dict.values()}
+    return {"Drones" : list(drone_dict.values())}
 
-@app.post("/drones/create", response_model = DroneCreate) #change this to post
+@app.post("/drones/create") #change this to post
 async def create_drone(
     drone : db.Drone
 ):
@@ -150,6 +147,7 @@ async def create_drone(
     
     drone_dict[drone.name] = drone
     return {"Status" : "Success!"}
+
 
 @app.post("/drones/{drone_name}/delete")
 async def delete_drone(drone_name : str):
@@ -177,6 +175,58 @@ async def update_drone_position(
     #THIS IS WHERE THE MAGIC WILL HAPPEN
 
     return {"Status" : "Success"}
+
+@app.get("/manuvers")
+async def get_manuvers():
+    return {"manuvers" : database.get_all_programs()}
+
+@app.post("/manuvers/create")
+async def create_manuver(
+    manuver : db.Program
+):
+    try:
+        database.create_program(manuver)
+    except Exception as e:
+        return {"Failure" : f"data.CreateProgram failed \n\n\n {e}"}
+    
+    return {"Success" : "Yay!"}
+    
+@app.post("/manuvers/delete")
+async def delete_manuver(
+    name : str
+):  
+    try:
+        database.delete_program(db.Program(name=name, content=[]))
+    except Exception as e:
+        return {"Failure" : f"failed \n\n\n {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.post("/manuvers/assign_to_drone")
+async def assign_path_to_drone(
+    program_name,
+    drone_name
+):
+    database.assign_program_to_drone(
+        drone=database.get_drone_by_name(drone_name),
+        program=database.get_program_by_name(program_name)
+    )
+    
+    return {"Success" : "Yay!"}
+
+@app.post("/manuvers/update_path")
+async def update_path(
+    program_name,
+    paths
+):
+    program = db.Program(name="temp", content=[])
+    program.content.append(paths)
+    program.name = program_name
+    print(program.content)
+    database.update_program_content(
+        program
+    )
+    return {"Success" : "Yay!"}
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")

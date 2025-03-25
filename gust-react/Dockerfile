@@ -16,9 +16,6 @@ COPY . .
 # Step 6: Build the React app for production
 RUN npm run build
 
-# Step 7: Serve the build directory using a static server
-RUN npm install -g serve
-
 CMD ["npm","run","dev"]
 
 # Expose the port the app will run on
