@@ -3,13 +3,14 @@ import requests
 def main():
     
     data = {
-        "name": "boberto",
+        "name": "boberto12",
         "model": "string",
         "current_long": 0.0,
         "current_lat": 0.0,
         "current_alt": 0.0,
         "current_yaw": 0.0
     }
+    
     data1 = {
         "name": "boberto1",
         "model": "string",
