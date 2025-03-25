@@ -1,47 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-function UploadPathButton({ vehicleID, paths }) {
-  const handleUpload = () => {
+const UploadPathButton = ({ vehicleID, paths }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleUpload = async () => {
     if (!vehicleID) {
-      alert('Please select a vehicle first.');
+      setError('Please select a vehicle first');
+      return;
+    }
+    if (paths.length === 0) {
+      setError('Please draw a path first');
       return;
     }
 
-    if (paths.length === 0 || paths.every((path) => path.length === 0)) {
-      alert('Please draw a path first.');
-      return;
-    }
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
 
-    // Prepare the data to send
-    const data = {
-      vehicleID,
-      paths,
-    };
-
-    // Send the data to the API
-    fetch('/paths', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        alert('Path uploaded successfully!');
-        console.log('Upload result:', result);
-      })
-      .catch((error) => {
-        console.error('Error uploading path:', error);
-        alert('Failed to upload path.');
+    try {
+      const response = await fetch('/paths', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          vehicleID,
+          paths,
+        }),
       });
+
+      if (!response.ok) throw new Error('Failed to upload path');
+      
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <button onClick={handleUpload} style={{ marginTop: '10px' }}>
-      Upload Path
-    </button>
+    <div className="upload-path">
+      <button 
+        onClick={handleUpload}
+        disabled={isLoading || !vehicleID || paths.length === 0}
+      >
+        {isLoading ? 'Uploading...' : 'Upload Path'}
+      </button>
+      
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">Path uploaded successfully!</div>}
+    </div>
   );
-}
+};
 
 export default UploadPathButton;

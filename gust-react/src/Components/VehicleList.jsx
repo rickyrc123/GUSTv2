@@ -1,41 +1,59 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function VehicleList({ onSelectVehicle }) {
+const VehicleList = ({ onSelectVehicle }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch vehicles from the API
-    fetch('/vehicles')
-      .then((response) => response.json())
-      .then((data) => setVehicles(data))
-      .catch((error) => console.error('Error fetching vehicles:', error));
+    const fetchVehicles = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:8000/drones');
+        if (!response.ok) throw new Error('Failed to fetch vehicles');
+        const data = await response.json();
+        setVehicles(data);
+        console.log('got them drones!');
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchVehicles();
   }, []);
 
   const handleSelectVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
-    onSelectVehicle(vehicle.vehicleID); // Pass the selected vehicleID to the parent
+    onSelectVehicle(vehicle.vehicleID);
   };
 
   return (
-    <div>
-      <h3>Select a Vehicle</h3>
-      <ul>
-        {vehicles.map((vehicle) => (
-          <li
-            key={vehicle.vehicleID}
-            onClick={() => handleSelectVehicle(vehicle)}
-            style={{
-              cursor: 'pointer',
-              fontWeight: selectedVehicle?.vehicleID === vehicle.vehicleID ? 'bold' : 'normal',
-            }}
-          >
-            {vehicle.vehicleID} - {vehicle.name || 'Unnamed Vehicle'}
-          </li>
-        ))}
-      </ul>
+    <div className="vehicle-list">
+      <h3>Vehicle Selection</h3>
+      
+      {error && <div className="error-message">{error}</div>}
+      
+      {isLoading ? (
+        <p>Loading vehicles...</p>
+      ) : (
+        <ul>
+          {vehicles.map(vehicle => (
+            <li
+              key={vehicle.vehicleID}
+              className={selectedVehicle?.vehicleID === vehicle.vehicleID ? 'selected' : ''}
+              onClick={() => handleSelectVehicle(vehicle)}
+            >
+              {vehicle.name} (ID: {vehicle.vehicleID})
+              {vehicle.type && <span> - {vehicle.type}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
+};
 
 export default VehicleList;
