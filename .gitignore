@@ -1,1 +1,9 @@
 db/__pycache__/
+
+# ArduPilot simulation logs
+*.log
+*.BIN
+*.bin
+*.tlog
+logs/
+*.mavlink
