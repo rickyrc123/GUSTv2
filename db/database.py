@@ -276,18 +276,18 @@ class DatabaseServer:
 
   # Program Services
   def create_program(self, program : schemas.CreateProgram):
-    try:
       new_program = models.Program(
         name=program.name,
+        content=program.content,
         created_at=datetime.datetime.utcnow(),
-        updated_at=datetime.datetime.utcnow()
+        last_updated=datetime.datetime.utcnow()
       )
 
       with self.Session.begin() as session:
         session.add(new_program)
         session.flush()
         
-        if new_program == None:
+        if new_program.name == None:
           new_program.name = f"Program{new_program.id:06}"
 
         session.execute(
@@ -297,9 +297,16 @@ class DatabaseServer:
         )
 
         session.commit()
-    except:
-      raise Exception("Program with same name is already defined")
-  
+
+  def get_program_by_name(self, name : str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Program)
+        .where(models.Program.name==name)
+        ).first()
+      
+      return result[0]
+
   def update_program_name(self, program: schemas.Program):
     with self.Session.begin() as session:
       session.execute(
@@ -309,27 +316,51 @@ class DatabaseServer:
       )
   
   def update_program_content(self, program: schemas.Program):
-    with self.Session.begin() as session:
-      session.execute(
-        update(models.Program)
-        .where(models.Swarm.id==program._id)
-        .values(content=program.content)
-      )
+     with self.Session.begin() as session:
+        # Get the program within the same session
+        db_program = session.execute(
+            select(models.Program)
+            .where(models.Program.name == program.name)
+        ).scalar_one_or_none()
+        
+        if db_program:
+            
+            updated_content = db_program.content + program.content
 
-      session.commit()
+            session.execute(
+                update(models.Program)
+                .where(models.Program.id == db_program.id)
+                .values(content=updated_content)
+            )
+        # Session will auto-commit when exiting the context
 
   def delete_program(self, program: schemas.Program):
     with self.Session.begin() as session:
-      session.execute(
-        delete(models.Program_Drone_Swarm)
-        .where(models.Program_Drone_Swarm.program_id==program._id)
-      )
-      session.execute(
-        delete(models.Program_Drone_Swarm)
-        .where(models.Program.id==program._id)
-      )
+        # First, retrieve the program_id based on the program name
+        program_id = session.execute(
+            select(models.Program.id)
+            .where(models.Program.name == program.name)
+        ).scalar()
 
-      session.commit()
+        # If the program with the specified name exists, proceed with deletion
+        if program_id:
+            # Delete from Program_Drone_Swarm where program_id matches
+            session.execute(
+                delete(models.Program_Drone_Swarm)
+                .where(models.Program_Drone_Swarm.program_id == program_id)
+            )
+
+            # Delete from the Program table where program_id matches
+            session.execute(
+                delete(models.Program)
+                .where(models.Program.id == program_id)
+            )
+
+            # Commit the transaction
+            session.commit()
+        else:
+            # If no program was found, handle it (optional)
+            raise ValueError(f"Program with name {program.name} not found.")
   
   def assign_program_to_drone(self, drone : schemas.Drone, program : schemas.Program, swarm : schemas.Swarm = None):
     with self.Session.begin() as session:
@@ -353,3 +384,13 @@ class DatabaseServer:
         )
       
       session.commit()
+
+  def get_all_programs(self):
+    with self.Session.begin() as session:
+      result = session.execute(select(models.Program)).all()
+
+      #this is dumb, needs a cool function
+      programs = [{"name": program[0].name,
+                   "path": program[0].content} for program in result]
+
+    return programs

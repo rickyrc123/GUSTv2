@@ -117,6 +117,6 @@ class Program(Base):
 
   id            = Column(Integer, primary_key=True, nullable=False)
   name          = Column(String, unique=True, nullable=True)
-  content       = Column(PickleType, nullable=False)
+  content       = Column(PickleType, nullable=True, default=list)
   created_at    = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
   last_updated  = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
