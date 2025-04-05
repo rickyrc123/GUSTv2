@@ -62,6 +62,7 @@ def gainAltitude():
 
         time.sleep(1)
     return target_altitude
+
 def moveDrone(numInputs,lat,lon,alt_m):
     for i in range(numInputs):
         # Convert latitude & longitude to integer format (scaled by 1E7)
