@@ -21,6 +21,7 @@ def getCoords(numInputs):
         lon.append(num)  
     return lat,lon
 def enterGuided() :
+    print("Entering guided mode")
     mode = 'GUIDED'
     mode_id = master.mode_mapping()[mode]
     master.set_mode(mode_id)
@@ -38,31 +39,31 @@ def findGps():
         time.sleep(1)
 def gainAltitude():
     target_altitude = 15
+
+    # Send takeoff command
     master.mav.command_long_send(
         master.target_system,
         master.target_component,
         mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
         0,
-        0,
-        0, 0, 0,
+        0, 0, 0, 0,
         0, 0,
         target_altitude
     )
-    # Wait until the drone reaches the target altitude
-    print("Drone takingoff!")
+
+    print("🚁 Drone taking off...")
+
     while True:
         msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
         if msg:
-            altitude = msg.relative_alt / 1000.0  # Convert mm to meters
+            altitude = msg.relative_alt / 1000.0  # mm → meters
             print(f"🔼 Current Altitude: {altitude:.1f}m")
 
-            if altitude >= target_altitude * 0.95:  # 95% of the target altitude
+            if altitude >= target_altitude * 0.90:
                 print("✅ Reached target altitude!")
-                break
+                return target_altitude
 
         time.sleep(1)
-    return target_altitude
-
 def moveDrone(numInputs,lat,lon,alt_m):
     for i in range(numInputs):
         # Convert latitude & longitude to integer format (scaled by 1E7)
@@ -101,7 +102,7 @@ def moveDrone(numInputs,lat,lon,alt_m):
                     print("✅ Reached waypoint!")
                     break
 
-            time.sleep(5)  # Check position every second
+            time.sleep(1)  # Check position every second
         time.sleep(1)  # Wait before sending next comman
 def stopDrone():
     print("🛑 Stopping movement.")
@@ -155,29 +156,33 @@ def landDrone():
 
         time.sleep(1)
     print("Stopping drone!")
+
 lat = []
 lon = []
 
 
 #ask for how many corrdinates are required
-#numInputs = getInputNum()
-#lat, lon = getCoords(numInputs)
-# turn drone t guided mode 
+numInputs = getInputNum()
+lat, lon = getCoords(numInputs)
+
+
+findGps()
+ #turn drone t0 guided mode 
 enterGuided()
 
+time.sleep(2)
 # Arm the drone
 droneArm()
 
+time.sleep(2)
+
 # Move drone
 alt_m=gainAltitude()  # Altitude in meters
- 
 
 # Set movement parameters
-#findGps()
-
-
-#alt_m = 15  
-#moveDrone(numInputs,lat,lon,alt_m)
+#
+#alt_m = 9 
+moveDrone(numInputs,lat,lon,alt_m)
 
 # Stop movement by sending zero velocity
 stopDrone()
