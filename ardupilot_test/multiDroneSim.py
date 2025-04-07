@@ -1,39 +1,40 @@
 from pymavlink import mavutil
 import time
+import threading
 
 
 def connectToDrone(index):
-    print(index)
     # Connect to ArduPilot SITL
     master = mavutil.mavlink_connection(f'udp:127.0.0.1:{14550 + index}')
-    print("waiting for heartbeat")
+    print(f'waiting for heartbeat for drone {index + 1} ')
     master.wait_heartbeat()
     print("Heartbeat received!")
     return master
 def getDroneNum():
-    x=int(input("Enter number of drones"))
+    x=int(input("Enter number of drones "))
     return x
-def getInputNum() :
-    x=int(input("Enter number of inputs"))
+def getInputNum(dNum) :
+    x=int(input(f"Enter number of inputs for drone {dNum + 1} "))
     return x
 def getCoords(numInputs):
     print("Enter coordinates")
     lat = []
     lon = []
     for i in range(numInputs):
-        num = float(input("Enter latitude"))
+        num = float(input("Enter latitude "))
         lat.append(num)
-        num = float(input("Enter longitude"))
+        num = float(input("Enter longitude "))
         lon.append(num)  
     return lat,lon
 def enterGuided(master) :
     mode = 'GUIDED'
     mode_id = master.mode_mapping()[mode]
     master.set_mode(mode_id)
-def droneArm(master):
+def droneArm(master,droneNum):
+    droneNum=droneNum+1
     master.arducopter_arm()
     master.motors_armed_wait()
-    print("Drone armed!")
+    print(f'Drone {droneNum} armed!')
 def findGps(master):
     print("⏳ Waiting for GPS lock...")
     while True:
@@ -60,20 +61,21 @@ def gainAltitude(master,dNumber):
         msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
         if msg:
             altitude = msg.relative_alt / 1000.0  # Convert mm to meters
-            print(f"🔼 Current Altitude: {altitude:.1f}m")
+            print(f"🔼 Drone {dNumber + 1} current Altitude: {altitude:.1f}m")
 
             if altitude >= target_altitude * 0.95:  # 95% of the target altitude
-                print(f"✅ {dNumber + 1} Reached target altitude!")
+                print(f"✅ Drone {dNumber + 1} reached target altitude!")
                 break
 
-        time.sleep(.5)
+        time.sleep(1)
     return target_altitude
 def moveDrone(master,numInputs,lat,lon,alt_m,dNumber):
     for i in range(numInputs):
         # Convert latitude & longitude to integer format (scaled by 1E7)
-        lat_int = int(lat * 1E7)#int(lat[i] * 1E7)
-        lon_int = int(lon * 1E7)#int(lon[i] * 1E7)
+        lat_int = int(lat[i] * 1E7)#int(lat * 1E7)
+        lon_int = int(lon[i] * 1E7)#int(lon * 1E7)
     # Send position target command
+
         master.mav.set_position_target_global_int_send(
             0, master.target_system, master.target_component,
             mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,
@@ -84,7 +86,7 @@ def moveDrone(master,numInputs,lat,lon,alt_m,dNumber):
             0,  # No yaw control
             0   # No yaw rate control
             )
-        print("📍 Moving to waypoint...")
+        print(f"📍 Drone {dNumber+1} moving to waypoint...")
 
         while True:
             # Receive position updates
@@ -95,21 +97,21 @@ def moveDrone(master,numInputs,lat,lon,alt_m,dNumber):
                 current_alt = msg.relative_alt / 1000.0  # Convert mm to meters
 
                 # Print status
-                print(f"📡 {dNumber} Current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
+                print(f"📡 Drone {dNumber+1} current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
 
                 # Check if drone is close to target
-                lat_reached = abs(current_lat - lat) < 0.00005  # ~5m tolerance#lat_reached = abs(current_lat - (lat[i])) < 0.00005  # ~5m tolerance
-                lon_reached = abs(current_lon - lon) < 0.00005  # ~5m tolerance#lon_reached = abs(current_lon - (lon[i])) < 0.00005  # ~5m tolerance
+                lat_reached = abs(current_lat - lat[i]) < 0.00005  # ~5m tolerance#lat_reached = abs(current_lat - (lat[i])) < 0.00005  # ~5m tolerance
+                lon_reached = abs(current_lon - lon[i]) < 0.00005  # ~5m tolerance#lon_reached = abs(current_lon - (lon[i])) < 0.00005  # ~5m tolerance
                 alt_reached = abs(current_alt - alt_m) < 1  # 1m altitude tolerance
 
                 if lat_reached and lon_reached and alt_reached:
-                    print("✅ Reached waypoint!")
+                    print(f"✅ Drone {dNumber+1} reached waypoint!")
                     break
 
             time.sleep(1)  # Check position every second
         time.sleep(1)  # Wait before sending next comman
-def stopDrone(master):
-    print("🛑 Stopping movement.")
+def stopDrone(master,dNumber):
+    print(f"🛑 Stopping movement for drone {dNumber}.")
     for _ in range(10):  # Send stop command for a short time
         master.mav.set_position_target_local_ned_send(
             0, master.target_system, master.target_component,
@@ -136,7 +138,8 @@ def stopDrone(master):
         0,
         0
     )
-def landDrone(master):
+def landDrone(master,dNumber):
+    dNumber=dNumber+1
     master.mav.command_long_send(
         master.target_system, master.target_component,
         mavutil.mavlink.MAV_CMD_NAV_LAND,  # Land command
@@ -145,61 +148,77 @@ def landDrone(master):
         0, 0, 0  # Latitude, Longitude, Altitude (ignored for landing)
     )
 
-    print("🛬 Landing initiated!")
+    print(f"🛬 Drone {dNumber} landing initiated!")
 
     # Wait for the drone to reach the ground
     while True:
         msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
         if msg:
             altitude = msg.relative_alt / 1000.0  # Convert mm to meters
-            print(f"🔽 Current Altitude: {altitude:.1f}m")
+            print(f"🔽 Drone {dNumber} current Altitude: {altitude:.1f}m")
 
             if altitude <= 0.5:  # If the drone is very close to the ground
-                print("✅ Landed successfully!")
+                print(f"✅ Drone {dNumber} landed successfully!")
                 break
 
         time.sleep(1)
-    print("Stopping drone!")
-lat = 37.61950281 #[]
-lon = -122.37637748 #[]
+    print(f"Stopping drone {dNumber}!")
+def arm_and_takeoff(master, i):
+    enterGuided(master)
+    droneArm(master, i)
+    gainAltitude(master, i)
 
+lat = []#37.61981077 #
+lon = []#-122.37742747 #
+numInputs = []
 #figure out how many drones you need
-index = 3 #getDroneNum()
+#droneNum = 2 
+droneNum = getDroneNum()
 
 #ask for how many corrdinates are required
 
-numInputs = 1 #getInputNum()
-#lat, lon = getCoords(numInputs)
+#numInputs = 1 
+
 
 #create multiple drone connections
 drones = []
-for i in range(index):
+for i in range(droneNum):
     drones.append(connectToDrone(i))
-
-# Perform the drone operations
-for i, master in enumerate(drones):
+    inputNums = getInputNum(i)
+    numInputs.append(inputNums)
+    lats, lons = getCoords(numInputs[i])
+    lat.append(lats)
+    lon.append(lons)
     
-    # turn drone t guided mode 
-    enterGuided(master)
+# Arm and Takeoff Drones Simultaneously Using Threads
+threads = []
+for i, master in enumerate(drones):
+    t = threading.Thread(target=arm_and_takeoff, args=(master, i))
+    t.start()
+    threads.append(t)
 
-    # Arm the drone
-    droneArm(master)
+for t in threads:
+    t.join()
 
-    # Move drone
-    alt_m=gainAltitude(master,i)  # Altitude in meters
+# Move Drones Simultaneously Using Threads
+threads = []
+for i, master in enumerate(drones):
+    t = threading.Thread(target=moveDrone, args=(master,numInputs[i], lat[i], lon[i], 15, i))
+    t.start()
+    threads.append(t)
 
+for t in threads:
+    t.join()
 
-    # Set movement parameters
-    findGps(master)
+# Land Drones Simultaneously Using Threads
+threads = []
+for i, master in enumerate(drones):
+    t = threading.Thread(target=landDrone, args=(master, i))
+    t.start()
+    threads.append(t)
 
+for t in threads:
+    t.join()
 
-    #alt_m = 15  
-    moveDrone(master,numInputs,lat,lon,alt_m,i)
-
-    # Stop movement by sending zero velocity
-    stopDrone(master)
-
-
-    # Send LAND command
-    landDrone(master)
+print("✅ All drones have completed their mission!")
 
