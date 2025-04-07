@@ -14,12 +14,13 @@ from api_models import PositionResponse             as PositionResponse
 from api_models import MultiPositionResponse        as ViewPosReponse
 from api_models import DroneCreateRequest           as DroneCreate
 
+import dragon_link
+
 import db
 
 #db tables
 
 DRONE_TABLE = "drones"
-
 # fake drone list
 DRONE_IDS = [
     1,
@@ -77,6 +78,7 @@ def _mavlink_init():
     print("Heartbeat received!")
     return master
 
+THREADS = []
 #initializes db tables on startup
 @app.on_event("startup")
 async def startup():
@@ -85,17 +87,31 @@ async def startup():
     for drone in drone_list:
         drone_dict[drone.name] = drone
     print("starting up")
-    ## ESTABLISH MAVLINK CONNECTION
+
+    ## CHECK UDP CONNECTION
+
+    ## SCAN UDP FOR OPEN PORTS
+
+        ## CREATE CONNECTIONS TO EACH PORT
+
+        ## GET INFORMATION FROM DB
+
+            ## IF NONE FOUND, ADD AVAILABLE INFORMATION
+    
+    ## AWAIT ACTIVATION
+    ## CREATE THREADS FOR EACH ACTIVE DRONE ON ACTIVATION
+
     
 
 
-#does things, eventually...
+## UPDATES DRONE INFORMATION IN THE DB, LAST_POS, ETC....
 @app.on_event("shutdown")
 async def shutdown():
     for _, drone in drone_dict.items():
         database.update_drone_info(drone=drone)
         database.update_drone_location(drone=drone)
 #sending stuff with the API
+
 #DEPRECIATED
 @app.get("/test_data/get_generated_data")
 async def generate_data():
@@ -176,12 +192,12 @@ async def update_drone_position(
 
     return {"Status" : "Success"}
 
-@app.get("/manuvers")
-async def get_manuvers():
-    return {"manuvers" : database.get_all_programs()}
+@app.get("/maneuvers")
+async def get_maneuvers():
+    return {"maneuvers" : database.get_all_programs()}
 
-@app.post("/manuvers/create")
-async def create_manuver(
+@app.post("/maneuvers/create")
+async def create_maneuver(
     manuver : db.Program
 ):
     try:
@@ -191,8 +207,8 @@ async def create_manuver(
     
     return {"Success" : "Yay!"}
     
-@app.post("/manuvers/delete")
-async def delete_manuver(
+@app.post("/maneuvers/delete")
+async def delete_maneuver(
     name : str
 ):  
     try:
@@ -202,7 +218,7 @@ async def delete_manuver(
     
     return {"Success" : "Yay!"}
 
-@app.post("/manuvers/assign_to_drone")
+@app.post("/maneuvers/assign_to_drone")
 async def assign_path_to_drone(
     program_name,
     drone_name
@@ -214,7 +230,7 @@ async def assign_path_to_drone(
     
     return {"Success" : "Yay!"}
 
-@app.post("/manuvers/update_path")
+@app.post("/maneuvers/update_path")
 async def update_path(
     program_name,
     paths
@@ -228,8 +244,35 @@ async def update_path(
     )
     return {"Success" : "Yay!"}
 
+## SINGLE DRONE CONNECTION
+s_connect = None
+
+@app.get("/drones/single_connection_init")
+async def single_connection_protocol():
+    s_connect = dragon_link.connect_to_dragonlink()
+
+    dragon_link.set_flight_mode(s_connect, 'LOITER')
+    dragon_link.arm_vehicle(s_connect)
+    dragon_link.set_flight_mode(s_connect, 'LOITER')
+
+@app.get("/drones/single_connection/take_off")
+async def single_drone_takeoff(t_alt = 5):
+    if s_connect is not None:    
+        dragon_link.takeoff(s_connect, t_altitude=t_alt)
+    else:
+        return {"Response" : "No drone connection"}
+
+@app.get("/drones/single_connection/land")
+async def single_drone_land():
+    if s_connect is not None:
+        dragon_link.land(s_connect)
+    else:
+        return {"Response" : "No drone connection"}
+
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
 async def read_root():
     inspector = inspect(engine)
     return {"Page": inspector.get_table_names()}    
+
+## TODO: ADD A PING DRONE FUNCTION, THIS WILL ALLOW USER TO SELECT A DRONE IN THE UI AND HAVE THE HARDWARE MAKE A SOUND
