@@ -4,10 +4,16 @@ import 'leaflet/dist/leaflet.css';
 import VehicleList from './VehicleList';
 import UploadPathButton from './UploadPathButton';
 import ManeuverSelector from './ManeuverSelector';
+import PathPointTable from './PathPointTable';
 import './PlanningWidget.css';
 
 const PlanningWidget = () => {
-  const [paths, setPaths] = useState([]);
+  const [paths, setPaths] = useState([
+    [
+      {lat: 51.505, lng: -0.09, alt: 100},
+      {lat: 51.51, lng: -0.1, alt: 150}
+    ]
+  ]);
   const [selectedVehicleID, setSelectedVehicleID] = useState(null);
   const [selectedManeuver, setSelectedManeuver] = useState(null);
   const [mapCenter] = useState([51.505, -0.09]);
@@ -18,10 +24,15 @@ const PlanningWidget = () => {
     useMapEvents({
       click(e) {
         setPaths((currentPaths) => {
+          const newPoint = {
+            lat: e.latlng.lat,
+            lng: e.latlng.lng,
+            alt: 0
+          }
           if (currentPaths.length === 0) return [[e.latlng]];
           const newPaths = [...currentPaths];
           const lastIndex = newPaths.length - 1;
-          newPaths[lastIndex] = [...newPaths[lastIndex], e.latlng];
+          newPaths[lastIndex] = [...newPaths[lastIndex], newPoint];
           return newPaths;
         });
       },
@@ -96,6 +107,10 @@ const PlanningWidget = () => {
             </React.Fragment>
           ))}
         </MapContainer>
+      </div>
+      <div className="path-data-section">
+        <h3>Path Point Editor</h3>
+        <PathPointTable paths={paths} setPaths={setPaths} />
       </div>
     </div>
   );
