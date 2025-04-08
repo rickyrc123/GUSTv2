@@ -201,16 +201,16 @@ async def update_drone_position(
 
 @app.get("/maneuvers")
 async def get_maneuvers():
-    return {"maneuvers" : database.get_all_programs()}
+    return {"maneuvers" : database.get_all_maneuvers()}
 
 @app.post("/maneuvers/create")
 async def create_maneuver(
-    manuver : db.Program
+    manuver : db.Maneuver
 ):
     try:
-        database.create_program(manuver)
+        database.create_maneuver(manuver)
     except Exception as e:
-        return {"Failure" : f"data.CreateProgram failed \n\n\n {e}"}
+        return {"Failure" : f"data.CreateManeuver failed \n\n\n {e}"}
     
     return {"Success" : "Yay!"}
     
@@ -219,7 +219,7 @@ async def delete_maneuver(
     name : str
 ):  
     try:
-        database.delete_program(db.Program(name=name, content=[]))
+        database.delete_maneuver(db.Maneuver(name=name, content=[]))
     except Exception as e:
         return {"Failure" : f"failed \n\n\n {e}"}
     
@@ -242,7 +242,7 @@ async def update_path(
     program_name,
     paths
 ):
-    program = db.Program(name="temp", content=[])
+    program = db.Maneuver(name="temp", content=[])
     program.content.append(paths)
     program.name = program_name
     print(program.content)

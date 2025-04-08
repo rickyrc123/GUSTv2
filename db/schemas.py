@@ -43,30 +43,6 @@ class CreateDrone(Drone):
   _id: int | None
   name: Annotated[str | None, Field(default=None, description="Display name of the drone. If None, will be auto-generated as 'Drone{id:06}'")]
 
-class Swarm(BaseModel):
-  """Base Swarm model representing a group of drones.
-  
-  Attributes:
-    name (str): Display name of the swarm
-    drones (List[DroneInSwarm]): List of drones currently in the swarm
-  """
-  _id: Annotated[int, Field(description="Swarm id (internal use only)")]
-  name: Annotated[str, Field(description="Display name of the swarm")]
-  drones: Annotated[List[str], Field(default=[], description="List of drones currently in the swarm by name")]
-
-  class Config:
-    from_attributes = True
-
-class CreateSwarm(Swarm):
-  """Schema for creating a new swarm.
-  
-  Attributes:
-    name (Optional[str]): Display name of the swarm. If None, will be auto-generated as 'Swarm{id:06}'.
-    All other attributes inherited from SwarmBase.
-  """
-  _id: int | None
-  name: Annotated[str | None, Field(default=None, description="Display name of the swarm. If None, will be auto-generated as 'Swarm{id:06}'")]
-
 class Waypoint(BaseModel):
   """Represents a single waypoint in 3D space.
   
@@ -116,3 +92,27 @@ class CreateProgram(Program):
   """
   _id: int | None
   name: Annotated[str | None, Field(default=None, description="Display name of the program. If None, will be auto-generated as 'Program{id:06}'")]
+
+class Maneuver(BaseModel):
+  """Base Maneuver model representing a group of drones.
+  
+  Attributes:
+    name (str): Display name of the maneuver
+    drones (List[(Drone, program)]): List of drones currently in the maneuver paired with their respective path
+  """
+  _id: Annotated[int, Field(description="Maneuver id (internal use only)")]
+  name: Annotated[str, Field(description="Display name of the maneuver")]
+  drones: Annotated[List[Drone, Program], Field(default=[], description="List of drones currently in the maneuver by name")]
+
+  class Config:
+    from_attributes = True
+
+class CreateManeuver(Maneuver):
+  """Schema for creating a new maneuver.
+  
+  Attributes:
+    name (Optional[str]): Display name of the maneuver. If None, will be auto-generated as 'Maneuver{id:06}'.
+    All other attributes inherited from SwarmBase.
+  """
+  _id: int | None
+  name: Annotated[str | None, Field(default=None, description="Display name of the maneuver. If None, will be auto-generated as 'Maneuver{id:06}'")]
