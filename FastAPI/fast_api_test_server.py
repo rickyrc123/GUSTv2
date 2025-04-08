@@ -269,6 +269,20 @@ async def single_drone_land():
     else:
         return {"Response" : "No drone connection"}
 
+@app.post("/drones/single_connection/seek_point")
+async def single_drone_seek(
+    x_pos, y_pos, alt
+):
+    if s_connect is not None:
+        dragon_link.seek_pos(
+            s_connect,
+            x_pos,
+            y_pos,
+            alt
+        )   
+    else:
+        return {"Response" : "No drone connection"}
+
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
 async def read_root():

@@ -15,6 +15,7 @@ import time
 from pymavlink import mavutil
 import argparse
 
+
 def connect_to_dragonlink(port="/dev/ttyUSB0", baudrate=115200):
     """ 
     Connect to the DragonLink system via serial port
@@ -136,6 +137,52 @@ def land(connection):
         0, 0, 0    # Unused params
     )
     print("Landing...")
+
+def seek_pos(
+    connection,
+    lat,
+    lon,
+    alt
+):
+    # Convert latitude & longitude to integer format (scaled by 1E7)
+        lat_int = int(lat * 1E7)
+        lon_int = int(lon * 1E7)
+
+        # Send position target command
+        connection.mav.set_position_target_global_int_send(
+            0, connection.target_system, connection.target_component,
+            mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,  # Relative to home altitude
+            0b0000111111111000,  # Position mask (only lat/lon/alt active)
+            lat_int, lon_int, alt,
+            0, 0, 0,  # No velocity control
+            0, 0, 0,  # No acceleration control
+            0,  # No yaw control
+            0   # No yaw rate control
+        )
+        print("Moving to waypoint...")
+
+        while True:
+            # Receive position updates
+            msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+            if msg:
+                current_lat = msg.lat / 1E7  # Convert to decimal degrees
+                current_lon = msg.lon / 1E7  # Convert to decimal degrees
+                current_alt = msg.relative_alt / 1000.0  # Convert mm to meters
+
+                # Print status
+                print(f"Current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
+
+                # Check if drone is close to target
+                lat_reached = abs(current_lat - (lat_int / 1E7)) < 0.00005  # ~5m tolerance
+                lon_reached = abs(current_lon - (lon_int / 1E7)) < 0.00005  # ~5m tolerance
+                alt_reached = abs(current_alt - alt) < 1  # 1m altitude tolerance
+
+                if lat_reached and lon_reached and alt_reached:
+                    print("Reached waypoint!")
+                    break
+
+            time.sleep(1)  # Check position every second
+        time.sleep(1)  # Wait before sending next command
 
 def main():
     parser = argparse.ArgumentParser(description='DragonLink MAVLink Control Script')
