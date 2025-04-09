@@ -1,6 +1,7 @@
 import MapComponent from "./MapComponent.jsx";
 import DroneList from "./DroneSelection.jsx";
 import AltimeterGauge from "./AltimeterGauge.jsx";
+import HomeManeuverSelect from "./HomeManeuverSelect.jsx";
 import { useState, useEffect } from "react";
 
 function HomeScreen() {
@@ -40,6 +41,7 @@ function HomeScreen() {
                 borderRadius: "8px",
             }}>
                 <DroneList drones={drones} onDroneSelect={handleDroneSelect}/>
+                <HomeManeuverSelect placeholder={"Maneuvers"}/>
             </div>
             <div className="map-container" style = {{
                 display: "flex",
