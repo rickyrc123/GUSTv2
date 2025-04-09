@@ -1,19 +1,35 @@
 import React, { useState, useCallback } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { ClientSideRowModelModule } from 'ag-grid-community';
+import { ModuleRegistry } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Tabs, Tab, Box } from '@mui/material';
 
+ModuleRegistry.registerModules([ClientSideRowModelModule]);
+
 // Add to PlanningWidget component
 const PathPointTable = ({ paths, setPaths }) => {
   const [selectedTab, setSelectedTab] = useState(0);
+  const [draggedRowIndex, setDraggedRowIndex] = useState(null);
 
   const columnDefs = [
     { 
-      field: 'order',
-      headerName: '#',
+      headerName: '↕',
       width: 60,
-      rowDrag: true,
+      cellRenderer: (params) => (
+        <div 
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            setDraggedRowIndex(params.rowIndex);
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          style={{ cursor: 'move', padding: '5px' }}
+        >
+          ⋮⋮
+        </div>
+      ),
       suppressMenu: true,
       filter: false,
       sortable: false
@@ -23,22 +39,29 @@ const PathPointTable = ({ paths, setPaths }) => {
       headerName: 'Latitude',
       editable: true,
       valueFormatter: params => params.value.toFixed(6),
-      cellRenderer: params => params.value.toFixed(6),
-      valueParser: params => parseFloat(params.newValue)
+      valueParser: params => {
+        const value = parseFloat(params.newValue);
+        return isNaN(value) ? params.oldValue : value;
+      }
     },
     {
       field: 'lng',
       headerName: 'Longitude',
       editable: true,
       valueFormatter: params => params.value.toFixed(6),
-      cellRenderer: params => params.value.toFixed(6),
-      valueParser: params => parseFloat(params.newValue)
+      valueParser: params => {
+        const value = parseFloat(params.newValue);
+        return isNaN(value) ? params.oldValue : value;
+      }
     },
     {
       field: 'alt',
       headerName: 'Altitude',
       editable: true,
-      valueParser: params => parseFloat(params.newValue)
+      valueParser: params => {
+        const value = parseFloat(params.newValue);
+        return isNaN(value) ? params.oldValue : value;
+      }
     },
     {
       headerName: 'Actions',
@@ -62,15 +85,21 @@ const PathPointTable = ({ paths, setPaths }) => {
     setPaths(newPaths);
   };
 
-  const onRowDragEnd = (e) => {
-    const newPath = [...paths[selectedTab]];
-    const movedRow = newPath.splice(e.oldIndex, 1)[0];
-    newPath.splice(e.newIndex, 0, movedRow);
-    
-    const newPaths = [...paths];
-    newPaths[selectedTab] = newPath.map((p, i) => ({ ...p, order: i + 1 }));
-    setPaths(newPaths);
-  };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const hoveredRowIndex = Math.floor((e.clientY - rect.top) / 28);
+
+    if (draggedRowIndex !== null && hoveredRowIndex !== draggedRowIndex)    {
+        const newPath = [...paths[selectedTab]];
+        const [removed] = newPath.splice(draggedRowIndex, 1);
+        newPath.splice(hoveredRowIndex, 0, removed);
+        const newPaths = [...paths];
+        newPaths[selectedTab] = newPath;
+        setPaths(newPaths);
+        setDraggedRowIndex(hoveredRowIndex);
+    }
+  }
 
   const onCellValueChanged = (e) => {
     const newPaths = [...paths];
@@ -80,6 +109,8 @@ const PathPointTable = ({ paths, setPaths }) => {
     };
     setPaths(newPaths);
   };
+
+  console.log(paths[selectedTab]?.map((p, i) => ({ ...p, order: i + 1 })) || [])
 
   return (
     <div className="path-point-editor">
@@ -98,15 +129,18 @@ const PathPointTable = ({ paths, setPaths }) => {
         ))}
       </Tabs>
 
-      <Box sx={{ height: 300 }} className="ag-theme-alpine">
+      <Box 
+        sx={{ height: 300 }} 
+        className="ag-theme-alpine"
+        onDragOver={handleDragOver}
+        onDragEnd={() => setDraggedRowIndex(null)}
+      >
         <AgGridReact
+          modules={[ClientSideRowModelModule]}
           columnDefs={columnDefs}
-          rowData={paths[selectedTab]?.map((p, i) => ({ ...p, order: i + 1 })) || []}
-          onRowDragEnd={onRowDragEnd}
+          rowData={paths[selectedTab] || []}
           onCellValueChanged={onCellValueChanged}
-          rowDragManaged={true}
-          animateRows={true}
-          suppressMoveWhenRowDragging={true}
+          suppressDragLeaveHidesColumns={true}
           defaultColDef={{
             sortable: true,
             filter: true,

@@ -1,7 +1,7 @@
 .planning-widget {
     display: flex;
     height: 90vh;
-    width: 100vh;
+    width: 100vw;
     font-family: Arial, sans-serif;
   }
   
@@ -16,6 +16,7 @@
   .map-container {
     flex: 1;
     height: 100%;
+    width: 50%;
   }
   
   .vehicle-list, .maneuver-selector {
@@ -160,4 +161,25 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .ag-row-dragging {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+  
+  .ag-theme-alpine .ag-row-hover {
+    background-color: #f8f9fa !important;
+  }
+  
+  .delete-point-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .delete-point-button:hover {
+    background: #cc0000;
   }
