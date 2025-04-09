@@ -33,7 +33,7 @@ services:
     networks:
       - backend
     volumes:
-      - ./db:/db
+      - .:/home/GUSTv2
     init: true
     stdin_open: true
     tty: true

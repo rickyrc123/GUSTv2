@@ -102,7 +102,7 @@ class Maneuver(BaseModel):
   """
   _id: Annotated[int, Field(description="Maneuver id (internal use only)")]
   name: Annotated[str, Field(description="Display name of the maneuver")]
-  drones: Annotated[List[Drone, Program], Field(default=[], description="List of drones currently in the maneuver by name")]
+  drones: Annotated[List[Tuple[Drone, Program]], Field(default=[], description="List of drones currently in the maneuver by name")]
 
   class Config:
     from_attributes = True

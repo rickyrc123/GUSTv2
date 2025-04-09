@@ -31,10 +31,10 @@ def _drone(info: models.DroneInfo, location: models.DroneLocation):
   drone._id = info.id
   return drone
 
-def _swarm(swarm: models.Swarm):
-  new_swarm = schemas.Swarm.model_validate(swarm.__dict__)
-  new_swarm._id = swarm.id
-  return new_swarm
+def _maneuver(maneuver: models.Maneuver):
+  new_maneuver = schemas.Maneuver.model_validate(maneuver.__dict__)
+  new_maneuver._id = maneuver.id
+  return new_maneuver
 
 class DatabaseServer:
   DATABASE_URL = os.getenv("DATABASE_URL")
@@ -67,7 +67,7 @@ class DatabaseServer:
         session.add(drone_location)
 
         session.add(
-          models.Program_Drone_Swarm(
+          models.Program_Drone_Maneuver(
             drone_id=drone_info.id
           )
         )
@@ -155,8 +155,8 @@ class DatabaseServer:
   def delete_drone(self, drone: schemas.Drone):
     with self.Session.begin() as session:
       session.execute(
-        delete(models.Program_Drone_Swarm)
-        .where(models.Program_Drone_Swarm.drone_id==drone._id)
+        delete(models.Program_Drone_Maneuver)
+        .where(models.Program_Drone_Maneuver.drone_id==drone._id)
       )
       session.execute(
         delete(models.DroneLocation)
@@ -168,67 +168,67 @@ class DatabaseServer:
       )
       session.commit()
 
-  # Swarm Services
-  def create_swarm(self, swarm: schemas.CreateSwarm):
+  # Maneuver Services
+  def create_maneuver(self, maneuver: schemas.CreateManeuver):
     try:
-      new_swarm = models.Swarm(
-        name=swarm.name,
+      new_maneuver = models.Maneuver(
+        name=maneuver.name,
         created_at=datetime.datetime.utcnow(),
         updated_at=datetime.datetime.utcnow()
       )
       
       with self.Session.begin() as session:
-        session.add(new_swarm)
+        session.add(new_maneuver)
         session.flush()
 
-        if new_swarm.name == None:
-          new_swarm.name = f"Swarm{new_swarm.id:06}"
+        if new_maneuver.name == None:
+          new_maneuver.name = f"Maneuver{new_maneuver.id:06}"
 
         session.execute(
-          update(models.Swarm)
-          .where(models.Swarm.id == new_swarm.id)
-          .values(name=new_swarm.name)
+          update(models.Maneuver)
+          .where(models.Maneuver.id == new_maneuver.id)
+          .values(name=new_maneuver.name)
           )
         
-        for drone in swarm.drones:
+        for drone in maneuver.drones:
           session.add(
-            models.Program_Drone_Swarm(
+            models.Program_Drone_Maneuver(
               drone_id=drone._id,
-              swarm_id=new_swarm.id
+              maneuver_id=new_maneuver.id
             )
           )
 
         session.commit()
     except:
-      raise Exception("Swarm with same name is already defined.")
+      raise Exception("Maneuver with same name is already defined.")
 
-  # Currently all swarms are returned with drone lists empty but the name
+  # Currently all maneuvers are returned with drone lists empty but the name
   # can be used for getting that info
-  def get_all_swarms(self) -> List[str]:
+  def get_all_maneuvers(self) -> List[str]:
     with self.Session.begin() as session:
       result = session.execute(
-        select(models.Swarm)
+        select(models.Maneuver)
         ).all()
 
-      swarms = [swarm[0].name for swarm in result]
+      maneuvers = [maneuver[0].name for maneuver in result]
     
-    return swarms
+    return maneuvers
   
-  def get_swarm_by_name(self, name : str):
+  def get_maneuver_by_name(self, name : str):
     with self.Session.begin() as session:
       result = session.execute(
-        select(models.Swarm)
-        .where(models.Swarm.name==name)
+        select(models.Maneuver)
+        .where(models.Maneuver.name==name)
       ).first()
 
-      return _swarm(*result)
+      return _maneuver(*result)
   
-  def get_drones_in_swarm(self, swarm: schemas.Swarm) -> List[str]:
+  def get_drones_in_maneuver(self, maneuver: schemas.Maneuver) -> List[str]:
     drones = []
     with self.Session.begin() as session:
       result = session.execute(
-        select(models.Program_Drone_Swarm.drone_id)
-        .where(models.Program_Drone_Swarm.swarm_id==swarm.id)
+        select(models.Program_Drone_Maneuver.drone_id)
+        .where(models.Program_Drone_Maneuver.maneuver_id==maneuver.id)
       ).all()
 
       for id in result:
@@ -241,53 +241,53 @@ class DatabaseServer:
     
     return drones
 
-  def add_drone_to_swarm(self, swarm: schemas.Swarm, drone: schemas.Drone):
-    swarm.drones.append(drone.name)
+  def add_drone_to_maneuver(self, maneuver: schemas.Maneuver, drone: schemas.Drone):
+    maneuver.drones.append(drone.name)
 
     with self.Session.begin() as session:
       session.add(
-        models.Program_Drone_Swarm(
+        models.Program_Drone_Maneuver(
           drone_id=drone._id,
-          swarm_id=swarm.id
+          maneuver_id=maneuver.id
         )
       )
 
       session.commit()
-    return swarm
+    return maneuver
   
-  def remove_drone_from_swarm(self, swarm: schemas.Swarm, drone: schemas.Drone):
-    swarm.drones.remove(drone.name)
+  def remove_drone_from_maneuver(self, maneuver: schemas.Maneuver, drone: schemas.Drone):
+    maneuver.drones.remove(drone.name)
     
     with self.Session.begin() as session:
       session.execute(
-        delete(models.Program_Drone_Swarm)
+        delete(models.Program_Drone_Maneuver)
         .where(
-          and_(models.Program_Drone_Swarm.drone_id==drone._id,
-          models.Program_Drone_Swarm.swarm_id==swarm._id)
+          and_(models.Program_Drone_Maneuver.drone_id==drone._id,
+          models.Program_Drone_Maneuver.maneuver_id==maneuver._id)
           )
       )
 
       session.commit()
 
-  def update_swarm_name(self, swarm: schemas.Swarm):
+  def update_maneuver_name(self, maneuver: schemas.Maneuver):
     with self.Session.begin() as session:
       session.execute(
-        update(models.Swarm)
-        .where(models.Swarm.id==swarm._id)
-        .values(name=swarm.name)
+        update(models.Maneuver)
+        .where(models.Maneuver.id==maneuver._id)
+        .values(name=maneuver.name)
       )
 
       session.commit()
   
-  def delete_swarm(self, swarm: schemas.Swarm):
+  def delete_maneuver(self, maneuver: schemas.Maneuver):
     with self.Session.begin() as session:
       session.execute(
-        delete(models.Program_Drone_Swarm)
-        .where(models.Program_Drone_Swarm.swarm_id==swarm._id)
+        delete(models.Program_Drone_Maneuver)
+        .where(models.Program_Drone_Maneuver.maneuver_id==maneuver._id)
       )
       session.execute(
-        delete(models.Swarm)
-        .where(models.Swarm.id==swarm._id)
+        delete(models.Maneuver)
+        .where(models.Maneuver.id==maneuver._id)
       )
       session.commit()
 
@@ -328,7 +328,7 @@ class DatabaseServer:
     with self.Session.begin() as session:
       session.execute(
         update(models.Program)
-        .where(models.Swarm.id==program._id)
+        .where(models.Maneuver.id==program._id)
         .values(name=program.name)
       )
   
@@ -361,10 +361,10 @@ class DatabaseServer:
 
         # If the program with the specified name exists, proceed with deletion
         if program_id:
-            # Delete from Program_Drone_Swarm where program_id matches
+            # Delete from Program_Drone_Maneuver where program_id matches
             session.execute(
-                delete(models.Program_Drone_Swarm)
-                .where(models.Program_Drone_Swarm.program_id == program_id)
+                delete(models.Program_Drone_Maneuver)
+                .where(models.Program_Drone_Maneuver.program_id == program_id)
             )
 
             # Delete from the Program table where program_id matches
@@ -379,25 +379,25 @@ class DatabaseServer:
             # If no program was found, handle it (optional)
             raise ValueError(f"Program with name {program.name} not found.")
   
-  def assign_program_to_drone(self, drone : schemas.Drone, program : schemas.Program, swarm : schemas.Swarm = None):
+  def assign_program_to_drone(self, drone : schemas.Drone, program : schemas.Program, maneuver : schemas.Maneuver = None):
     with self.Session.begin() as session:
-      if swarm is None:
+      if maneuver is None:
         session.execute(
-          update(models.Program_Drone_Swarm)
+          update(models.Program_Drone_Maneuver)
           .where(
-            and_(models.Program_Drone_Swarm.drone_id==drone._id,
-                 models.Program_Drone_Swarm.swarm_id.is_(None))
+            and_(models.Program_Drone_Maneuver.drone_id==drone._id,
+                 models.Program_Drone_Maneuver.maneuver_id.is_(None))
           )
-          .values(models.Program_Drone_Swarm.program_id==program._id)
+          .values(models.Program_Drone_Maneuver.program_id==program._id)
         )
       else:
         session.execute(
-          update(models.Program_Drone_Swarm)
+          update(models.Program_Drone_Maneuver)
           .where(
-            and_(models.Program_Drone_Swarm.drone_id==drone._id,
-                 models.Program_Drone_Swarm.swarm_id==swarm._id)
+            and_(models.Program_Drone_Maneuver.drone_id==drone._id,
+                 models.Program_Drone_Maneuver.maneuver_id==maneuver._id)
           )
-          .values(models.Program_Drone_Swarm.program_id==program._id)
+          .values(models.Program_Drone_Maneuver.program_id==program._id)
         )
       
       session.commit()
