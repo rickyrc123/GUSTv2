@@ -69,7 +69,7 @@ def set_flight_mode(connection, mode):
         connection.target_system,
         connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
-        0,  # Confirmation
+        1,  # Confirmation
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id, 0, 0, 0, 0, 0
     )
@@ -88,7 +88,7 @@ def arm_vehicle(connection):
         connection.target_system,
         connection.target_component,
         mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM,
-        0,  # Confirmation
+        1,  # Confirmation
         1,  # Arm (1=arm, 0=disarm)
         0, 0, 0, 0, 0, 0  # Parameters 2-7 (not used)
     )
@@ -105,9 +105,9 @@ def takeoff(connection, t_altitude):
         connection.target_system,
         connection.target_component,
         mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
-        0,          # Confirmation
+        1,          # Confirmation
         0, 0, 0, 0,  # Unused params
-        0, 0, 0,    # Unused params 
+        0, 0,    # Unused params 
         t_altitude    # Target altitude
     )
 
@@ -115,7 +115,7 @@ def takeoff(connection, t_altitude):
     print("Drone takingoff!")
 
     while True:
-        msg = connection.mav.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+        msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
         if msg:
             altitude = msg.relative_alt / 1000.0  # Convert mm to meters
             print(f"Current Altitude: {altitude:.1f}m")
@@ -184,6 +184,8 @@ def seek_pos(
             time.sleep(1)  # Check position every second
         time.sleep(1)  # Wait before sending next command
 
+path = []
+
 def main():
     parser = argparse.ArgumentParser(description='DragonLink MAVLink Control Script')
     parser.add_argument('--port', required=True, help='Serial port (e.g., /dev/ttyUSB0 or COM3)')
@@ -194,17 +196,19 @@ def main():
         # Connect to DragonLink
         dl = connect_to_dragonlink(args.port, args.baud)
         
-        arm_vehicle(dl)
-        
         # Example commands (modify as needed)
-        set_flight_mode(dl, 'LOITER')
-        time.sleep(1)
-
+        set_flight_mode(dl, 'GUIDED')
+        arm_vehicle(dl)
         #take off
         thing = input("Press Enter to Takeoff")
         takeoff(dl, 2)
 
-
+        print("Seeking point")
+        seek_pos(dl,
+                 lat=33.1823705,
+                 lon=-87.5111005,
+                 alt=5
+        )
         #land
         thing = input("Press Enter to Land")
         land(dl)
