@@ -16,7 +16,7 @@ const PlanningWidget = () => {
   ]);
   const [selectedVehicleID, setSelectedVehicleID] = useState(null);
   const [selectedManeuver, setSelectedManeuver] = useState(null);
-  const [mapCenter] = useState([51.505, -0.09]);
+  const [mapCenter] = useState([33.1823705, -87.5111005]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Handle adding markers to the map
