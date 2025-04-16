@@ -51,7 +51,7 @@ const PlanningWidget = () => {
 
   // Clear all paths
   const handleClearPaths = () => {
-    setPaths([]);
+    setPaths([[]]);
   };
 
   // Add new path

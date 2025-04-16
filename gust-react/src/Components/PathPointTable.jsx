@@ -8,6 +8,8 @@ import { Tabs, Tab, Box } from '@mui/material';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
+
+
 // Add to PlanningWidget component
 const PathPointTable = ({ paths, setPaths }) => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -38,6 +40,7 @@ const PathPointTable = ({ paths, setPaths }) => {
       field: 'lat',
       headerName: 'Latitude',
       editable: true,
+      cellEditor: 'agTextCellEditor',
       valueFormatter: params => params.value.toFixed(6),
       valueParser: params => {
         const value = parseFloat(params.newValue);
@@ -48,6 +51,7 @@ const PathPointTable = ({ paths, setPaths }) => {
       field: 'lng',
       headerName: 'Longitude',
       editable: true,
+      cellEditor: 'agTextCellEditor',
       valueFormatter: params => params.value.toFixed(6),
       valueParser: params => {
         const value = parseFloat(params.newValue);
@@ -58,6 +62,7 @@ const PathPointTable = ({ paths, setPaths }) => {
       field: 'alt',
       headerName: 'Altitude',
       editable: true,
+      cellEditor: 'agTextCellEditor',
       valueParser: params => {
         const value = parseFloat(params.newValue);
         return isNaN(value) ? params.oldValue : value;
@@ -78,6 +83,31 @@ const PathPointTable = ({ paths, setPaths }) => {
       filter: false
     }
   ];
+
+  const handleExportCSV = () => {
+    const currentPath = paths[selectedTab];
+    if (!currentPath || currentPath.length === 0) return;
+  
+    // Create CSV content
+    const csvHeader = 'Latitude,Longitude,Altitude\n';
+    const csvRows = currentPath.map(point => 
+      `${point.lat},${point.lng},${point.alt}`
+    ).join('\n');
+    
+    const csvString = csvHeader + csvRows;
+  
+    // Create download link
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `path_${selectedTab + 1}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
 
   const handleDeletePoint = (rowIndex) => {
     const newPaths = [...paths];
@@ -114,20 +144,29 @@ const PathPointTable = ({ paths, setPaths }) => {
 
   return (
     <div className="path-point-editor">
-      <Tabs 
-        value={selectedTab} 
-        onChange={(e, newValue) => setSelectedTab(newValue)}
-        variant="scrollable"
-        scrollButtons="auto"
-      >
-        {paths.map((_, index) => (
-          <Tab 
-            key={index} 
-            label={`Path ${index + 1}`}
-            sx={{ minWidth: 100 }}
-          />
-        ))}
-      </Tabs>
+      <div className="table-controls">
+        <Tabs 
+          value={selectedTab} 
+          onChange={(e, newValue) => setSelectedTab(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {paths.map((_, index) => (
+            <Tab 
+              key={index} 
+              label={`Path ${index + 1}`}
+              sx={{ minWidth: 100 }}
+            />
+          ))}
+        </Tabs>
+        <button
+          className='export-csv-button'
+          onClick={handleExportCSV}
+          disabled={!paths[selectedTab].length}
+        >
+          Export to CSV
+        </button>
+      </div>
 
       <Box 
         sx={{ height: 300 }} 
@@ -141,12 +180,16 @@ const PathPointTable = ({ paths, setPaths }) => {
           rowData={paths[selectedTab] || []}
           onCellValueChanged={onCellValueChanged}
           suppressDragLeaveHidesColumns={true}
+          stopEditingWhenCellsLoseFocus={true}
+          singleClickEdit={true}
+          suppressClickEdit={true}
           defaultColDef={{
             sortable: true,
             filter: true,
             resizable: true,
             flex: 1,
           }}
+          key={selectedTab}
         />
       </Box>
     </div>

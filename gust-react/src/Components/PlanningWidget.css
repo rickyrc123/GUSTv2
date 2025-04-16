@@ -185,3 +185,29 @@
   .delete-point-button:hover {
     background: #cc0000;
   }
+
+  .table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .export-csv-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    height: fit-content;
+  }
+  
+  .export-csv-button:disabled {
+    background: #81C784;
+    cursor: not-allowed;
+  }
+  
+  .export-csv-button:not(:disabled):hover {
+    background: #45a049;
+  }
