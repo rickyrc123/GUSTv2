@@ -16,7 +16,7 @@ from pymavlink import mavutil
 import argparse
 
 
-def connect_to_dragonlink(port="/dev/ttyUSB0", baudrate=115200):
+def connect_to_dragonlink(port="udpout:10.223.168.1:63278"):
     """ 
     Connect to the DragonLink system via serial port
     
@@ -27,8 +27,8 @@ def connect_to_dragonlink(port="/dev/ttyUSB0", baudrate=115200):
     Returns:
         mavutil.mavlink_connection: MAVLink connection object
     """
-    print(f"Connecting to DragonLink on {port} at {baudrate} baud...")
-    connection = mavutil.mavlink_connection(port, baud=baudrate)
+    print(f"Connecting to Drone on {port}")
+    connection = mavutil.mavlink_connection(device=port, baud=57600)
     
     # Wait for heartbeat
     print("Waiting for heartbeat...")
@@ -186,32 +186,31 @@ def seek_pos(
 
 path = []
 
+def execute_path(connection, path):
+    for x in path:
+        seek_pos(connection, lat=x[0], lon=x[1], alt=x[2])
+        
 def main():
-    parser = argparse.ArgumentParser(description='DragonLink MAVLink Control Script')
-    parser.add_argument('--port', required=True, help='Serial port (e.g., /dev/ttyUSB0 or COM3)')
-    parser.add_argument('--baud', type=int, default=57600, help='Baud rate (default: 57600)')
-    args = parser.parse_args()
-    
     try:
         # Connect to DragonLink
-        dl = connect_to_dragonlink(args.port, args.baud)
+        dl = connect_to_dragonlink()
         
         # Example commands (modify as needed)
-        set_flight_mode(dl, 'GUIDED')
-        arm_vehicle(dl)
+        #set_flight_mode(dl, 'LOITER')
+        #arm_vehicle(dl)
         #take off
-        thing = input("Press Enter to Takeoff")
-        takeoff(dl, 2)
+        #thing = input("Press Enter to Takeoff")
+        #takeoff(dl, 2)
 
-        print("Seeking point")
-        seek_pos(dl,
-                 lat=33.1823705,
-                 lon=-87.5111005,
-                 alt=5
-        )
+        #print("Seeking point")
+        #seek_pos(dl,
+        #         lat=33.1823705,
+        #         lon=-87.5111005,
+        #         alt=5
+        #)
         #land
-        thing = input("Press Enter to Land")
-        land(dl)
+        #thing = input("Press Enter to Land")
+        #land(dl)
 
 
     except KeyboardInterrupt:

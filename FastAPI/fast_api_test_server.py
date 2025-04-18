@@ -269,6 +269,31 @@ async def single_drone_land():
     else:
         return {"Response" : "No drone connection"}
 
+@app.post("/drones/single_connection/execute_path")
+async def execute_path(
+    drone_name : str
+):
+    ## get drone object
+    drone = drone_dict[drone_name]
+    
+    ## check connection
+    if s_connect is None:
+        return {"Failure" : "No drone connection"}
+
+    ## get drone path
+    database.get_program_by_name(drone_name)
+    path = None
+
+    
+    for x in path:
+        dragon_link.seek_pos(
+            s_connect, 
+            lat=x["lat"],
+            lon=x["lon"],
+            alt=x["alt"]
+        )
+    
+
 @app.post("/drones/single_connection/seek_point")
 async def single_drone_seek(
     x_pos, y_pos, alt
