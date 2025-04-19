@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-buttons a {
+            text-decoration: none;
+            color: white;
+            background-color: #555;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-buttons a:hover {
+            background-color: #777;
+        }
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px 0;
+        }
+        .team-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        .team-member {
+            text-align: center;
+            margin: 10px;
+        }
+        .team-member img {
+            width: 200px;
+            height: 200px;
+            border-radius: 10%;
+            object-fit: cover;
+        }
+        .team-member p {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Meet Our Team</h1>
+        <div class="nav-buttons">
+            <a href="index.html">Home</a>
+            <a href="team.html">About</a>
+            <a href="docs.html">Docs</a>
+            <a href="guide.html">Start Guide</a>
+        </div>
+    </header>
+    <main>
+        <div class="team-container">
+            <div class="team-member">
+                <img src="images/nick.jpg" alt="Nick">
+                <p>Nicholas Warren</p>
+            </div>
+            <div class="team-member">
+                <img src="images/jcob_Senior_Pic.jpg" alt="Jcob">
+                <p>Jacob Stock</p>
+            </div>
+            <div class="team-member">
+                <img src="images/ricardo.jpeg" alt="Ricardo">
+                <p>Ricardo Crenshaw</p>
+            </div>
+            <div class="team-member">
+                <img src="images/james.jpg" alt="James">
+                <p>James Montgomory</p>
+            </div>
+            <div class="team-member">
+                <img src="images/cameron.jpg" alt="Cameron">
+                <p>Cameron Acree</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

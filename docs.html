@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-buttons a {
+            text-decoration: none;
+            color: white;
+            background-color: #555;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-buttons a:hover {
+            background-color: #777;
+        }
+        main {
+            padding: 20px;
+            text-align: left;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Documentation</h1>
+        <div class="nav-buttons">
+            <a href="index.html">Home</a>
+            <a href="team.html">About Us</a>
+            <a href="guide.html">Start Guide</a>
+            <a href="page4.html">Page 4</a>
+        </div>
+    </header>
+    <main>
+        <h2>Welcome to the Documentation</h2>
+        <p>This page provides detailed information about the GUSTv2 project, its features, and how to use it effectively.</p>
+        
+        <h2>Table of Contents</h2>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#setup">Setup Instructions</a></li>
+            <li><a href="#usage">Usage Guide</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+
+        <h2 id="introduction">Introduction</h2>
+        <p>GUSTv2 is an open-source ground control system for planning missions and controlling teams and swarms of uncrewed vehicles. It is designed to be simple to use and highly customizable.</p>
+
+        <h2 id="features">Features</h2>
+        <ul>
+            <li>Real-time telemetry and sensor streaming</li>
+            <li>Mission planning and execution</li>
+            <li>Multi-vehicle support</li>
+            <li>Emergency protocols</li>
+            <li>Customizable path design</li>
+        </ul>
+
+        <h2 id="setup">Setup Instructions</h2>
+        <p>Follow these steps to set up GUSTv2:</p>
+        <ol>
+            <li>Clone the repository from GitHub.</li>
+            <li>Install the required dependencies using the provided <code>environment.yml</code> file.</li>
+            <li>Run the Docker container using <code>docker-compose up --build</code>.</li>
+        </ol>
+
+        <h2 id="usage">Usage Guide</h2>
+        <p>Once the setup is complete, you can access the application through your browser. Use the navigation menu to explore different features and functionalities.</p>
+
+        <h2 id="faq">FAQ</h2>
+        <p>If you have any questions, refer to the FAQ section or contact the development team for assistance.</p>
+    </main>
+</body>
+</html>
