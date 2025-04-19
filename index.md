@@ -15,7 +15,7 @@ Welcome to the homepage for GUSTv2! This project is an open source ground contro
  ## Planned features
   - TAK integration
   - Path validator for custom vehicle types 
- 
+ <a href="page.html">page</a>
 
 GUSTv2 aims to function as an all in one ground station for planning and controlling teams and swarms of vehicle. We want to provide a performance focused piece of software that is simple to install and use on Windows and Linux platforms. GUSTv2 is simple to modify and built on widely supported technologies. Our goal is to provide the casual user and developer alike with a robust and simple software package to control any vehicle that supports the MavLink communication protocol.
 
