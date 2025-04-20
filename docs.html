@@ -54,7 +54,10 @@
 </head>
 <body>
     <header>
-        <h1>Documentation</h1>
+        <div style="display: flex; align-items: center;">
+            <img src="images/gust_logo.png" alt="GUST Logo" style="height: 75px; margin-right: 10px;">
+            <h1>Documentation</h1>
+        </div>
         <div class="nav-buttons">
             <a href="index.html">Home</a>
             <a href="team.html">About Us</a>
@@ -87,16 +90,24 @@
             <li>Customizable path design</li>
         </ul>
 
-        <h2 id="setup">Setup Instructions</h2>
-        <p>Follow these steps to set up GUSTv2:</p>
+        <h2 id="setup">Fast API Backend</h2>
+        <p>The app runs on a fastAPI backend written in python 3 and run in a Ubuntu 22.04 docker container for development purposes. The app itself runs as an electron app.</p>
         <ol>
-            <li>Clone the repository from GitHub.</li>
+            <li>To view api endpoints visit localhost:8000/docs while the app is running</li>
             <li>Install the required dependencies using the provided <code>environment.yml</code> file.</li>
-            <li>Run the Docker container using <code>docker-compose up --build</code>.</li>
+            <li>Run the Docker container using <code>docker compose up --build</code>.</li>
         </ol>
 
-        <h2 id="usage">Usage Guide</h2>
-        <p>Once the setup is complete, you can access the application through your browser. Use the navigation menu to explore different features and functionalities.</p>
+        <h2 id="usage">How to contribute</h2>
+        <p>The source code to this project can be found at: https://github.com/rickyrc123/GUSTv2.</p>
+        <ul>
+            <li>Fork the repository to your own GitHub account.</li>
+            <li>Create a new branch for your feature or bug fix.</li>
+            <li>Make your changes and commit them with clear messages.</li>
+            <li>Push your changes to your forked repository.</li>
+            <li>Create a pull request to the main repository.</li>
+        </ul>
+        
 
         <h2 id="faq">FAQ</h2>
         <p>If you have any questions, refer to the FAQ section or contact the development team for assistance.</p>

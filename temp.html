@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Documentation</h1>
+
+    <h2>Endpoints in <code>fast_api_test_server.py</code></h2>
+
+    <h3>GET /test_data/get_generated_data</h3>
+    <p>Generates random test data for drones.</p>
+    <p><strong>Response:</strong> JSON payload containing randomly generated drone data.</p>
+
+    <h3>GET /drones</h3>
+    <p>Retrieves a list of all drones currently in the system.</p>
+    <p><strong>Response:</strong> JSON object with a list of drones.</p>
+
+    <h3>POST /drones/create</h3>
+    <p>Creates a new drone in the system.</p>
+    <p><strong>Request Body:</strong> JSON object containing drone details.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>name</td>
+                <td>string</td>
+                <td>Name of the drone</td>
+            </tr>
+            <tr>
+                <td>model</td>
+                <td>string</td>
+                <td>Model of the drone</td>
+            </tr>
+            <tr>
+                <td>status</td>
+                <td>string</td>
+                <td>Status of the drone</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Response:</strong> Status message indicating success or failure.</p>
+
+    <h3>GET /drones/{drone_name}</h3>
+    <p>Retrieves details of a specific drone by its name.</p>
+    <p><strong>Path Parameter:</strong> <code>drone_name</code> - Name of the drone.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>drone_name</td>
+                <td>string</td>
+                <td>Name of the drone</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Response:</strong> JSON object with drone details.</p>
+
+    <h3>POST /drones/{drone_name}/delete</h3>
+    <p>Deletes a specific drone by its name.</p>
+    <p><strong>Path Parameter:</strong> <code>drone_name</code> - Name of the drone.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>drone_name</td>
+                <td>string</td>
+                <td>Name of the drone</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Response:</strong> Status message indicating success or failure.</p>
+
+    <h3>POST /drones/{drone_name}/update_position</h3>
+    <p>Updates the last known position of a specific drone.</p>
+    <p><strong>Path Parameter:</strong> <code>drone_name</code> - Name of the drone.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Field</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>drone_name</td>
+                <td>string</td>
+                <td>Name of the drone</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Response:</strong> Status message indicating success or failure.</p>
+
+    <!-- Repeat similar structure for other endpoints -->
+
+</body>
+</html>

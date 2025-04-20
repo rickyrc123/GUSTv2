@@ -5,16 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GUST</title>
     <style>
-        body {
+       
+       body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-image: url('images/gust_logo.png'); /* Path to the logo */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain; /* Adjusts the image to fit the screen */
+            height: 100vh; /* Ensures the body takes up the full viewport height */
         }
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #333;
+            background-color: rgba(51, 51, 51, 0.9); /* Semi-transparent background */
             color: white;
             padding: 10px 20px;
         }
@@ -36,7 +42,11 @@
         main {
             padding: 20px;
             text-align: center;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background for readability */
+            margin: 20px;
+            border-radius: 10px;
         }
+    
     </style>
 </head>
 <body>
