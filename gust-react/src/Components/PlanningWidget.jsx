@@ -4,13 +4,19 @@ import 'leaflet/dist/leaflet.css';
 import VehicleList from './VehicleList';
 import UploadPathButton from './UploadPathButton';
 import ManeuverSelector from './ManeuverSelector';
+import PathPointTable from './PathPointTable';
 import './PlanningWidget.css';
 
 const PlanningWidget = () => {
-  const [paths, setPaths] = useState([]);
+  const [paths, setPaths] = useState([
+    [
+      {lat: 51.505, lng: -0.09, alt: 100},
+      {lat: 51.51, lng: -0.1, alt: 150}
+    ]
+  ]);
   const [selectedVehicleID, setSelectedVehicleID] = useState(null);
   const [selectedManeuver, setSelectedManeuver] = useState(null);
-  const [mapCenter] = useState([51.505, -0.09]);
+  const [mapCenter] = useState([33.1823705, -87.5111005]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Handle adding markers to the map
@@ -18,10 +24,15 @@ const PlanningWidget = () => {
     useMapEvents({
       click(e) {
         setPaths((currentPaths) => {
+          const newPoint = {
+            lat: e.latlng.lat,
+            lng: e.latlng.lng,
+            alt: 0
+          }
           if (currentPaths.length === 0) return [[e.latlng]];
           const newPaths = [...currentPaths];
           const lastIndex = newPaths.length - 1;
-          newPaths[lastIndex] = [...newPaths[lastIndex], e.latlng];
+          newPaths[lastIndex] = [...newPaths[lastIndex], newPoint];
           return newPaths;
         });
       },
@@ -40,7 +51,7 @@ const PlanningWidget = () => {
 
   // Clear all paths
   const handleClearPaths = () => {
-    setPaths([]);
+    setPaths([[]]);
   };
 
   // Add new path
@@ -74,7 +85,7 @@ const PlanningWidget = () => {
       </div>
 
       <div className="map-container">
-        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '80%' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -96,6 +107,10 @@ const PlanningWidget = () => {
             </React.Fragment>
           ))}
         </MapContainer>
+      </div>
+      <div className="path-data-section">
+        <h3>Path Point Editor</h3>
+        <PathPointTable paths={paths} setPaths={setPaths} />
       </div>
     </div>
   );

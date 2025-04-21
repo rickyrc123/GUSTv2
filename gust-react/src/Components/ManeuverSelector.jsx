@@ -34,22 +34,22 @@ const ManeuverSelector = ({
   }, [refreshTrigger]);
 
   // Fetch details for selected maneuver
-  useEffect(() => {
-    if (selectedManeuver) {
-      const fetchManeuverDetails = async () => {
-        try {
-          const response = await fetch(`/maneuvers/${selectedManeuver.maneuver_id}`);
-          if (!response.ok) throw new Error('Failed to fetch maneuver details');
-          const data = await response.json();
-          setManeuverDetails(data);
-        } catch (err) {
-          setError(err.message);
-        }
-      };
+  // useEffect(() => {
+  //   if (selectedManeuver) {
+  //     const fetchManeuverDetails = async () => {
+  //       try {
+  //         const response = await fetch(`/maneuvers/${selectedManeuver.maneuver_id}`);
+  //         if (!response.ok) throw new Error('Failed to fetch maneuver details');
+  //         const data = await response.json();
+  //         setManeuverDetails(data);
+  //       } catch (err) {
+  //         setError(err.message);
+  //       }
+  //     };
       
-      fetchManeuverDetails();
-    }
-  }, [selectedManeuver]);
+  //     fetchManeuverDetails();
+  //   }
+  // }, [selectedManeuver]);
 
   // Create new maneuver
   const handleCreateManeuver = async () => {
