@@ -230,6 +230,17 @@ async def update_path(
         return {"Failure" : f"Failed to update program path {e}"}
     return {"Success" : "Yay!"}
 
+@app.post("/programs/manuevers/get_drones_in_maneuver")
+async def get_drones_in_maneuver(
+    maneuver_name
+):
+    try:
+        drones = database.get_drones_in_maneuver(database.get_maneuver_by_name(maneuver_name))
+    except Exception as e:
+        return {"Failure" : f"Failed to get drones in maneuver {e}"}
+    
+    return {"Drones" : drones}
+
 ## SINGLE DRONE CONNECTION
 s_connect = None
 
