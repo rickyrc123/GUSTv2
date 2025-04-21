@@ -15,54 +15,42 @@ const PathPointTable = ({ paths, setPaths }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [draggedRowIndex, setDraggedRowIndex] = useState(null);
 
+  const safePaths = paths.length === 0 ? [[]] : paths.map(path => 
+    path.map(p => ({
+      lat: p?.lat || 0,
+      lng: p?.lng || 0,
+      alt: p?.alt || 0
+    }))
+  );
+
   const columnDefs = [
-    { 
-      headerName: '↕',
-      width: 60,
-      cellRenderer: (params) => (
-        <div 
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.effectAllowed = 'move';
-            setDraggedRowIndex(params.rowIndex);
-          }}
-          onDragOver={(e) => e.preventDefault()}
-          style={{ cursor: 'move', padding: '5px' }}
-        >
-          ⋮⋮
-        </div>
-      ),
-      suppressMenu: true,
-      filter: false,
-      sortable: false
-    },
+
     {
       field: 'lat',
       headerName: 'Latitude',
       editable: true,
-      cellEditor: 'agTextCellEditor',
-      valueFormatter: params => params.value.toFixed(6),
+      valueFormatter: params => params.value?.toFixed(6) || '0.000000',
       valueParser: params => {
         const value = parseFloat(params.newValue);
         return isNaN(value) ? params.oldValue : value;
-      }
+      },
+      cellRenderer: params => params.value?.toFixed(6) || '0.000000'
     },
     {
       field: 'lng',
       headerName: 'Longitude',
       editable: true,
-      cellEditor: 'agTextCellEditor',
-      valueFormatter: params => params.value.toFixed(6),
+      valueFormatter: params => params.value?.toFixed(6) || '0.000000',
       valueParser: params => {
         const value = parseFloat(params.newValue);
         return isNaN(value) ? params.oldValue : value;
-      }
+      },
+      cellRenderer: params => params.value?.toFixed(6) || '0.000000'
     },
     {
       field: 'alt',
       headerName: 'Altitude',
       editable: true,
-      cellEditor: 'agTextCellEditor',
       valueParser: params => {
         const value = parseFloat(params.newValue);
         return isNaN(value) ? params.oldValue : value;
@@ -110,26 +98,35 @@ const PathPointTable = ({ paths, setPaths }) => {
 
 
   const handleDeletePoint = (rowIndex) => {
-    const newPaths = [...paths];
-    newPaths[selectedTab] = newPaths[selectedTab].filter((_, i) => i !== rowIndex);
-    setPaths(newPaths);
+    setPaths(prev => {
+      const newPaths = [...prev];
+      if (newPaths[selectedTab]?.[rowIndex]) {
+        newPaths[selectedTab] = newPaths[selectedTab].filter((_, i) => i !== rowIndex);
+      }
+      return newPaths;
+    });
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     const hoveredRowIndex = Math.floor((e.clientY - rect.top) / 28);
-
-    if (draggedRowIndex !== null && hoveredRowIndex !== draggedRowIndex)    {
-        const newPath = [...paths[selectedTab]];
-        const [removed] = newPath.splice(draggedRowIndex, 1);
-        newPath.splice(hoveredRowIndex, 0, removed);
-        const newPaths = [...paths];
-        newPaths[selectedTab] = newPath;
-        setPaths(newPaths);
-        setDraggedRowIndex(hoveredRowIndex);
+    
+    if (draggedRowIndex !== null && 
+        hoveredRowIndex !== draggedRowIndex &&
+        safePaths[selectedTab]?.[draggedRowIndex] &&
+        hoveredRowIndex >= 0 && 
+        hoveredRowIndex < safePaths[selectedTab].length) {
+      const newPath = [...safePaths[selectedTab]];
+      const [removed] = newPath.splice(draggedRowIndex, 1);
+      newPath.splice(hoveredRowIndex, 0, removed);
+      
+      const newPaths = [...safePaths];
+      newPaths[selectedTab] = newPath;
+      setPaths(newPaths);
+      setDraggedRowIndex(hoveredRowIndex);
     }
-  }
+  };
 
   const onCellValueChanged = (e) => {
     const newPaths = [...paths];
@@ -175,21 +172,17 @@ const PathPointTable = ({ paths, setPaths }) => {
         onDragEnd={() => setDraggedRowIndex(null)}
       >
         <AgGridReact
-          modules={[ClientSideRowModelModule]}
+          key={`${selectedTab}-${safePaths[selectedTab]?.length}`}
           columnDefs={columnDefs}
-          rowData={paths[selectedTab] || []}
+          rowData={safePaths[selectedTab] || []}
           onCellValueChanged={onCellValueChanged}
-          suppressDragLeaveHidesColumns={true}
-          stopEditingWhenCellsLoseFocus={true}
-          singleClickEdit={true}
-          suppressClickEdit={true}
+          getRowId={params => params.data.lat + '-' + params.data.lng}
           defaultColDef={{
             sortable: true,
             filter: true,
             resizable: true,
             flex: 1,
           }}
-          key={selectedTab}
         />
       </Box>
     </div>
