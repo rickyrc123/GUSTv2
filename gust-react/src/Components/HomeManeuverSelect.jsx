@@ -1,59 +1,54 @@
 import PropTypes from "prop-types";
-import { useState, useRef, useEffect } from 'react';
+import { FixedSizeList as List } from "react-window";
 
-const HomeManeuverSelect = ({placeholder}) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [selected, setSelected] = useState(null);
-    const dropdownRef = useRef(null);
+const ManeuverList = ({ maneuvers = [], height = 575, width = 180, itemSize = 75, onManeuverSelect })=> {
+    
+    const Row = ({ index }) => {
+        const handleClick = () => {
+            onManeuverSelect(maneuvers[index]);
+        };
 
-    const toggle = () => setIsOpen(!isOpen);
-
-    const selectOption = (option) => {
-        setSelected(option);
-        setIsOpen(false);
+        //First div style is how the buttons fit in the list
+        return (
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: '15px'
+            }}>    
+                <button style={{width: '90%'}} onClick={handleClick}>
+                    {maneuvers[index]}
+                </button>
+            </div>
+        );
     };
 
-    const options = [
-        { value: '1', label: 'Option 1' },
-        { value: '2', label: 'Option 2' },
-        { value: '3', label: 'Option 3' }
-      ];
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-            setIsOpen(false);
-        }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    return (
-        <div ref={dropdownRef} style={{ position: 'relative', display: 'inline-block' }}>
-        <div onClick={toggle} style={{ cursor: 'pointer', padding: '8px', border: '1px solid #ccc', color: '#000' }}>
-            {selected ? selected.label : placeholder}
-        </div>
-        {isOpen && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, border: '1px solid #ccc' }}>
-            {options.map((option) => (
-                <div 
-                key={option.value} 
-                onClick={() => selectOption(option)}
-                style={{ padding: '8px', cursor: 'pointer', backgroundColor: '#fff', color: '#000' }}
-                >
-                {option.label}
-                </div>
-            ))}
-            </div>
-        )}
+    return(
+        <div style={{ 
+            border: "1px solid #ddd", 
+            borderRadius: "8px", 
+            overflow: "hidden"
+        }}>
+            <List
+                itemSize={itemSize}
+                itemCount={maneuvers.length}
+                height={height}
+                width={width}
+            >
+                {Row}
+            </List>  
         </div>
     );
 };
 
+ManeuverList.propTypes = {
+    height: PropTypes.number,
+    width: PropTypes.number,
+    itemSize: PropTypes.number,
+    index: PropTypes.any,
+    onManeuverSelect: PropTypes.func.isRequired,
+    maneuvers: PropTypes.array
+};
 
-HomeManeuverSelect.propTypes = {
-    placeholder: PropTypes.any,
-}
-
-export default HomeManeuverSelect;
+export default ManeuverList;
