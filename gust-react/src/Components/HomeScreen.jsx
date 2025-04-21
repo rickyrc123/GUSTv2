@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 function HomeScreen() {
     const [selectedDrone, setSelectedDrone] = useState(null);
     const [selectedManeuver, setSelectedManeuver] = useState(null);
+    
     const [drones, setDrones] = useState([]);
     const [maneuvers, setManeuvers] = useState([]);
 
@@ -22,6 +23,8 @@ function HomeScreen() {
                 const maneuverResponse = await fetch("http://localhost:8000/maneuvers");
                 const maneuver = await maneuverResponse.json();
                 setManeuvers(maneuver.maneuvers || [])
+
+                
 
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -39,6 +42,7 @@ function HomeScreen() {
 
     const handleManeuverSelect = (maneuver) => {
         setSelectedManeuver(maneuver);
+
     };
 
     return (
@@ -51,7 +55,7 @@ function HomeScreen() {
                 padding: "20px",
                 borderRadius: "8px",
             }}>
-                <DroneList drones={drones} onDroneSelect={handleDroneSelect}/>
+                <DroneList drones={drones} onDroneSelect={handleDroneSelect} selectedDrone={selectedDrone}/>
             </div>
             <div className="map-container" style = {{
                 display: "flex",
