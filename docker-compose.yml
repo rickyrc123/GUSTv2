@@ -33,7 +33,7 @@ services:
     networks:
       - backend
     volumes:
-      - ./db:/db
+      - .:/home/GUSTv2
     init: true
     stdin_open: true
     tty: true
@@ -54,6 +54,13 @@ services:
     volumes:
       - ./db:/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
+  gust-react:
+    build:
+      context: ./gust-react
+    ports:  
+      - "5173:5173"
+    depends_on:
+      - fastapi
 
 networks:
   backend:

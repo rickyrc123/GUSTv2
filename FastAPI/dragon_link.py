@@ -15,7 +15,7 @@ import time
 from pymavlink import mavutil
 import argparse
 
-def connect_to_dragonlink(port, baudrate=115200):
+def connect_to_dragonlink(port="udp:10.223.168.1:14550", baudrate=115200):
     """ 
     Connect to the DragonLink system via serial port
     
@@ -34,7 +34,7 @@ def connect_to_dragonlink(port, baudrate=115200):
     connection.wait_heartbeat()
     print(f"Heartbeat from system (system {connection.target_system}, component {connection.target_component})")
     
-    msg = connection.recv_match(type='HEARTBEAT', blocking=True, timeout=5)
+    msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=5)
     print(f"Heartbeat: {msg}")
 
     return connection
@@ -68,7 +68,7 @@ def set_flight_mode(connection, mode):
         connection.target_system,
         connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
-        0,  # Confirmation
+        1,  # Confirmation
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id, 0, 0, 0, 0, 0
     )
@@ -98,7 +98,7 @@ def arm_vehicle(connection):
     ack = connection.recv_match(type='COMMAND_ACK', blocking=True)
     print(f"Command result: {ack.result}")
 
-def takeoff(connection, altitude):
+def takeoff(connection, t_altitude):
     """Command takeoff to specified altitude (meters)"""
     connection.mav.command_long_send(
         connection.target_system,
@@ -106,10 +106,24 @@ def takeoff(connection, altitude):
         mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
         0,          # Confirmation
         0, 0, 0, 0,  # Unused params
-        0, 0, 0,    # Unused params
-        altitude    # Target altitude
+        0, 0, 0,    # Unused params 
+        t_altitude    # Target altitude
     )
-    print(f"Takeoff command sent to {altitude}m")
+
+    print(f"Takeoff command sent to {t_altitude}m")
+    print("Drone takingoff!")
+
+    while True:
+        msg = connection.mav.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+        if msg:
+            altitude = msg.relative_alt / 1000.0  # Convert mm to meters
+            print(f"Current Altitude: {altitude:.1f}m")
+
+            if altitude >= t_altitude * 0.95:  # 95% of the target altitude
+                print("Reached target altitude!")
+                break
+
+        time.sleep(1)
 
 def land(connection):
     """Command landing at current position"""
@@ -121,32 +135,16 @@ def land(connection):
         0, 0, 0, 0, # Unused params
         0, 0, 0    # Unused params
     )
-    print("Land command sent")
+    print("Landing...")
 
 def main():
-    parser = argparse.ArgumentParser(description='DragonLink MAVLink Control Script')
-    parser.add_argument('--port', required=True, help='Serial port (e.g., /dev/ttyUSB0 or COM3)')
-    parser.add_argument('--baud', type=int, default=57600, help='Baud rate (default: 57600)')
-    args = parser.parse_args()
-    
     try:
         # Connect to DragonLink
-        dl = connect_to_dragonlink(args.port, args.baud)
-        
-        arm_vehicle(dl)
+        dl = connect_to_dragonlink()
         
         # Example commands (modify as needed)
         set_flight_mode(dl, 'LOITER')
-        time.sleep(1)
-
-        #take off
-        thing = input("Press Enter to Takeoff")
-        takeoff(dl, 2)
-
-
-        #land
-        thing = input("Press Enter to Land")
-        land(dl)
+        
 
 
     except KeyboardInterrupt:
