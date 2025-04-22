@@ -174,10 +174,10 @@ async def assign_path_to_drone(
     path = None
 ):  
     try:
-        database.assign_program_to_drone(
+        database.assign_path_to_drone(
             maneuver=database.get_maneuver_by_name(maneuver_name),
             drone=database.get_drone_by_name(drone_name),
-            program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
+            path=db.schemas.Path(name=f"{maneuver_name}{drone_name}", content=path)
         )
     except Exception as e:
         return {"Failure" : f"{e}"}
@@ -186,14 +186,14 @@ async def assign_path_to_drone(
 
 @app.post("/programs/update_path")
 async def update_path(
-    program_name,
+    path_name,
     new_path
 ):
-    program = db.schemas.Program(name=program_name, content=new_path)
-    print(program.content)
+    path = db.schemas.Path(name=path_name, content=new_path)
+    print(path.content)
     try:
-        database.update_program_content(
-            program
+        database.update_path_content(
+            path
         )
     except Exception as e:
         return {"Failure" : f"Failed to update program path {e}"}
