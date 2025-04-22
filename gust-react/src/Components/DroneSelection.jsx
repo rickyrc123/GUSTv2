@@ -10,11 +10,12 @@ const DroneList = ({
     selectedDrone,
     maneuverDrones = []
 }) => {
-    const filteredDrones = maneuverDrones.length
-        ? drones.filter((drone) => maneuverDrones.includes(drone.name))
-        : drones;
+    const filteredDrones = drones.filter((drone) => maneuverDrones.includes(drone.name));
 
     const Row = ({ index }) => {
+        if(!maneuverDrones.length){
+            return;
+        }
         const drone = filteredDrones[index];
 
         const handleClick = () => {
