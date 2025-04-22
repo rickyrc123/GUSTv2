@@ -403,38 +403,61 @@ class DatabaseServer:
             # If no path was found, handle it (optional)
             raise ValueError(f"Path with name {path.name} not found.")
 
-  def assign_path_to_drone(self, drone : schemas.Drone, path : schemas.Path = None, maneuver : schemas.Maneuver = None):
+  def assign_path_to_drone(self, drone: schemas.Drone, path: schemas.Path = None, maneuver: schemas.Maneuver = None):
     with self.Session.begin() as session:
-      if maneuver is None:
-        session.execute(
-          update(models.Path_Drone_Maneuver)
-          .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
-                 models.Path_Drone_Maneuver.maneuver_id.is_(None))
-          )
-          .values({"path_id": path._id})
-        )
-      elif path is None:
-        session.execute(
-          update(models.Path_Drone_Maneuver)
-          .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id)
-          )
-          .values({"maneuver_id": maneuver._id})
-        )
-      else:
-        print(f"Path id: {path._id}")
-        session.execute(
-          update(models.Path_Drone_Maneuver)
-          .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
-                 models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
-          )
-          .values({"path_id": path._id})
-        )
-      
-      session.commit()
+        # Check if an entry for the drone already exists in the Path_Drone_Maneuver table
+        existing_entry = session.execute(
+            select(models.Path_Drone_Maneuver)
+            .where(models.Path_Drone_Maneuver.drone_id == drone._id)
+        ).scalar_one_or_none()
 
+        if not existing_entry:
+            # Add a new entry if it doesn't exist
+            session.add(
+                models.Path_Drone_Maneuver(
+                    drone_id=drone._id,
+                    path_id=path._id if path else None,
+                    maneuver_id=maneuver._id if maneuver else None
+                )
+            )
+        else:
+            # Update the existing entry
+            if maneuver is None:
+                session.execute(
+                    update(models.Path_Drone_Maneuver)
+                    .where(
+                        and_(
+                            models.Path_Drone_Maneuver.drone_id == drone._id,
+                            models.Path_Drone_Maneuver.maneuver_id.is_(None)
+                        )
+                    )
+                    .values({"path_id": path._id})
+                )
+            elif path is None:
+                session.execute(
+                    update(models.Path_Drone_Maneuver)
+                    .where(
+                        and_(
+                            models.Path_Drone_Maneuver.drone_id == drone._id
+                        )
+                    )
+                    .values({"maneuver_id": maneuver._id})
+                )
+            else:
+                session.execute(
+                    update(models.Path_Drone_Maneuver)
+                    .where(
+                        and_(
+                            models.Path_Drone_Maneuver.drone_id == drone._id
+                        )
+                    )
+                    .values({"path_id": path._id})
+                    .values({"maneuver_id": maneuver._id})
+                )
+
+        session.commit()
+                                  
+                   
   def get_path_by_drone_name(self, drone_name: str):
     with self.Session.begin() as session:
 
