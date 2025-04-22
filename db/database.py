@@ -185,7 +185,7 @@ class DatabaseServer:
       with self.Session.begin() as session:
         session.add(new_maneuver)
         session.flush()
-
+        
         if new_maneuver.name == None:
           new_maneuver.name = f"Maneuver{new_maneuver.id:06}"
 
@@ -204,8 +204,8 @@ class DatabaseServer:
           )
 
         session.commit()
-    except:
-      raise Exception("Maneuver with same name is already defined.")
+    except Exception as e:
+      raise Exception(f"Maneuver with same name is already {e}")
 
   # Currently all maneuvers are returned with drone lists empty but the name
   # can be used for getting that info
@@ -219,6 +219,15 @@ class DatabaseServer:
     
     return maneuvers
   
+  def get_maneuver_id_by_name(self, name : str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Maneuver)
+        .where(models.Maneuver.name==name)
+      ).first()
+      id = result[0].id 
+    return id
+  
   def get_maneuver_by_name(self, name : str):
     with self.Session.begin() as session:
       result = session.execute(
@@ -228,13 +237,22 @@ class DatabaseServer:
 
       return _maneuver(*result)
   
-  def get_drones_in_maneuver(self, maneuver: schemas.Maneuver) -> List[str]:
+  def get_drones_in_maneuver(self, maneuver) -> List[str]:
     drones = []
     with self.Session.begin() as session:
-      result = session.execute(
-        select(models.Path_Drone_Maneuver.drone_id)
-        .where(models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
-      ).all()
+        # Reattach the maneuver object to the session if necessary
+        db_maneuver = session.execute(
+            select(models.Maneuver).where(models.Maneuver.id == self.get_maneuver_id_by_name(maneuver))
+        ).scalar_one_or_none()
+
+        if not db_maneuver:
+            raise ValueError(f"Maneuver with ID {maneuver} not found.")
+
+        # Query drones in the maneuver
+        result = session.execute(
+            select(models.Path_Drone_Maneuver.drone_id)
+            .where(models.Path_Drone_Maneuver.maneuver_id == db_maneuver.id)
+        ).all()
 
       for id in result:
         drone_name = session.execute(
@@ -413,7 +431,7 @@ class DatabaseServer:
             and_(models.Path_Drone_Maneuver.drone_id==drone._id,
                  models.Path_Drone_Maneuver.maneuver_id.is_(None))
           )
-          .values(models.Path_Drone_Maneuver.path_id==path._id)
+          .values({"path_id": path._id})
         )
       elif path is None:
         session.execute(
