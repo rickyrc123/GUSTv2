@@ -227,27 +227,27 @@ async def delete_maneuver(
 
 @app.post("/maneuvers/assign_to_drone")
 async def assign_path_to_drone(
-    program_name,
+    path_name,
     drone_name
 ):
-    database.assign_program_to_drone(
+    database.assign_path_to_drone(
         drone=database.get_drone_by_name(drone_name),
-        program=database.get_program_by_name(program_name)
+        path=database.get_path_by_name(path_name)
     )
     
     return {"Success" : "Yay!"}
 
 @app.post("/maneuvers/update_path")
 async def update_path(
-    program_name,
+    path_name,
     paths
 ):
-    program = db.Maneuver(name="temp", content=[])
-    program.content.append(paths)
-    program.name = program_name
-    print(program.content)
-    database.update_program_content(
-        program
+    path = db.Maneuver(name="temp", content=[])
+    path.content.append(paths)
+    path.name = path_name
+    print(path.content)
+    database.update_path_content(
+        path
     )
     return {"Success" : "Yay!"}
 
