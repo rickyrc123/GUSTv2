@@ -191,7 +191,7 @@ async def delete_maneuver(
     name : str
 ):  
     try:
-        database.delete_maneuver(db.Maneuver(name=name, content=[]))
+        database.delete_maneuver(database.get_maneuver_by_name(name))
     except Exception as e:
         return {"Failure" : f"failed \n\n\n {e}"}
     
@@ -218,7 +218,7 @@ async def assign_path_to_drone(
         try:
             database.assign_path_to_drone(
                 maneuver=database.get_maneuver_by_name(maneuver_name),
-                drone=database.get_drone_by_name(drone_name),
+                drone=database.get_drone_by_name(drone_name)
             )
         except Exception as e:
             return {"Failure" : f"{e}"}

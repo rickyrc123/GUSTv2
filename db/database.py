@@ -73,7 +73,9 @@ class DatabaseServer:
 
         session.add(
           models.Path_Drone_Maneuver(
-            drone_id=drone_info.id
+            drone_id=drone_info.id,
+            maneuver_id=None,
+            path_id=None
           )
         )
 
@@ -416,12 +418,12 @@ class DatabaseServer:
         session.execute(
           update(models.Path_Drone_Maneuver)
           .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
-                 models.Path_Drone_Maneuver.path_id.is_(None))
+            and_(models.Path_Drone_Maneuver.drone_id==drone._id)
           )
           .values({"maneuver_id": maneuver._id})
         )
       else:
+        print(f"Path id: {path._id}")
         session.execute(
           update(models.Path_Drone_Maneuver)
           .where(
