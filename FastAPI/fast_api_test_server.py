@@ -282,18 +282,35 @@ async def remove_drone_from_maneuver(
     
     return {"Success" : "Yay!"}
 
-@app.get("/drones/single_connection_init")
-async def single_connection_protocol():
-    s_connect = dragon_link.connect_to_dragonlink()
+@app.get("/drones/single_connection/available_connections")
 
-    dragon_link.set_flight_mode(s_connect, 'GUIDED')
-    dragon_link.arm_vehicle(s_connect)
-    dragon_link.set_flight_mode(s_connect, 'LOITER')
+@app.get("/drones/single_connection/execute_path")
+async def single_connection_execute_path(
+    path_name : str,
+    drone_name : str
+):  
+    # Execute the path for the specified drone
+    try:
+        path = database.get_path_by_name(path_name)
+        
+        dragon_link.execute_path(s_connect, path)
+    except Exception as e:
+        return {"Failure" : f"Failed to execute path {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.post("/drones/single_connection/set_mode")
+async def single_connection_protocol(
+    mode : str = "LOITER"
+):
+    s_connect = dragon_link.connect_to_dragonlink()
+    dragon_link.set_flight_mode(s_connect, mode)
 
 @app.get("/drones/single_connection/take_off")
 async def single_drone_takeoff(t_alt = 5):
-    if s_connect is not None:    
+    if s_connect is not None:   
         dragon_link.set_flight_mode(s_connect, 'GUIDED')
+        dragon_link.arm_vehicle(s_connect)
         dragon_link.takeoff(s_connect, t_altitude=t_alt)
     else:
         return {"Response" : "No drone connection"}

@@ -137,6 +137,26 @@ def land(connection):
     )
     print("Landing...")
 
+def seek(connection, lat, lon, alt):
+    """Command to seek a specific location"""
+    connection.mav.command_long_send(
+        connection.target_system,
+        connection.target_component,
+        mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,
+        0,          # Confirmation
+        0, 0, 0, 0, # Unused params
+        lat, lon, alt  # Target location (lat, lon, alt)
+    )
+    print(f"Seeking to {lat}, {lon}, {alt}")
+
+def execute_path(connection, path):
+    """Execute a predefined path"""
+    for waypoint in path:
+        lat, lon, alt = waypoint
+        seek(connection, lat, lon, alt)
+        time.sleep(1)  # Wait for the vehicle to reach the waypoint
+        print(f"Reached waypoint: {lat}, {lon}, {alt}")
+
 def main():
     try:
         # Connect to DragonLink
