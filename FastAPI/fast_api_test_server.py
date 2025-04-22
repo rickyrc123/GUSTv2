@@ -201,7 +201,7 @@ async def update_path(
     program = db.schemas.Program(name=program_name, content=new_path)
     print(program.content)
     try:
-        database.update_program_content(
+        database.update_path_content(
             program
         )
     except Exception as e:
