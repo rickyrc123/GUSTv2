@@ -377,6 +377,18 @@ async def m_connect_refresh_connections():
     available_connections = dragon_link.scan_for_available_connections()
     return {"Available Connections": available_connections}
 
+@app.get("/drones/m_connect/take_off")
+async def m_connect_take_off(
+    connection_id,
+    t_alt = 5
+):
+    # Take off the specified drone
+    try:
+        print("Taking OFF!")
+    except Exception as e:
+        return {"Failure" : f"Failed to take off {e}"}
+    
+    return {"Success" : "Yay!"}
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
 async def read_root():
