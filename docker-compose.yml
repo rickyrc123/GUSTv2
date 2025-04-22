@@ -54,6 +54,7 @@ services:
     volumes:
       - ./db:/db
     command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
+
   # gust-react:
   #   build:
   #     context: ./gust-react
@@ -61,6 +62,7 @@ services:
   #     - "5173:5173"
   #   depends_on:
   #     - fastapi
+
 
 networks:
   backend:
