@@ -239,14 +239,14 @@ async def get_path_by_drone(
 #get paths in manuver
 @app.post("/programs/update_path")
 async def update_path(
-    program_name,
+    path_name,
     new_path
 ):
-    program = db.schemas.Program(name=program_name, content=new_path)
-    print(program.content)
     try:
+        path = database.get_path_by_name(path_name)
+        path.content = new_path
         database.update_path_content(
-            program
+            path
         )
     except Exception as e:
         return {"Failure" : f"Failed to update program path {e}"}
