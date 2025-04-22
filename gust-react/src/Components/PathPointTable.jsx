@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import { ClientSideRowModelModule } from 'ag-grid-community';
-import { ModuleRegistry } from 'ag-grid-community';
+import { AgGridReact } from '@ag-grid-community/react';
+import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
+import { ModuleRegistry } from '@ag-grid-community/core';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Tabs, Tab, Box } from '@mui/material';
@@ -98,13 +98,20 @@ const PathPointTable = ({ paths, setPaths }) => {
 
 
   const handleDeletePoint = (rowIndex) => {
-    setPaths(prev => {
-      const newPaths = [...prev];
-      if (newPaths[selectedTab]?.[rowIndex]) {
-        newPaths[selectedTab] = newPaths[selectedTab].filter((_, i) => i !== rowIndex);
-      }
-      return newPaths;
-    });
+    
+    console.log(rowIndex);
+    // setPaths(prev => {
+    //   const newPaths = [...prev];
+    //   if (newPaths[selectedTab]?.[rowIndex]) {
+    //     console.log('old path');
+    //     console.log(newPaths[selectedTab])
+    //     console.log('new path');
+    //     console.log(newPaths[selectedTab].filter((_, i) => i !== rowIndex))
+    //     newPaths[selectedTab] = newPaths[selectedTab].filter((_, i) => i !== rowIndex);
+    //   }
+    //   return newPaths;
+    // });
+    // console.log(paths);
   };
 
   const handleDragOver = (e) => {

@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import VehicleList from './VehicleList';
 import UploadPathButton from './UploadPathButton';
 import ManeuverSelector from './ManeuverSelector';
-import PathPointTable from './PathPointTable';
+// import PathPointTable from './PathPointTable';
 import './PlanningWidget.css';
 
 const PlanningWidget = () => {
@@ -67,7 +67,7 @@ const PlanningWidget = () => {
   return (
     <div className="planning-widget">
       <div className="control-panel">
-        <VehicleList onSelectVehicle={setSelectedVehicleID} />
+        
         <ManeuverSelector
           selectedManeuver={selectedManeuver}
           onSelectManeuver={setSelectedManeuver}
@@ -76,11 +76,11 @@ const PlanningWidget = () => {
           paths={paths}
           refreshTrigger={refreshTrigger}
         />
-        
+        <VehicleList onSelectVehicle={setSelectedVehicleID} selectedManeuver={selectedManeuver} />
         <div className="path-actions">
-          <button onClick={handleAddNewPath}>Start New Path</button>
+          <button onClick={handleAddNewPath} disabled={selectedVehicleID == null}>Start New Path</button>
           <button onClick={handleClearPaths}>Clear All Paths</button>
-          <UploadPathButton vehicleID={selectedVehicleID} paths={paths} />
+          {/* <UploadPathButton vehicleID={selectedVehicleID} paths={paths} /> */}
         </div>
       </div>
 
@@ -110,7 +110,7 @@ const PlanningWidget = () => {
       </div>
       <div className="path-data-section">
         <h3>Path Point Editor</h3>
-        <PathPointTable paths={paths} setPaths={setPaths} />
+        {/* <PathPointTable paths={paths} setPaths={setPaths} /> */}
       </div>
     </div>
   );
