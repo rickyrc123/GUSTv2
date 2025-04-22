@@ -223,6 +223,15 @@ class DatabaseServer:
       id = result[0].id 
     return id
   
+  def get_maneuver_by_name(self, name : str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Maneuver)
+        .where(models.Maneuver.name==name)
+      ).first()
+
+      return _maneuver(*result)
+  
   def get_drones_in_maneuver(self, maneuver) -> List[str]:
     drones = []
     with self.Session.begin() as session:
