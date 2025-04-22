@@ -422,7 +422,7 @@ class DatabaseServer:
             and_(models.Path_Drone_Maneuver.drone_id==drone._id,
                  models.Path_Drone_Maneuver.path_id.is_(None))
           )
-          .values(models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
+          .values({"maneuver_id": maneuver._id})
         )
       else:
         session.execute(

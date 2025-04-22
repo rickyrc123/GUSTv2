@@ -112,7 +112,7 @@ class CreateManeuver(Maneuver):
   
   Attributes:
     name (Optional[str]): Display name of the maneuver. If None, will be auto-generated as 'Maneuver{id:06}'.
-    All other attributes inherited from SwarmBase.
+    All other attributes inherited from ManeuverBase.
   """
   _id: int | None
   name: Annotated[str | None, Field(default=None, description="Display name of the maneuver. If None, will be auto-generated as 'Maneuver{id:06}'")]
