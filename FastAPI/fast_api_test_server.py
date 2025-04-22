@@ -203,12 +203,14 @@ async def delete_maneuver(
 @app.post("/maneuvers/assign_to_drone")
 async def assign_path_to_drone(
     maneuver_name,
+    path,
     drone_name
 ):
     try:
-        database.add_drone_to_maneuver(
+        database.assign_program_to_drone(
             maneuver=database.get_maneuver_by_name(maneuver_name),
-            drone=database.get_drone_by_name(drone_name)
+            drone=database.get_drone_by_name(drone_name),
+            program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
         )
     except Exception as e:
         return {"Failure" : f"{e}"}

@@ -243,7 +243,7 @@ class DatabaseServer:
 
   def add_drone_to_maneuver(self, maneuver: schemas.Maneuver, drone: schemas.Drone):
     maneuver.drones.append(drone.name)
-
+    
     with self.Session.begin() as session:
       session.add(
         models.Program_Drone_Maneuver(
