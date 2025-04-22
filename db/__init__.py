@@ -3,8 +3,8 @@ from .setup import build
 from .schemas import (
   Drone,
   CreateDrone,
-  Swarm,
-  CreateSwarm,
+  Maneuver,
+  CreateManeuver,
   Waypoint,
   CreateWaypoint,
   Program,
@@ -18,8 +18,8 @@ __all__ = [
   # Schemas (external data models)
   'Drone',
   'CreateDrone',
-  'Swarm',
-  'CreateSwarm',
+  'Maneuver',
+  'CreateManeuver',
   'Waypoint',
   'CreateWaypoint',
   'Program',

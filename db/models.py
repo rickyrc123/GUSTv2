@@ -57,35 +57,35 @@ class DroneLocation(Base):
   current_yaw  = Column(Double,   nullable=True)
 
 
-class Swarm(Base):
-  """Model representing a drone swarm.
+class Maneuver(Base):
+  """Model representing a drone maneuver that contains drones and related programs.
 
   Attributes:
-    id (int): Unique identifier for the swarm, auto-incremented by the database.
-    name (str): Display name of the swarm, must be unique.
-    created_at (datetime): Timestamp of when the swarm was created.
-    updated_at (datetime): Timestamp of the last update to the swarm's information.
+    id (int): Unique identifier for the maneuver, auto-incremented by the database.
+    name (str): Display name of the maneuver, must be unique.
+    created_at (datetime): Timestamp of when the maneuver was created.
+    updated_at (datetime): Timestamp of the last update to the maneuver's information.
   """
-  __tablename__ = 'swarms'
+  __tablename__ = 'maneuvers'
 
   id         = Column(Integer,  primary_key=True, autoincrement=True)
   name       = Column(String,   unique=True, nullable=True)
   created_at = Column(DateTime, nullable=False, server_default='now()')
   updated_at = Column(DateTime, nullable=False, server_default='now()')
 
-class Program_Drone_Swarm(Base):
-  """Table that relates programs to drones depending on their swarm
+class Program_Drone_Maneuver(Base):
+  """Table that relates programs to drones depending on their Maneuver
 
   Attributes:
     drone_id (int): Only non nullable key, relates the specific drone that is running the program
     program_id (int): nullable, if this value is null this means that the drone does not have any specific program related to it
-    swarm_id (int): relates the drone to a swarm allowing one drone to have different programs depending on the swarm it is in, a null value means the program is for the drone on its own with no swarm relation 
+    Maneuver_id (int): relates the drone to a maneuver allowing one drone to have different programs depending on the maneuver it is in, a null value means the program is for the drone on its own with no maneuver relation 
   """
   __tablename__ = 'program_drone_swarms'
 
   drone_id   = Column(Integer, ForeignKey('drone_info.id'), primary_key=True, nullable=False)
   program_id = Column(Integer, ForeignKey('programs.id'),   nullable=True)
-  swarm_id   = Column(Integer, ForeignKey('swarms.id'),     nullable=True)
+  maneuver_id   = Column(Integer, ForeignKey('maneuvers.id'),     nullable=True)
 
 class Waypoint(Base):
   """Model representing a waypoint in 3D space.
