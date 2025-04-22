@@ -173,15 +173,24 @@ async def assign_path_to_drone(
     drone_name,
     path = None
 ):  
-    try:
-        database.assign_program_to_drone(
-            maneuver=database.get_maneuver_by_name(maneuver_name),
-            drone=database.get_drone_by_name(drone_name),
-            program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
-        )
-    except Exception as e:
-        return {"Failure" : f"{e}"}
-    
+    if path is not None:
+
+        try:
+            database.assign_program_to_drone(
+                maneuver=database.get_maneuver_by_name(maneuver_name),
+                drone=database.get_drone_by_name(drone_name),
+                program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
+            )
+        except Exception as e:
+            return {"Failure" : f"{e}"}
+    else:
+        try:
+            database.assign_program_to_drone(
+                maneuver=database.get_maneuver_by_name(maneuver_name),
+                drone=database.get_drone_by_name(drone_name),
+            )
+        except Exception as e:
+            return {"Failure" : f"{e}"}
     return {"Success" : "Yay!"}
 
 @app.post("/programs/update_path")
