@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 function HomeScreen() {
     const [selectedDrone, setSelectedDrone] = useState(null);
     const [selectedManeuver, setSelectedManeuver] = useState(null);
-    
+    const [maneuverDrones, setManeuverDrones] = useState([]);
     const [drones, setDrones] = useState([]);
     const [maneuvers, setManeuvers] = useState([]);
 
@@ -22,8 +22,7 @@ function HomeScreen() {
 
                 const maneuverResponse = await fetch("http://localhost:8000/maneuvers");
                 const maneuver = await maneuverResponse.json();
-                setManeuvers(maneuver.maneuvers || [])
-
+                setManeuvers(maneuver.maneuvers || []);
                 
 
             } catch (error) {
@@ -36,13 +35,36 @@ function HomeScreen() {
         return () => clearInterval(interval);
     }, []);
 
+    useEffect(() => {
+        const fetchManeuverDrones = async () => {
+            if (selectedManeuver) {
+                try {
+                    const maneuverDronesResponse = await fetch(`http://localhost:8000/programs/manuevers/get_drones_in_maneuver?maneuver_name=${selectedManeuver}`, {
+                        method: "POST",
+                        headers: {
+                            "accept": "application/json"
+                        },
+                        body: null
+                    });
+                    const maneuverDronesHold = await maneuverDronesResponse.json();
+                    setManeuverDrones(maneuverDronesHold.Drones || []);
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            } else {
+                setManeuverDrones([]);
+            }
+        };
+
+        fetchManeuverDrones();
+    }, [selectedManeuver]);
+
     const handleDroneSelect = (drone) => {
         setSelectedDrone(drone);
     };
 
     const handleManeuverSelect = (maneuver) => {
         setSelectedManeuver(maneuver);
-
     };
 
     return (
@@ -55,7 +77,7 @@ function HomeScreen() {
                 padding: "20px",
                 borderRadius: "8px",
             }}>
-                <DroneList drones={drones} onDroneSelect={handleDroneSelect} selectedDrone={selectedDrone}/>
+                <DroneList drones={drones} onDroneSelect={handleDroneSelect} selectedDrone={selectedDrone} maneuverDrones={maneuverDrones}/>
             </div>
             <div className="map-container" style = {{
                 display: "flex",

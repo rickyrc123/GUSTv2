@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { FixedSizeList as List } from "react-window";
 
-const ManeuverList = ({ maneuvers = [], height = 575, width = 180, itemSize = 75, onManeuverSelect })=> {
+const ManeuverList = ({ maneuvers = [], height = 575, width = 180, itemSize = 75, onManeuverSelect, selectedManeuver })=> {
     
     const Row = ({ index }) => {
         const handleClick = () => {
@@ -16,7 +16,7 @@ const ManeuverList = ({ maneuvers = [], height = 575, width = 180, itemSize = 75
                 justifyContent: "center",
                 marginBottom: '15px'
             }}>    
-                <button style={{width: '90%'}} onClick={handleClick}>
+                <button style={{width: '90%', background: selectedManeuver && selectedManeuver === maneuvers[index] ? '#2196f3' : '#8bcafd'}} onClick={handleClick}>
                     {maneuvers[index]}
                 </button>
             </div>
@@ -48,7 +48,8 @@ ManeuverList.propTypes = {
     itemSize: PropTypes.number,
     index: PropTypes.any,
     onManeuverSelect: PropTypes.func.isRequired,
-    maneuvers: PropTypes.array
+    maneuvers: PropTypes.array,
+    selectedManeuver: PropTypes.string
 };
 
 export default ManeuverList;

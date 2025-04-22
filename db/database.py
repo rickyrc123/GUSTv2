@@ -107,6 +107,15 @@ class DatabaseServer:
         ).first()
       
       return _drone(*result)
+    
+  def get_maneuver_by_name(self, name : str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Maneuver)
+        .where(models.Maneuver.name==name)
+      ).first()
+
+      return _maneuver(*result)
 
   def get_drone_by_location(self, long: float, lat: float, alt: float):
     with self.Session.begin() as session:
