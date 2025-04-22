@@ -58,7 +58,7 @@ class DroneLocation(Base):
 
 
 class Maneuver(Base):
-  """Model representing a drone maneuver that contains drones and related programs.
+  """Model representing a drone maneuver that contains drones and related paths.
 
   Attributes:
     id (int): Unique identifier for the maneuver, auto-incremented by the database.
@@ -73,15 +73,15 @@ class Maneuver(Base):
   created_at = Column(DateTime, nullable=False, server_default='now()')
   updated_at = Column(DateTime, nullable=False, server_default='now()')
 
-class Program_Drone_Maneuver(Base):
-  """Table that relates programs to drones depending on their Maneuver
+class Path_Drone_Maneuver(Base):
+  """Table that relates paths to drones depending on their Maneuver
 
   Attributes:
-    drone_id (int): Only non nullable key, relates the specific drone that is running the program
-    program_id (int): nullable, if this value is null this means that the drone does not have any specific program related to it
-    Maneuver_id (int): relates the drone to a maneuver allowing one drone to have different programs depending on the maneuver it is in, a null value means the program is for the drone on its own with no maneuver relation 
+    drone_id (int): Only non nullable key, relates the specific drone that is running the path
+    path_id (int): nullable, if this value is null this means that the drone does not have any specific path related to it
+    Maneuver_id (int): relates the drone to a maneuver allowing one drone to have different paths depending on the maneuver it is in, a null value means the path is for the drone on its own with no maneuver relation 
   """
-  __tablename__ = 'program_drone_swarms'
+  __tablename__ = 'path_drone_swarms'
 
   drone_id   = Column(Integer, ForeignKey('drone_info.id'), primary_key=True, nullable=False)
   program_id = Column(Integer, ForeignKey('programs.id'),   nullable=True)
@@ -103,17 +103,17 @@ class Waypoint(Base):
   lat  = Column(Double, nullable=True)
   alt  = Column(Double, nullable=True)
 
-class Program(Base):
-  """Model representing a user-defined flight program.
+class Path(Base):
+  """Model representing a user-defined flight path.
 
   Attributes:
-    id (int): Unique identifier for the program, auto-incremented by the database.
-    name (str): Display name of the program.
+    id (int): Unique identifier for the path, auto-incremented by the database.
+    name (str): Display name of the path.
     content (str): A string representation of waypoints and their associated speeds.
-    created_at (datetime): Timestamp of when the program was created.
-    last_updated (datetime): Timestamp of the last update to the program.
+    created_at (datetime): Timestamp of when the path was created.
+    last_updated (datetime): Timestamp of the last update to the path.
   """
-  __tablename__ = 'programs'
+  __tablename__ = 'paths'
 
   id            = Column(Integer, primary_key=True, nullable=False)
   name          = Column(String, unique=True, nullable=True)
