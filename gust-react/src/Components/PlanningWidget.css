@@ -1,7 +1,7 @@
 .planning-widget {
     display: flex;
     height: 90vh;
-    width: 100vh;
+    width: 100vw;
     font-family: Arial, sans-serif;
   }
   
@@ -16,6 +16,7 @@
   .map-container {
     flex: 1;
     height: 100%;
+    width: 50%;
   }
   
   .vehicle-list, .maneuver-selector {
@@ -126,4 +127,87 @@
   
   .delete-maneuver:hover:not(:disabled) {
     background: #d32f2f;
+  }
+
+  .path-point-editor {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+  }
+  
+  .ag-theme-alpine {
+    width: 100%;
+    height: 300px;
+    margin-top: 10px;
+  }
+  
+  .delete-point-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .delete-point-button:hover {
+    background: #cc0000;
+  }
+  
+  .path-data-section {
+    margin-top: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 30%;
+    height: 90%;
+  }
+  .ag-row-dragging {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+  
+  .ag-theme-alpine .ag-row-hover {
+    background-color: #f8f9fa !important;
+  }
+  
+  .delete-point-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .delete-point-button:hover {
+    background: #cc0000;
+  }
+
+  .table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .export-csv-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    height: fit-content;
+  }
+  
+  .export-csv-button:disabled {
+    background: #81C784;
+    cursor: not-allowed;
+  }
+  
+  .export-csv-button:not(:disabled):hover {
+    background: #45a049;
   }

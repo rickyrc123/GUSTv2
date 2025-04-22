@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
 import { FixedSizeList as List } from "react-window";
 
-const DroneList = ({ drones = [], height = 575, width = 180, itemSize = 75, onDroneSelect, selectedDrone })=> {
+const ManeuverList = ({ maneuvers = [], height = 575, width = 180, itemSize = 75, onManeuverSelect })=> {
     
     const Row = ({ index }) => {
         const handleClick = () => {
-            onDroneSelect(drones[index]);
+            onManeuverSelect(maneuvers[index]);
         };
 
         //First div style is how the buttons fit in the list
@@ -14,11 +14,10 @@ const DroneList = ({ drones = [], height = 575, width = 180, itemSize = 75, onDr
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: '15px',
-                
+                marginBottom: '15px'
             }}>    
-                <button style={{width: '90%', background: selectedDrone && selectedDrone.name === drones[index].name ? '#2196f3' : 'red'}} onClick={handleClick} >
-                    {drones[index].name}
+                <button style={{width: '90%'}} onClick={handleClick}>
+                    {maneuvers[index]}
                 </button>
             </div>
         );
@@ -33,7 +32,7 @@ const DroneList = ({ drones = [], height = 575, width = 180, itemSize = 75, onDr
         }}>
             <List
                 itemSize={itemSize}
-                itemCount={drones.length}
+                itemCount={maneuvers.length}
                 height={height}
                 width={width}
             >
@@ -43,14 +42,13 @@ const DroneList = ({ drones = [], height = 575, width = 180, itemSize = 75, onDr
     );
 };
 
-DroneList.propTypes = {
+ManeuverList.propTypes = {
     height: PropTypes.number,
     width: PropTypes.number,
     itemSize: PropTypes.number,
     index: PropTypes.any,
-    onDroneSelect: PropTypes.func.isRequired,
-    drones: PropTypes.array,
-    selectedDrone: PropTypes.any
+    onManeuverSelect: PropTypes.func.isRequired,
+    maneuvers: PropTypes.array
 };
 
-export default DroneList;
+export default ManeuverList;

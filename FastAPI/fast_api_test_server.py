@@ -245,6 +245,7 @@ async def update_path(
     try:
         path = database.get_path_by_name(path_name)
         path.content = new_path
+
         database.update_path_content(
             path
         )
