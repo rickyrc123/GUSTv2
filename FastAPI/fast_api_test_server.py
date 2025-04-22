@@ -145,6 +145,17 @@ async def update_drone_position(
 async def get_maneuvers():
     return {"maneuvers" : database.get_all_maneuvers()}
 
+@app.get("/maneuvers/get_path")
+async def get_maneuver(
+    maneuver_name : str
+):
+    try:
+        maneuver = database.get_maneuver_by_name(maneuver_name)
+    except Exception as e:
+        return {"Failure" : f"db.get_maneuver_by_name failed \n\n\n {e}"}
+    
+    return {"Maneuver" : maneuver}
+
 @app.post("/maneuvers/create")
 async def create_maneuver(
     manuver : db.schemas.CreateManeuver
@@ -174,7 +185,6 @@ async def assign_path_to_drone(
     path = None
 ):  
     if path is not None:
-
         try:
             database.assign_path_to_drone(
                 maneuver=database.get_maneuver_by_name(maneuver_name),
