@@ -83,7 +83,7 @@ function HomeScreen() {
             <div style={{
                 position: "absolute",
                 left: "20%",
-                top: "80%",
+                top: "85%",
                 transform: "translate(-50%, -50%)",
                 padding: "20px",
                 borderRadius: "8px",
@@ -106,7 +106,7 @@ function HomeScreen() {
             <div className="gauges-container" style={{
                 position: "absolute",
                 left: "50%",
-                top: "87%",
+                top: "89%",
                 transform: "translate(-50%, -50%)", 
             }}>
                 <AltimeterGauge selectedDrone={selectedDrone}/>
