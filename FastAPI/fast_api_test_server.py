@@ -88,40 +88,7 @@ async def shutdown():
 #sending stuff with the API
 
 #DEPRECIATED
-@app.get("/test_data/get_generated_data")
-async def generate_data():
-    position_array = []
-    num_positions = None
 
-    #if no range specified, make it random
-    if num_positions is None: 
-        num_positions = random.randint(1,25)
-
-    for _ in range(0, num_positions):
-
-        # random position coordinates, longitude, latitude, and Altitude
-        rand_long  =  random.uniform( -180,  180 )
-        rand_lat   =  random.uniform(  -90,  90  )
-        rand_alt   =  random.uniform(    0,  50  )
-        rand_dir   =  random.uniform(    0,  360 )
- 
-        position_array.append({
-           "long"           : rand_long, 
-           "lat"            : rand_lat,
-           "alt_meters"     : rand_alt,
-           "direction"      : rand_dir
-        })
-    
-    # convert to json payload
-    # websocket messages must be bytes or strings
-
-    payload = {
-        "coordinates" : position_array,
-        "drone_id"    : random.choice(DRONE_IDS),
-        "message"     : "WARNING!: This is randomly generated data!"
-    }
-
-    return payload
 
 @app.get("/drones")
 async def get_all_drones():
@@ -203,12 +170,14 @@ async def delete_maneuver(
 @app.post("/maneuvers/assign_to_drone")
 async def assign_path_to_drone(
     maneuver_name,
-    drone_name
-):
+    drone_name,
+    path = None
+):  
     try:
-        database.add_drone_to_maneuver(
+        database.assign_program_to_drone(
             maneuver=database.get_maneuver_by_name(maneuver_name),
-            drone=database.get_drone_by_name(drone_name)
+            drone=database.get_drone_by_name(drone_name),
+            program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
         )
     except Exception as e:
         return {"Failure" : f"{e}"}
@@ -238,9 +207,8 @@ async def get_drones_in_maneuver(
         drones = database.get_drones_in_maneuver(database.get_maneuver_by_name(maneuver_name))
     except Exception as e:
         return {"Failure" : f"Failed to get drones in maneuver {e}"}
-
+    
     return {"Drones" : drones}
-
 
 ## SINGLE DRONE CONNECTION
 s_connect = None
