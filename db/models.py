@@ -84,8 +84,8 @@ class Path_Drone_Maneuver(Base):
   __tablename__ = 'path_drone_swarms'
 
   drone_id   = Column(Integer, ForeignKey('drone_info.id'), primary_key=True, nullable=False)
-  path_id = Column(Integer, ForeignKey('paths.id'),   nullable=True)
-  Maneuver_id   = Column(Integer, ForeignKey('maneuvers.id'),     nullable=True)
+  program_id = Column(Integer, ForeignKey('programs.id'),   nullable=True)
+  maneuver_id   = Column(Integer, ForeignKey('maneuvers.id'),     nullable=True)
 
 class Waypoint(Base):
   """Model representing a waypoint in 3D space.

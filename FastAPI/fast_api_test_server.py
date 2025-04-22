@@ -1,7 +1,6 @@
 
 import random
 from typing import Union
-import db.database
 from fastapi import FastAPI
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
@@ -21,30 +20,6 @@ import db
 #db tables
 
 DRONE_TABLE = "drones"
-# fake drone list
-DRONE_IDS = [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10
-]
-#states?
-STATES = {
-   -1 : "UNKNOWN",
-    1 : "f",
-    2 : "a",
-    3 : "",
-    4 : "",
-    5 : "",
-    6 : "",
-    7 : ""
-}
 
 #the app
 app = FastAPI()
@@ -113,40 +88,7 @@ async def shutdown():
 #sending stuff with the API
 
 #DEPRECIATED
-@app.get("/test_data/get_generated_data")
-async def generate_data():
-    position_array = []
-    num_positions = None
 
-    #if no range specified, make it random
-    if num_positions is None: 
-        num_positions = random.randint(1,25)
-
-    for _ in range(0, num_positions):
-
-        # random position coordinates, longitude, latitude, and Altitude
-        rand_long  =  random.uniform( -180,  180 )
-        rand_lat   =  random.uniform(  -90,  90  )
-        rand_alt   =  random.uniform(    0,  50  )
-        rand_dir   =  random.uniform(    0,  360 )
- 
-        position_array.append({
-           "long"           : rand_long, 
-           "lat"            : rand_lat,
-           "alt_meters"     : rand_alt,
-           "direction"      : rand_dir
-        })
-    
-    # convert to json payload
-    # websocket messages must be bytes or strings
-
-    payload = {
-        "coordinates" : position_array,
-        "drone_id"    : random.choice(DRONE_IDS),
-        "message"     : "WARNING!: This is randomly generated data!"
-    }
-
-    return payload
 
 @app.get("/drones")
 async def get_all_drones():
@@ -205,7 +147,7 @@ async def get_maneuvers():
 
 @app.post("/maneuvers/create")
 async def create_maneuver(
-    manuver : db.Maneuver
+    manuver : db.schemas.CreateManeuver
 ):
     try:
         database.create_maneuver(manuver)
@@ -227,29 +169,46 @@ async def delete_maneuver(
 
 @app.post("/maneuvers/assign_to_drone")
 async def assign_path_to_drone(
-    path_name,
-    drone_name
-):
-    database.assign_path_to_drone(
-        drone=database.get_drone_by_name(drone_name),
-        path=database.get_path_by_name(path_name)
-    )
+    maneuver_name,
+    drone_name,
+    path = None
+):  
+    try:
+        database.assign_program_to_drone(
+            maneuver=database.get_maneuver_by_name(maneuver_name),
+            drone=database.get_drone_by_name(drone_name),
+            program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
+        )
+    except Exception as e:
+        return {"Failure" : f"{e}"}
     
     return {"Success" : "Yay!"}
 
-@app.post("/maneuvers/update_path")
+@app.post("/programs/update_path")
 async def update_path(
-    path_name,
-    paths
+    program_name,
+    new_path
 ):
-    path = db.Maneuver(name="temp", content=[])
-    path.content.append(paths)
-    path.name = path_name
-    print(path.content)
-    database.update_path_content(
-        path
-    )
+    program = db.schemas.Program(name=program_name, content=new_path)
+    print(program.content)
+    try:
+        database.update_program_content(
+            program
+        )
+    except Exception as e:
+        return {"Failure" : f"Failed to update program path {e}"}
     return {"Success" : "Yay!"}
+
+@app.post("/programs/manuevers/get_drones_in_maneuver")
+async def get_drones_in_maneuver(
+    maneuver_name
+):
+    try:
+        drones = database.get_drones_in_maneuver(database.get_maneuver_by_name(maneuver_name))
+    except Exception as e:
+        return {"Failure" : f"Failed to get drones in maneuver {e}"}
+    
+    return {"Drones" : drones}
 
 ## SINGLE DRONE CONNECTION
 s_connect = None
@@ -258,13 +217,14 @@ s_connect = None
 async def single_connection_protocol():
     s_connect = dragon_link.connect_to_dragonlink()
 
-    dragon_link.set_flight_mode(s_connect, 'LOITER')
+    dragon_link.set_flight_mode(s_connect, 'GUIDED')
     dragon_link.arm_vehicle(s_connect)
     dragon_link.set_flight_mode(s_connect, 'LOITER')
 
 @app.get("/drones/single_connection/take_off")
 async def single_drone_takeoff(t_alt = 5):
     if s_connect is not None:    
+        dragon_link.set_flight_mode(s_connect, 'GUIDED')
         dragon_link.takeoff(s_connect, t_altitude=t_alt)
     else:
         return {"Response" : "No drone connection"}
@@ -275,6 +235,16 @@ async def single_drone_land():
         dragon_link.land(s_connect)
     else:
         return {"Response" : "No drone connection"}
+    
+### MULIT DRONE CONNECTIONS
+
+@app.get("/drones/m_connect/set_flight_mode")
+async def m_connect_set_flight_mode(
+    drone_id,
+    mode = "LOITER"
+):
+     print("inprogress, beep beep boop") 
+
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")

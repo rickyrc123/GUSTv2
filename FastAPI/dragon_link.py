@@ -15,7 +15,7 @@ import time
 from pymavlink import mavutil
 import argparse
 
-def connect_to_dragonlink(port="/dev/ttyUSB0", baudrate=115200):
+def connect_to_dragonlink(port="udp:10.223.168.1:14550", baudrate=115200):
     """ 
     Connect to the DragonLink system via serial port
     
@@ -34,7 +34,7 @@ def connect_to_dragonlink(port="/dev/ttyUSB0", baudrate=115200):
     connection.wait_heartbeat()
     print(f"Heartbeat from system (system {connection.target_system}, component {connection.target_component})")
     
-    msg = connection.recv_match(type='HEARTBEAT', blocking=True, timeout=5)
+    msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=5)
     print(f"Heartbeat: {msg}")
 
     return connection
@@ -68,7 +68,7 @@ def set_flight_mode(connection, mode):
         connection.target_system,
         connection.target_component,
         mavutil.mavlink.MAV_CMD_DO_SET_MODE,
-        0,  # Confirmation
+        1,  # Confirmation
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id, 0, 0, 0, 0, 0
     )
@@ -138,29 +138,13 @@ def land(connection):
     print("Landing...")
 
 def main():
-    parser = argparse.ArgumentParser(description='DragonLink MAVLink Control Script')
-    parser.add_argument('--port', required=True, help='Serial port (e.g., /dev/ttyUSB0 or COM3)')
-    parser.add_argument('--baud', type=int, default=57600, help='Baud rate (default: 57600)')
-    args = parser.parse_args()
-    
     try:
         # Connect to DragonLink
-        dl = connect_to_dragonlink(args.port, args.baud)
-        
-        arm_vehicle(dl)
+        dl = connect_to_dragonlink()
         
         # Example commands (modify as needed)
         set_flight_mode(dl, 'LOITER')
-        time.sleep(1)
-
-        #take off
-        thing = input("Press Enter to Takeoff")
-        takeoff(dl, 2)
-
-
-        #land
-        thing = input("Press Enter to Land")
-        land(dl)
+        
 
 
     except KeyboardInterrupt:
