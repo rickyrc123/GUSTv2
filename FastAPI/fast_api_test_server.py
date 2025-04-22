@@ -266,6 +266,21 @@ async def get_drones_in_maneuver(
 ## SINGLE DRONE CONNECTION
 s_connect = None
 
+@app.post("/programs/manuevers/remove_drone_from_maneuver")
+async def remove_drone_from_maneuver(
+    drone_name,
+    maneuver_name
+):
+    try:
+        database.remove_drone_from_maneuver(
+            drone=database.get_drone_by_name(drone_name),
+            maneuver=database.get_maneuver_by_name(maneuver_name)
+        )
+    except Exception as e:
+        return {"Failure" : f"Failed to remove drone from maneuver {e}"}
+    
+    return {"Success" : "Yay!"}
+
 @app.get("/drones/single_connection_init")
 async def single_connection_protocol():
     s_connect = dragon_link.connect_to_dragonlink()
