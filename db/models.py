@@ -85,7 +85,7 @@ class Program_Drone_Maneuver(Base):
 
   drone_id   = Column(Integer, ForeignKey('drone_info.id'), primary_key=True, nullable=False)
   program_id = Column(Integer, ForeignKey('programs.id'),   nullable=True)
-  Maneuver_id   = Column(Integer, ForeignKey('maneuvers.id'),     nullable=True)
+  maneuver_id   = Column(Integer, ForeignKey('maneuvers.id'),     nullable=True)
 
 class Waypoint(Base):
   """Model representing a waypoint in 3D space.
