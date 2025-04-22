@@ -173,15 +173,24 @@ async def assign_path_to_drone(
     drone_name,
     path = None
 ):  
-    try:
-        database.assign_path_to_drone(
-            maneuver=database.get_maneuver_by_name(maneuver_name),
-            drone=database.get_drone_by_name(drone_name),
-            path=db.schemas.Path(name=f"{maneuver_name}{drone_name}", content=path)
-        )
-    except Exception as e:
-        return {"Failure" : f"{e}"}
-    
+    if path is not None:
+
+        try:
+            database.assign_path_to_drone(
+                maneuver=database.get_maneuver_by_name(maneuver_name),
+                drone=database.get_drone_by_name(drone_name),
+                path=db.schemas.Path(name=f"{maneuver_name}{drone_name}", content=path)
+            )
+        except Exception as e:
+            return {"Failure" : f"{e}"}
+    else:
+        try:
+            database.assign_path_to_drone(
+                maneuver=database.get_maneuver_by_name(maneuver_name),
+                drone=database.get_drone_by_name(drone_name),
+            )
+        except Exception as e:
+            return {"Failure" : f"{e}"}
     return {"Success" : "Yay!"}
 
 @app.post("/programs/update_path")
@@ -204,7 +213,7 @@ async def get_drones_in_maneuver(
     maneuver_name
 ):
     try:
-        drones = database.get_drones_in_maneuver(database.get_maneuver_by_name(maneuver_name))
+        drones = database.get_drones_in_maneuver(maneuver_name)
     except Exception as e:
         return {"Failure" : f"Failed to get drones in maneuver {e}"}
     
@@ -237,6 +246,7 @@ async def single_drone_land():
         return {"Response" : "No drone connection"}
     
 ### MULIT DRONE CONNECTIONS
+connections = []
 
 @app.get("/drones/m_connect/set_flight_mode")
 async def m_connect_set_flight_mode(
@@ -245,6 +255,67 @@ async def m_connect_set_flight_mode(
 ):
      print("inprogress, beep beep boop") 
 
+@app.get("/drones/m_connect/available_connections")
+async def m_connect_available_connections():
+    # Scan for available UDP ports and return a list of available connections
+    available_connections = dragon_link.scan_for_available_connections()
+    return {"Available Connections": available_connections}
+
+@app.get("/drones/m_connect/close_connection")
+async def m_connect_close_connection(
+    connection_id
+):
+    # Close the specified connection
+    try:
+        dragon_link.close_connection(connections[connection_id])
+        del connections[connection_id]
+    except Exception as e:
+        return {"Failure" : f"Failed to close connection {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/select_connection")
+async def m_connect_select_connection(
+    connection_id
+):
+    # Select the specified connection
+    try:
+        selected_connection = connections[connection_id]
+    except Exception as e:
+        return {"Failure" : f"Failed to select connection {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/close_all_connections")
+async def m_connect_close_all_connections():
+    # Close all connections
+    for connection in connections:
+        try:
+            dragon_link.close_connection(connection)
+        except Exception as e:
+            return {"Failure" : f"Failed to close connection {e}"}
+    
+    connections.clear()
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/close_connection")
+async def m_connect_close_connection(
+    connection_id
+):
+    # Close the specified connection
+    try:
+        dragon_link.close_connection(connections[connection_id])
+        del connections[connection_id]
+    except Exception as e:
+        return {"Failure" : f"Failed to close connection {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/refresh_connections")
+async def m_connect_refresh_connections():
+    # Scan for available UDP ports and return a list of available connections
+    available_connections = dragon_link.scan_for_available_connections()
+    return {"Available Connections": available_connections}
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")

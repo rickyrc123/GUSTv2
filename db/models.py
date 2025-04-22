@@ -81,7 +81,7 @@ class Path_Drone_Maneuver(Base):
     path_id (int): nullable, if this value is null this means that the drone does not have any specific path related to it
     Maneuver_id (int): relates the drone to a maneuver allowing one drone to have different paths depending on the maneuver it is in, a null value means the path is for the drone on its own with no maneuver relation 
   """
-  __tablename__ = 'path_drone_swarms'
+  __tablename__ = 'path_drone_maneuvers'
 
   drone_id   = Column(Integer, ForeignKey('drone_info.id'), primary_key=True, nullable=False)
   path_id = Column(Integer, ForeignKey('paths.id'),   nullable=True)
