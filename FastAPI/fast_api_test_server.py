@@ -240,7 +240,7 @@ async def get_path_by_drone(
 @app.post("/programs/update_path")
 async def update_path(
     path_name,
-    new_path
+    new_path : list[db.schemas.Waypoint] = None
 ):
     try:
         path = database.get_path_by_name(path_name)

@@ -366,12 +366,10 @@ class DatabaseServer:
         
         if db_path:
             
-            updated_content = db_path.content + path.content
-
             session.execute(
                 update(models.Path)
                 .where(models.Path.id == db_path.id)
-                .values(content=updated_content)
+                .values(content=path.content)
             )
         # Session will auto-commit when exiting the context
 
