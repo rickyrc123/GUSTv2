@@ -78,7 +78,7 @@ class Path(BaseModel):
   """
   _id: Annotated[int, Field(description="Drone id (internal use only)")]
   name: Annotated[str, Field(description="Display name of the path")]
-  content: Annotated[List[Tuple[Waypoint, float]], Field(description="List of waypoint and speed pairs. Each tuple contains a Waypoint and the speed to travel to this waypoint in meters/second")]
+  content: Annotated[List[Waypoint] | None, Field(description="List of waypoint and speed pairs. Each tuple contains a Waypoint and the speed to travel to this waypoint in meters/second")]
 
   class Config:
     from_attributes = True

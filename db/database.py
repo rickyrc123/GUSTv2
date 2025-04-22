@@ -36,6 +36,11 @@ def _maneuver(maneuver: models.Maneuver):
   new_maneuver._id = maneuver.id
   return new_maneuver
 
+def _path(path: models.Path):
+  new_path = schemas.Path.model(path.__dict__)
+  new_path._id = maneuver_id
+  return new_path
+
 class DatabaseServer:
   DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -228,7 +233,7 @@ class DatabaseServer:
     with self.Session.begin() as session:
       result = session.execute(
         select(models.Path_Drone_Maneuver.drone_id)
-        .where(models.Path_Drone_Maneuver.maneuver_id==maneuver.id)
+        .where(models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
       ).all()
 
       for id in result:
@@ -240,6 +245,26 @@ class DatabaseServer:
         drones.append(drone_name)
     
     return drones
+
+  def get_paths_in_maneuver(self, maneuver: schemas.Maneuver) -> List[str]:
+    paths = []
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Path_Drone_Maneuver.path_id)
+        .where(models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
+      ).all()
+
+      for id in result:
+        drone_name = session.execute(
+          select(models.Path.name)
+          .where(models.Path.id==id)
+        ).first()
+
+        paths.append(path_name)
+    
+    paths = [_path(path) for path in paths]
+
+    return paths
 
   def add_drone_to_maneuver(self, maneuver: schemas.Maneuver, drone: schemas.Drone):
     maneuver.drones.append(drone.name)
@@ -397,7 +422,7 @@ class DatabaseServer:
             and_(models.Path_Drone_Maneuver.drone_id==drone._id,
                  models.Path_Drone_Maneuver.path_id.is_(None))
           )
-          .values(models.Path_Drone_Maneuver.maneuver_id==path._id)
+          .values(models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
         )
       else:
         session.execute(

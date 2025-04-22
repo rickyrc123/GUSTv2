@@ -210,6 +210,17 @@ async def get_drones_in_maneuver(
     
     return {"Drones" : drones}
 
+@app.post("/programs/manuevers/get_paths_in_maneuver")
+async def get_paths_in_maneuver(
+    maneuver_name
+):
+    try:
+        paths = database.get_paths_in_maneuver(database.get_maneuver_by_name(maneuver_name))
+    except Exception as e:
+        return {"Failure" : f"Failed to get paths in maneuver {e}"}
+    
+    return {"Paths" : paths}
+
 ## SINGLE DRONE CONNECTION
 s_connect = None
 
