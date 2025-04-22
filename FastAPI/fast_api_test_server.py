@@ -237,6 +237,7 @@ async def single_drone_land():
         return {"Response" : "No drone connection"}
     
 ### MULIT DRONE CONNECTIONS
+connections = []
 
 @app.get("/drones/m_connect/set_flight_mode")
 async def m_connect_set_flight_mode(
@@ -245,6 +246,67 @@ async def m_connect_set_flight_mode(
 ):
      print("inprogress, beep beep boop") 
 
+@app.get("/drones/m_connect/available_connections")
+async def m_connect_available_connections():
+    # Scan for available UDP ports and return a list of available connections
+    available_connections = dragon_link.scan_for_available_connections()
+    return {"Available Connections": available_connections}
+
+@app.get("/drones/m_connect/close_connection")
+async def m_connect_close_connection(
+    connection_id
+):
+    # Close the specified connection
+    try:
+        dragon_link.close_connection(connections[connection_id])
+        del connections[connection_id]
+    except Exception as e:
+        return {"Failure" : f"Failed to close connection {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/select_connection")
+async def m_connect_select_connection(
+    connection_id
+):
+    # Select the specified connection
+    try:
+        selected_connection = connections[connection_id]
+    except Exception as e:
+        return {"Failure" : f"Failed to select connection {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/close_all_connections")
+async def m_connect_close_all_connections():
+    # Close all connections
+    for connection in connections:
+        try:
+            dragon_link.close_connection(connection)
+        except Exception as e:
+            return {"Failure" : f"Failed to close connection {e}"}
+    
+    connections.clear()
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/close_connection")
+async def m_connect_close_connection(
+    connection_id
+):
+    # Close the specified connection
+    try:
+        dragon_link.close_connection(connections[connection_id])
+        del connections[connection_id]
+    except Exception as e:
+        return {"Failure" : f"Failed to close connection {e}"}
+    
+    return {"Success" : "Yay!"}
+
+@app.get("/drones/m_connect/refresh_connections")
+async def m_connect_refresh_connections():
+    # Scan for available UDP ports and return a list of available connections
+    available_connections = dragon_link.scan_for_available_connections()
+    return {"Available Connections": available_connections}
 
 #simply gives all the tables in the db, ensures it is properly setup
 @app.get("/")
