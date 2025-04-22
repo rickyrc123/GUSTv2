@@ -141,11 +141,19 @@ async def update_drone_position(
 
     return {"Status" : "Success"}
 
+@app.get("/paths")
+async def get_all_paths():
+    return {"Paths" : database.get_all_paths()}
+
 @app.get("/maneuvers")
 async def get_maneuvers():
     return {"maneuvers" : database.get_all_maneuvers()}
 
-@app.get("/maneuvers/get_path")
+@app.get("/links")
+async def get_links():
+    return {"links" : database.get_all_pathdronemanuevers()}
+
+@app.get("/maneuvers/get_manuver_by_name")
 async def get_maneuver(
     maneuver_name : str
 ):
@@ -155,6 +163,17 @@ async def get_maneuver(
         return {"Failure" : f"db.get_maneuver_by_name failed \n\n\n {e}"}
     
     return {"Maneuver" : maneuver}
+
+@app.post("/paths/delete")
+async def delete_path(
+    path_name : str
+):
+    try:
+        database.delete_path(path=database.get_path_by_name(path_name))
+    except Exception as e:
+        return {"Failure" : f"db.delete_path failed \n\n\n {e}"}
+    
+    return {"Success" : "Yay!"}
 
 @app.post("/maneuvers/create")
 async def create_maneuver(
@@ -182,14 +201,16 @@ async def delete_maneuver(
 async def assign_path_to_drone(
     maneuver_name,
     drone_name,
-    path = None
+    path : list[db.schemas.Waypoint] = None  
 ):  
     if path is not None:
         try:
+            path = database.create_path(
+                db.schemas.CreatePath(name=f"{maneuver_name}{drone_name}", content=path))
             database.assign_path_to_drone(
                 maneuver=database.get_maneuver_by_name(maneuver_name),
                 drone=database.get_drone_by_name(drone_name),
-                path=db.schemas.Path(name=f"{maneuver_name}{drone_name}", content=path)
+                path=database.get_path_by_name(f"{maneuver_name}{drone_name}")
             )
         except Exception as e:
             return {"Failure" : f"{e}"}
@@ -203,6 +224,19 @@ async def assign_path_to_drone(
             return {"Failure" : f"{e}"}
     return {"Success" : "Yay!"}
 
+#get drone path
+@app.post("/programs/get_path_by_drone")
+async def get_path_by_drone(
+    drone_name,
+):
+    try:
+        path = database.get_path_by_drone_name(drone_name)
+    except Exception as e:
+        return {"Failure" : f"Failed to get drone path {e}"}
+    
+    return {"Path" : path} 
+
+#get paths in manuver
 @app.post("/programs/update_path")
 async def update_path(
     program_name,
@@ -268,7 +302,7 @@ async def m_connect_set_flight_mode(
 @app.get("/drones/m_connect/available_connections")
 async def m_connect_available_connections():
     # Scan for available UDP ports and return a list of available connections
-    available_connections = dragon_link.scan_for_available_connections()
+    available_connections = ("0.0.0.0", "udp:10.223.168.1:14450")
     return {"Available Connections": available_connections}
 
 @app.get("/drones/m_connect/close_connection")
@@ -284,7 +318,7 @@ async def m_connect_close_connection(
     
     return {"Success" : "Yay!"}
 
-@app.get("/drones/m_connect/select_connection")
+@app.post("/drones/m_connect/select_connection")
 async def m_connect_select_connection(
     connection_id
 ):
