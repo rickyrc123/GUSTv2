@@ -248,7 +248,7 @@ class DatabaseServer:
       session.add(
         models.Path_Drone_Maneuver(
           drone_id=drone._id,
-          maneuver_id=maneuver.id
+          maneuver_id=maneuver._id
         )
       )
 
@@ -379,7 +379,7 @@ class DatabaseServer:
             # If no path was found, handle it (optional)
             raise ValueError(f"Path with name {path.name} not found.")
   
-  def assign_path_to_drone(self, drone : schemas.Drone, path : schemas.Path, maneuver : schemas.Maneuver = None):
+  def assign_path_to_drone(self, drone : schemas.Drone, path : schemas.Path = None, maneuver : schemas.Maneuver = None):
     with self.Session.begin() as session:
       if maneuver is None:
         session.execute(
@@ -389,6 +389,15 @@ class DatabaseServer:
                  models.Path_Drone_Maneuver.maneuver_id.is_(None))
           )
           .values(models.Path_Drone_Maneuver.path_id==path._id)
+        )
+      elif path is None:
+        session.execute(
+          update(models.Path_Drone_Maneuver)
+          .where(
+            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
+                 models.Path_Drone_Maneuver.path_id.is_(None))
+          )
+          .values(models.Path_Drone_Maneuver.maneuver_id==path._id)
         )
       else:
         session.execute(
