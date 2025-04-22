@@ -25,7 +25,7 @@ const AltimeterGauge = ({ selectedDrone }) => {
             minValue={0}
             maxValue={1000}
             style={{
-                width: 400
+                width: 300
             }}
             labels={{
                 valueLabel: {

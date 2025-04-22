@@ -19,7 +19,7 @@ const DroneList = ({
         const drone = filteredDrones[index];
 
         const handleClick = () => {
-        onDroneSelect(drone);
+            onDroneSelect(drone);
         };
 
         return (
@@ -32,16 +32,16 @@ const DroneList = ({
                 }}
             >
                 <button
-                style={{
-                    width: "90%",
-                    background:
-                    selectedDrone && selectedDrone.name === drone.name
-                        ? "#2196f3"
-                        : "#8bcafd"
-                }}
-                onClick={handleClick}
+                    style={{
+                        width: "90%",
+                        background:
+                        selectedDrone && selectedDrone.name === drone.name
+                            ? "#2196f3"
+                            : "#8bcafd"
+                    }}
+                    onClick={handleClick}
                 >
-                {drone.name}
+                    {drone.name}
                 </button>
             </div>
             );

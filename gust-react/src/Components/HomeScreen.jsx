@@ -1,7 +1,8 @@
 import MapComponent from "./MapComponent.jsx";
 import DroneList from "./DroneSelection.jsx";
-//import AltimeterGauge from "./AltimeterGauge.jsx";
+import AltimeterGauge from "./AltimeterGauge.jsx";
 import ManeuverList from "./HomeManeuverSelect.jsx";
+import ArmButton from "./ArmButton.jsx"
 import { useState, useEffect } from "react";
 
 function HomeScreen() {
@@ -79,14 +80,36 @@ function HomeScreen() {
             }}>
                 <DroneList drones={drones} onDroneSelect={handleDroneSelect} selectedDrone={selectedDrone} maneuverDrones={maneuverDrones}/>
             </div>
+            <div style={{
+                position: "absolute",
+                left: "20%",
+                top: "80%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                borderRadius: "8px",
+            }}>
+                <ArmButton selectedDrone={selectedDrone}/>
+            </div>
             <div className="map-container" style = {{
                 display: "flex",
+                flexDirection: 'column',
                 justifyContent: "center",
                 alignItems: "center",
                 height: "100vh",
                 width: "100vw",
+
             }}>
                 <MapComponent drones={drones} selectedDrone={selectedDrone}/>
+
+                
+            </div>
+            <div className="gauges-container" style={{
+                position: "absolute",
+                left: "50%",
+                top: "87%",
+                transform: "translate(-50%, -50%)", 
+            }}>
+                <AltimeterGauge selectedDrone={selectedDrone}/>
             </div>
             <div style={{
                 position: "absolute",
@@ -102,14 +125,5 @@ function HomeScreen() {
         </div>
     );
 }
-/* <div className="gauges-container" style={{
-                position: "absolute",
-                left: "82%",
-                top: "50%",
-                transform: "translate(-50%, -50%)",
-                padding: "20px",
-                borderRadius: "8px",
-            }}>
-                <AltimeterGauge selectedDrone={selectedDrone}/>
-            </div> */
+
 export default HomeScreen;
