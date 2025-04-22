@@ -176,16 +176,16 @@ async def assign_path_to_drone(
     if path is not None:
 
         try:
-            database.assign_program_to_drone(
+            database.assign_path_to_drone(
                 maneuver=database.get_maneuver_by_name(maneuver_name),
                 drone=database.get_drone_by_name(drone_name),
-                program=db.schemas.Program(name=f"{maneuver_name}{drone_name}", content=path)
+                path=db.schemas.Path(name=f"{maneuver_name}{drone_name}", content=path)
             )
         except Exception as e:
             return {"Failure" : f"{e}"}
     else:
         try:
-            database.assign_program_to_drone(
+            database.assign_path_to_drone(
                 maneuver=database.get_maneuver_by_name(maneuver_name),
                 drone=database.get_drone_by_name(drone_name),
             )
@@ -213,7 +213,7 @@ async def get_drones_in_maneuver(
     maneuver_name
 ):
     try:
-        drones = database.get_drones_in_maneuver(database.get_maneuver_by_name(maneuver_name))
+        drones = database.get_drones_in_maneuver(maneuver_name)
     except Exception as e:
         return {"Failure" : f"Failed to get drones in maneuver {e}"}
     
