@@ -67,7 +67,6 @@ class mavlink_drone:
         print("Drone takingoff!")
         while True:
             msg = master.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
-            requests.post(url=)
             if msg:
                 altitude = msg.relative_alt / 1000.0  # Convert mm to meters
                 print(f"🔼 Current Altitude: {altitude:.1f}m")

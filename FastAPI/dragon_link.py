@@ -137,33 +137,85 @@ def land(connection):
     )
     print("Landing...")
 
-def seek(connection, lat, lon, alt):
-    """Command to seek a specific location"""
-    connection.mav.command_long_send(
-        connection.target_system,
-        connection.target_component,
-        mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,
-        0,          # Confirmation
-        0, 0, 0, 0, # Unused params
-        lat, lon, alt  # Target location (lat, lon, alt)
-    )
-    print(f"Seeking to {lat}, {lon}, {alt}")
+def seek_position(
+        connection,
+        lat : float,
+        lon : float,
+        alt : float,
+    ):
+        # Convert latitude & longitude to integer format (scaled by 1E7)
+        lat_int = int(lat * 1E7)
+        lon_int = int(lon * 1E7)
+
+        # Send position target command
+        connection.mav.set_position_target_global_int_send(
+            0, connection.target_system, connection.target_component,
+            mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,  # Relative to home altitude
+            0b0000111111111000,  # Position mask (only lat/lon/alt active)
+            lat_int, lon_int, alt,
+            0, 0, 0,  # No velocity control
+            0, 0, 0,  # No acceleration control
+            0,  # No yaw control
+            0   # No yaw rate control
+        )
+        print("📍 Moving to waypoint...")
+
+        while True:
+            # Receive position updates
+            msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
+            if msg:
+                current_lat = msg.lat / 1E7  # Convert to decimal degrees
+                current_lon = msg.lon / 1E7  # Convert to decimal degrees
+                current_alt = msg.relative_alt / 1000.0  # Convert mm to meters
+
+                # Print status
+                print(f"📡 Current Position: {current_lat:.6f}, {current_lon:.6f}, Alt: {current_alt:.1f}m")
+
+                # Check if drone is close to target
+                lat_reached = abs(current_lat - (lat_int / 1E7)) < 0.00005  # ~5m tolerance
+                lon_reached = abs(current_lon - (lon_int / 1E7)) < 0.00005  # ~5m tolerance
+                alt_reached = abs(current_alt - alt) < 1  # 1m altitude tolerance
+
+                if lat_reached and lon_reached and alt_reached:
+                    print("✅ Reached waypoint!")
+                    break
+
+            time.sleep(1)  # Check position every second
+        time.sleep(1)  # Wait before sending next command
 
 def execute_path(connection, path):
     """Execute a predefined path"""
     for waypoint in path:
-        lat, lon, alt = waypoint
-        seek(connection, lat, lon, alt)
+        lat = waypoint[0]
+        lon = waypoint[1]
+        alt = waypoint[2]
+        seek_position(connection, lat, lon, alt)
         time.sleep(1)  # Wait for the vehicle to reach the waypoint
         print(f"Reached waypoint: {lat}, {lon}, {alt}")
 
 def main():
+
+    path = [
+        (1,2,3),
+        (1,2,3),
+        (1,2,3)
+    ]
+
     try:
         # Connect to DragonLink
         dl = connect_to_dragonlink()
         
         # Example commands (modify as needed)
-        set_flight_mode(dl, 'LOITER')
+        set_flight_mode(dl, 'GUIDED')
+
+        arm_vehicle(dl)
+
+        takeoff(dl, 10)  # Take off to 10 meters
+
+        execute_path(dl, path)  # Execute the predefined path
+
+        land(dl)  # Land the vehicle
+         
         
 
 
