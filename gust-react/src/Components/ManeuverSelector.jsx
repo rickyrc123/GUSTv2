@@ -17,6 +17,23 @@ const ManeuverSelector = ({
   const [maneuverDetailsNames, setManeuverDetailsNames] = useState([]);
   const [maneuverDetailsPaths, setManeuverDetailsPaths] = useState([]);
 
+  const convertPathFormat = (path) => {
+    return path.map(point => {
+      if(Array.isArray(point)) {
+        return {
+          lat: point[1],
+          lng: point[0],
+          alt: point[2] || 0,
+        }
+      }
+      return {
+        lat: point.lat,
+        lng: point.long,
+        alt: point.alt || 0,
+      }
+    });
+  }
+
   // Fetch maneuvers from API
   useEffect(() => {
     const fetchManeuvers = async () => {
@@ -50,6 +67,8 @@ const ManeuverSelector = ({
     const fetchManeuverDetails = async () => {
       try {
         if (!selectedManeuver || !isMounted) return;
+
+        setPaths([]);
   
         // 1. Fetch drones in maneuver
         const dronesResponse = await fetch(
@@ -66,9 +85,6 @@ const ManeuverSelector = ({
         
         // Update drone names immediately
         const newDroneNames = Array.from(dronesData.Drones);
-        if (isMounted) {
-          setManeuverDetailsNames(newDroneNames);
-        }
   
         // 2. Fetch paths for each drone
         if (newDroneNames.length > 0) {
@@ -87,14 +103,18 @@ const ManeuverSelector = ({
   
           const pathsResults = await Promise.all(pathsPromises);
           const formattedPaths = pathsResults.map(result => 
-            Array.from(result.Path?.path || [])
+            convertPathFormat(Array.from(result.Path?.path || []))
           );
   
           if (isMounted) {
+            setPaths(formattedPaths)
+            setManeuverDetailsNames(newDroneNames);
             setManeuverDetailsPaths(formattedPaths);
           }
         } else {
           if (isMounted) {
+            setPaths([]);
+            setManeuverDetailsNames([]);
             setManeuverDetailsPaths([]);
           }
         }
