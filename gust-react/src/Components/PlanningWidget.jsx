@@ -32,7 +32,7 @@ const PlanningWidget = () => {
           const newPoint = {
             lat: e.latlng.lat,
             lng: e.latlng.lng,
-            alt: 0
+            alt: 10
           }
           if (currentPaths.length === 0) return [[e.latlng]];
           const newPaths = [...currentPaths];
