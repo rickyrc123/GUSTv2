@@ -26,9 +26,11 @@ const ManeuverList = ({ maneuvers = [], height = 575, width = 180, itemSize = 75
 
     return(
         <div style={{ 
-            border: "1px solid #ddd", 
+            border: "3px solid #ddd",
+            borderColor: "#a0a0a0",
             borderRadius: "8px", 
-            overflow: "hidden"
+            overflow: "hidden",
+            backgroundColor: "#b0b0b0"
         }}>
             <List
                 itemSize={itemSize}

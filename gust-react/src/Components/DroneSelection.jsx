@@ -50,9 +50,11 @@ const DroneList = ({
     return (
         <div
         style={{
-            border: "1px solid #ddd",
+            border: "3px solid #ddd",
             borderRadius: "8px",
-            overflow: "hidden"
+            overflow: "hidden",
+            backgroundColor: "#b0b0b0",
+            borderColor: "#a0a0a0"
         }}
         >
         <List
