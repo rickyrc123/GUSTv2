@@ -11,6 +11,7 @@ import {
   Typography
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import "./ConnectionScreen.css"
 
 const ConnectionScreen = () => {
   const [connections, setConnections] = useState([]);

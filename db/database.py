@@ -36,6 +36,11 @@ def _maneuver(maneuver: models.Maneuver):
   new_maneuver._id = maneuver.id
   return new_maneuver
 
+def _path(path: models.Path):
+  new_path = schemas.Path.model_validate(path.__dict__)
+  new_path._id = path.id
+  return new_path
+
 class DatabaseServer:
   DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -68,7 +73,9 @@ class DatabaseServer:
 
         session.add(
           models.Path_Drone_Maneuver(
-            drone_id=drone_info.id
+            drone_id=drone_info.id,
+            maneuver_id=None,
+            path_id=None
           )
         )
 
@@ -232,6 +239,15 @@ class DatabaseServer:
       id = result[0].id 
     return id
   
+  def get_maneuver_by_name(self, name : str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Maneuver)
+        .where(models.Maneuver.name==name)
+      ).first()
+
+      return _maneuver(*result)
+  
   def get_drones_in_maneuver(self, maneuver) -> List[str]:
     drones = []
     with self.Session.begin() as session:
@@ -341,8 +357,8 @@ class DatabaseServer:
         .where(models.Path.name==name)
         ).first()
       
-      return result[0]
-
+      return _path(*result)
+    
   def update_path_name(self, path: schemas.Path):
     with self.Session.begin() as session:
       session.execute(
@@ -361,12 +377,10 @@ class DatabaseServer:
         
         if db_path:
             
-            updated_content = db_path.content + path.content
-
             session.execute(
                 update(models.Path)
                 .where(models.Path.id == db_path.id)
-                .values(content=updated_content)
+                .values(content=path.content)
             )
         # Session will auto-commit when exiting the context
 
@@ -397,45 +411,123 @@ class DatabaseServer:
         else:
             # If no path was found, handle it (optional)
             raise ValueError(f"Path with name {path.name} not found.")
-  
-  def assign_path_to_drone(self, drone : schemas.Drone, path : schemas.Path = None, maneuver : schemas.Maneuver = None):
+
+  def assign_path_to_drone(self, drone: schemas.Drone, path: schemas.Path = None, maneuver: schemas.Maneuver = None):
     with self.Session.begin() as session:
-      if maneuver is None:
-        session.execute(
-          update(models.Path_Drone_Maneuver)
-          .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
-                 models.Path_Drone_Maneuver.maneuver_id.is_(None))
-          )
-          .values({"path_id": path._id})
-        )
-      elif path is None:
-        session.execute(
-          update(models.Path_Drone_Maneuver)
-          .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
-                 models.Path_Drone_Maneuver.path_id.is_(None))
-          )
-          .values({"maneuver_id": maneuver._id})
-        )
-      else:
-        session.execute(
-          update(models.Path_Drone_Maneuver)
-          .where(
-            and_(models.Path_Drone_Maneuver.drone_id==drone._id,
-                 models.Path_Drone_Maneuver.maneuver_id==maneuver._id)
-          )
-          .values(models.Path_Drone_Maneuver.path_id==path._id)
-        )
-      
-      session.commit()
+        # Check if an entry for the drone already exists in the Path_Drone_Maneuver table
+        existing_entry = session.execute(
+            select(models.Path_Drone_Maneuver)
+            .where(models.Path_Drone_Maneuver.drone_id == drone._id)
+        ).scalar_one_or_none()
+
+        if not existing_entry:
+            # Add a new entry if it doesn't exist
+            session.add(
+                models.Path_Drone_Maneuver(
+                    drone_id=drone._id,
+                    path_id=path._id if path else None,
+                    maneuver_id=maneuver._id if maneuver else None
+                )
+            )
+        else:
+            # Update the existing entry
+            if maneuver is None:
+                session.execute(
+                    update(models.Path_Drone_Maneuver)
+                    .where(
+                        and_(
+                            models.Path_Drone_Maneuver.drone_id == drone._id,
+                            models.Path_Drone_Maneuver.maneuver_id.is_(None)
+                        )
+                    )
+                    .values({"path_id": path._id})
+                )
+            elif path is None:
+                session.execute(
+                    update(models.Path_Drone_Maneuver)
+                    .where(
+                        and_(
+                            models.Path_Drone_Maneuver.drone_id == drone._id
+                        )
+                    )
+                    .values({"maneuver_id": maneuver._id})
+                )
+            else:
+                session.execute(
+                    update(models.Path_Drone_Maneuver)
+                    .where(
+                        and_(
+                            models.Path_Drone_Maneuver.drone_id == drone._id
+                        )
+                    )
+                    .values({"path_id": path._id})
+                    .values({"maneuver_id": maneuver._id})
+                )
+
+        session.commit()
+                                  
+                   
+  def get_path_by_drone_name(self, drone_name: str):
+    with self.Session.begin() as session:
+
+       # First, retrieve the drone_id based on the drone name
+      drone_id = session.execute(
+            select(models.DroneInfo.id)
+            .where(models.DroneInfo.name == drone_name)
+      ).scalar()
+
+      print(drone_id)
+
+      #Second, get path id from drone id
+      path_id = session.execute(
+            select(models.Path_Drone_Maneuver.path_id)
+            .where(models.Path_Drone_Maneuver.drone_id == drone_id)
+      ).scalar()
+
+      print(path_id)
+      #get content
+      result = session.execute(
+        select(models.Path)
+        .where(models.Path.id==path_id)
+      ).first()
+
+      print(result)
+      path = {"name": result[0].name,
+              "path": result[0].content}
+
+    return path
+  
+  def get_path_by_maneuver_name(self, maneuver_name: str):
+    with self.Session.begin() as session:
+      result = session.execute(
+        select(models.Path_Drone_Maneuver)
+        .join(models.Maneuver, models.Path_Drone_Maneuver.maneuver_id == models.Maneuver.id)
+        .join(models.Path, models.Path_Drone_Maneuver.path_id == models.Path.id)
+        .where(models.Maneuver.name==maneuver_name)
+      ).all()
+
+      paths = [{"name": path[0].name,
+                "path": path[0].content} for path in result]
+
+    return paths
 
   def get_all_paths(self):
     with self.Session.begin() as session:
       result = session.execute(select(models.Path)).all()
 
       #this is dumb, needs a cool function
-      paths = [{"name": path[0].name,
-                   "path": path[0].content} for path in result]
+      paths = [{"UID" : path[0].id,
+                "name": path[0].name,
+                "path": path[0].content} for path in result]
 
     return paths
+  
+  def get_all_pathdronemanuevers(self):
+    with self.Session.begin() as session:
+      result = session.execute(select(models.Path_Drone_Maneuver)).all()
+
+      path_drones = [{"drone_id" : path[0].drone_id,
+                      "maneuver_id": path[0].maneuver_id,
+                      "path_id": path[0].path_id} for path in result]
+
+    return path_drones

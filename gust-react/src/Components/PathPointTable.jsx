@@ -1,35 +1,40 @@
-import React, { useState, useCallback } from 'react';
-import { AgGridReact } from '@ag-grid-community/react';
-import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
-import { ModuleRegistry } from '@ag-grid-community/core';
+import React, {useState} from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import { ClientSideRowModelModule } from 'ag-grid-community';
+import { ModuleRegistry } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Tabs, Tab, Box } from '@mui/material';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
+const PathPointTable = ({ paths, setPaths, selectedPathIndex, setSelectedPathIndex }) => {
+  const [selectedTab, setSelectedTab] = [selectedPathIndex, setSelectedPathIndex];
+  const [modules] = React.useState([ClientSideRowModelModule]);
 
+  const getRowId = (params) => {
+    // Use AG Grid's built-in node ID as fallback
+    return params.data?.lat && params.data?.lng && params.data?.alt 
+      ? `${params.data.lat}-${params.data.lng}-${params.data.alt}-${params.node.rowIndex}`
+      : params.node.id;
+  };
 
-// Add to PlanningWidget component
-const PathPointTable = ({ paths, setPaths }) => {
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [draggedRowIndex, setDraggedRowIndex] = useState(null);
-
-  const safePaths = paths.length === 0 ? [[]] : paths.map(path => 
-    path.map(p => ({
-      lat: p?.lat || 0,
-      lng: p?.lng || 0,
-      alt: p?.alt || 0
-    }))
-  );
-
+  // Column definitions with editing and delete button
   const columnDefs = [
-
+    {
+      headerName: '#',
+      valueGetter: 'node.rowIndex + 1',
+      width: 60,
+      sortable: false,
+      filter: false,
+      supressMovable: true
+    },
     {
       field: 'lat',
       headerName: 'Latitude',
       editable: true,
-      valueFormatter: params => params.value?.toFixed(6) || '0.000000',
+      cellEditor: 'agTextCellEditor',
+      valueFormatter: params => params.value?.toFixed(6) || '',
       valueParser: params => {
         const value = parseFloat(params.newValue);
         return isNaN(value) ? params.oldValue : value;
@@ -40,16 +45,15 @@ const PathPointTable = ({ paths, setPaths }) => {
       field: 'lng',
       headerName: 'Longitude',
       editable: true,
-      valueFormatter: params => params.value?.toFixed(6) || '0.000000',
+      valueFormatter: params => params.value?.toFixed(6) || '',
       valueParser: params => {
         const value = parseFloat(params.newValue);
         return isNaN(value) ? params.oldValue : value;
-      },
-      cellRenderer: params => params.value?.toFixed(6) || '0.000000'
+      }
     },
     {
       field: 'alt',
-      headerName: 'Altitude',
+      headerName: 'Altitude (m)',
       editable: true,
       valueParser: params => {
         const value = parseFloat(params.newValue);
@@ -60,17 +64,43 @@ const PathPointTable = ({ paths, setPaths }) => {
       headerName: 'Actions',
       cellRenderer: params => (
         <button 
-          onClick={() => handleDeletePoint(params.rowIndex)}
           className="delete-point-button"
+          onClick={() => handleDeletePoint(params.node.rowIndex)}
         >
           Delete
         </button>
       ),
-      suppressMenu: true,
       sortable: false,
-      filter: false
+      filter: false,
+      width: 100
     }
   ];
+
+  // Handle point deletion
+  const handleDeletePoint = (rowIndex) => {
+    console.log(rowIndex);
+    setPaths(prevPaths => {
+      const newPaths = [...prevPaths];
+      if (newPaths[selectedTab] && newPaths[selectedTab][rowIndex]) {
+        newPaths[selectedTab] = newPaths[selectedTab].filter((_, i) => i !== rowIndex);
+      }
+      return newPaths;
+    });
+  };
+
+  // Handle cell value changes
+  const onCellValueChanged = (params) => {
+    setPaths(prevPaths => {
+      const newPaths = [...prevPaths];
+      if (newPaths[selectedTab] && newPaths[selectedTab][params.rowIndex]) {
+        newPaths[selectedTab][params.rowIndex] = {
+          ...newPaths[selectedTab][params.rowIndex],
+          [params.colDef.field]: params.newValue
+        };
+      }
+      return newPaths;
+    });
+  };
 
   const handleExportCSV = () => {
     const currentPath = paths[selectedTab];
@@ -96,99 +126,47 @@ const PathPointTable = ({ paths, setPaths }) => {
     window.URL.revokeObjectURL(url);
   };
 
-
-  const handleDeletePoint = (rowIndex) => {
-    
-    console.log(rowIndex);
-    // setPaths(prev => {
-    //   const newPaths = [...prev];
-    //   if (newPaths[selectedTab]?.[rowIndex]) {
-    //     console.log('old path');
-    //     console.log(newPaths[selectedTab])
-    //     console.log('new path');
-    //     console.log(newPaths[selectedTab].filter((_, i) => i !== rowIndex))
-    //     newPaths[selectedTab] = newPaths[selectedTab].filter((_, i) => i !== rowIndex);
-    //   }
-    //   return newPaths;
-    // });
-    // console.log(paths);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    const hoveredRowIndex = Math.floor((e.clientY - rect.top) / 28);
-    
-    if (draggedRowIndex !== null && 
-        hoveredRowIndex !== draggedRowIndex &&
-        safePaths[selectedTab]?.[draggedRowIndex] &&
-        hoveredRowIndex >= 0 && 
-        hoveredRowIndex < safePaths[selectedTab].length) {
-      const newPath = [...safePaths[selectedTab]];
-      const [removed] = newPath.splice(draggedRowIndex, 1);
-      newPath.splice(hoveredRowIndex, 0, removed);
-      
-      const newPaths = [...safePaths];
-      newPaths[selectedTab] = newPath;
-      setPaths(newPaths);
-      setDraggedRowIndex(hoveredRowIndex);
-    }
-  };
-
-  const onCellValueChanged = (e) => {
-    const newPaths = [...paths];
-    newPaths[selectedTab][e.rowIndex] = {
-      ...newPaths[selectedTab][e.rowIndex],
-      [e.colDef.field]: e.newValue
-    };
-    setPaths(newPaths);
-  };
-
-  console.log(paths[selectedTab]?.map((p, i) => ({ ...p, order: i + 1 })) || [])
-
   return (
     <div className="path-point-editor">
-      <div className="table-controls">
-        <Tabs 
-          value={selectedTab} 
+      <div className='table-controls'>
+        <Tabs
+          value={selectedTab}
           onChange={(e, newValue) => setSelectedTab(newValue)}
           variant="scrollable"
           scrollButtons="auto"
         >
           {paths.map((_, index) => (
             <Tab 
-              key={index} 
+              key={index}
               label={`Path ${index + 1}`}
               sx={{ minWidth: 100 }}
             />
           ))}
         </Tabs>
-        <button
-          className='export-csv-button'
+        <button 
+          className="export-csv-button"
           onClick={handleExportCSV}
-          disabled={!paths[selectedTab].length}
+          disabled={!paths[selectedTab]?.length}
         >
           Export to CSV
         </button>
       </div>
-
-      <Box 
-        sx={{ height: 300 }} 
-        className="ag-theme-alpine"
-        onDragOver={handleDragOver}
-        onDragEnd={() => setDraggedRowIndex(null)}
-      >
+      <Box sx={{ height: 400 }} className="ag-theme-alpine">
         <AgGridReact
-          key={`${selectedTab}-${safePaths[selectedTab]?.length}`}
+          modules={modules}
           columnDefs={columnDefs}
-          rowData={safePaths[selectedTab] || []}
+          rowData={paths[selectedTab] || []}
           onCellValueChanged={onCellValueChanged}
-          getRowId={params => params.data.lat + '-' + params.data.lng}
+          singleClickEdit={true}
+          supressClickEdit={false}
+          stopEditingWhenCellsLoseFocus={true}
+          key={`grid-${selectedTab}-${paths[selectedTab]?.length}`} // Force re-render on tab change
           defaultColDef={{
+            resizable: true,
             sortable: true,
             filter: true,
-            resizable: true,
             flex: 1,
+            editable: true,
           }}
         />
       </Box>

@@ -3,6 +3,7 @@ import DroneList from "./DroneSelection.jsx";
 import AltimeterGauge from "./AltimeterGauge.jsx";
 import ManeuverList from "./HomeManeuverSelect.jsx";
 import ArmButton from "./ArmButton.jsx"
+import Gust_alt from "./../assets/Gust_alt.png"
 import { useState, useEffect } from "react";
 
 function HomeScreen() {
@@ -90,6 +91,16 @@ function HomeScreen() {
             }}>
                 <ArmButton selectedDrone={selectedDrone}/>
             </div>
+            <div className="gust-logo" style={{
+                position: "absolute",
+                left: "50%",
+                top: "10%",
+                transform: "translate(-50%, -50%)",
+                padding: "20px",
+                borderRadius: "8px",
+            }}>
+                <img src={Gust_alt} style={{ width: 200 }} />
+            </div>
             <div className="map-container" style = {{
                 display: "flex",
                 flexDirection: 'column',
@@ -100,8 +111,6 @@ function HomeScreen() {
 
             }}>
                 <MapComponent drones={drones} selectedDrone={selectedDrone}/>
-
-                
             </div>
             <div className="gauges-container" style={{
                 position: "absolute",
