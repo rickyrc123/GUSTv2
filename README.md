@@ -6,5 +6,5 @@
 </p>
 
 <h1> How to run the electron app </h1>
-<p> npm install in main directory, and maybe react</p>
+<p> npm build</p>
 <p> npm start </p>
