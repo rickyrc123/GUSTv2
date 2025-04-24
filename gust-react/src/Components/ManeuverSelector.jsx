@@ -8,7 +8,8 @@ const ManeuverSelector = ({
   vehicleID,
   paths,
   setPaths,
-  refreshTrigger
+  refreshTrigger,
+  setRefreshTrigger
 }) => {
   const [maneuvers, setManeuvers] = useState([]);
   const [newManeuverName, setNewManeuverName] = useState('');
@@ -16,6 +17,7 @@ const ManeuverSelector = ({
   const [error, setError] = useState(null);
   const [maneuverDetailsNames, setManeuverDetailsNames] = useState([]);
   const [maneuverDetailsPaths, setManeuverDetailsPaths] = useState([]);
+  const [selectedPath, setSelectedPath] = useState(null);
 
   const convertPathFormat = (path) => {
     return path.map(point => {
@@ -41,14 +43,14 @@ const ManeuverSelector = ({
       try {
         const response = await fetch('http://localhost:8000/maneuvers');
         if (!response.ok) throw new Error('Failed to fetch maneuvers');
-        console.log("got them mans");
-        console.log(maneuvers);
+        // console.log("got them mans");
+        // console.log(maneuvers);
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         setManeuvers(Array.from(data['maneuvers']));
-        console.log("mans are in ");
-        console.log(maneuvers);
-        console.log("-----");
+        // console.log("mans are in ");
+        // console.log(maneuvers);
+        // console.log("-----");
       } catch (err) {
         setError(err.message);
       } finally {
@@ -85,6 +87,10 @@ const ManeuverSelector = ({
         
         // Update drone names immediately
         const newDroneNames = Array.from(dronesData.Drones);
+        setManeuverDetailsNames(newDroneNames);
+        console.log('before state');
+        console.log(newDroneNames);
+        console.log('-----');
   
         // 2. Fetch paths for each drone
         if (newDroneNames.length > 0) {
@@ -108,13 +114,17 @@ const ManeuverSelector = ({
   
           if (isMounted) {
             setPaths(formattedPaths)
-            setManeuverDetailsNames(newDroneNames);
+            //setManeuverDetailsNames(newDroneNames);
+            
             setManeuverDetailsPaths(formattedPaths);
+            console.log('mounted and set');
+            console.log(maneuverDetailsPaths);
+            console.log('-----');
           }
         } else {
           if (isMounted) {
             setPaths([]);
-            setManeuverDetailsNames([]);
+            //setManeuverDetailsNames([]);
             setManeuverDetailsPaths([]);
           }
         }
@@ -128,13 +138,19 @@ const ManeuverSelector = ({
   
     // Initial fetch
     fetchManeuverDetails();
-    
+    console.log('drone names');
+    console.log(maneuverDetailsNames);
+    console.log('-----');
     // Cleanup function
     return () => {
       isMounted = false;
       controller.abort();
     };
-  }, [selectedManeuver]);
+    
+  }, [selectedManeuver, refreshTrigger]);
+
+  
+
 
   // Create new maneuver
   const handleCreateManeuver = async () => {
@@ -173,29 +189,28 @@ const ManeuverSelector = ({
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete "${selectedManeuver.name}"?`)) {
+    if (!window.confirm(`Are you sure you want to delete "${selectedManeuver}"?`)) {
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/delete_maneuver`, {
+      const response = await fetch(`http://localhost:8000/maneuvers/delete?name=${selectedManeuver}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          maneuver_id: selectedManeuver.maneuver_id
-        }),
+        
       });
 
       if (!response.ok) throw new Error('Failed to delete maneuver');
       
-      setManeuvers(maneuvers.filter(m => m.maneuver_id !== selectedManeuver.maneuver_id));
-      setSelectedManeuver(null);
+      setManeuvers(maneuvers.filter(m => m !== selectedManeuver));
+      onSelectManeuver(null);
       setManeuverDetailsNames(null);
       setManeuverDetailsPaths(null);
       setError(null);
+      setRefreshTrigger(prev => prev + 1);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -249,7 +264,12 @@ const ManeuverSelector = ({
   };
 
   // Delete path from maneuver
-  const handleDeletePathFromManeuver = async (vehicleId) => {
+  const handleDeletePathFromManeuver = async (index) => {
+    console.log('indel');
+    console.log(maneuverDetailsNames);
+    console.log(index);
+    console.log(maneuverDetailsNames[index]);
+    console.log('-------');
     if (!selectedManeuver) {
       setError('Please select a maneuver first');
       return;
@@ -260,16 +280,13 @@ const ManeuverSelector = ({
     }
 
     setIsLoading(true);
+    let droneName = maneuverDetailsNames[index];
     try {
-      const response = await fetch('/delete_maneuver_path', {
+      const response = await fetch(`http://localhost:8000/programs/manuevers/remove_drone_from_maneuver?drone_name=${droneName}&maneuver_name=${selectedManeuver}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          maneuver_id: selectedManeuver,
-          vehicleID: vehicleId
-        }),
       });
 
       if (!response.ok) throw new Error('Failed to delete path from maneuver');
@@ -278,7 +295,7 @@ const ManeuverSelector = ({
       // const detailsResponse = await fetch(`/maneuvers/${selectedManeuver}`);
       // if (!detailsResponse.ok) throw new Error('Failed to fetch updated maneuver details');
       // setManeuverDetails(await detailsResponse.json());
-      
+      setRefreshTrigger(prev => prev + 1);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -286,7 +303,12 @@ const ManeuverSelector = ({
       setIsLoading(false);
     }
   };
- 
+
+  const handlePathOnClick = (index) => {
+    //setSelectedPathIndex(index);
+    console.log('bump');
+  };
+  console.log(maneuverDetailsNames);
   return (
     <div className="maneuver-selector">
       <h3>Maneuver Management</h3>
@@ -345,7 +367,9 @@ const ManeuverSelector = ({
           {maneuverDetailsNames?.length > 0 ? (
             <ul className="path-list">
               {maneuverDetailsPaths.map((path, index) => (
-                <li key={index}>
+                <li key={index}
+                  onClick={handlePathOnClick(index)}
+                >
                   <div>
                     <strong>Vehicle ID:</strong> {maneuverDetailsNames[index]}
                   </div>
@@ -353,7 +377,7 @@ const ManeuverSelector = ({
                     <strong>Points:</strong> {maneuverDetailsNames.length}
                   </div>
                   <button
-                    onClick={() => handleDeletePathFromManeuver(path.vehicleID)}
+                    onClick={() => handleDeletePathFromManeuver(index)}
                     disabled={isLoading}
                   >
                     Delete Path
