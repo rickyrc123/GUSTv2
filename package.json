@@ -1,0 +1,54 @@
+{
+  "name": "electron",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps",
+    "prepare-docker": "docker compose build fastapi && docker tag fastapi:latest fastapi-service:latest && docker save -o docker-images.tar postgres:latest fastapi-service:latest",
+    "prepare_react": "cd gust-react && npm run build"
+  },
+  "build": {
+    "appId": "com.yourcompany.yourapp",
+    "productName": "GUSTv2",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "docker-images.tar",
+        "to": "docker-images.tar"
+      },
+      {
+        "from": "gust-react/dist",
+        "to": "gust-react/dist"
+      },
+      {
+        "from": "docker-compose.yml",
+        "to": "docker-compose.yml"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Development"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.2.1",
+    "electron-builder": "^26.0.12"
+  }
+}
