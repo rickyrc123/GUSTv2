@@ -311,7 +311,7 @@ const ManeuverSelector = ({
           </button>
           
           <h5>Associated Paths:</h5>
-          {maneuverDetailsPaths?.length > 0 ? (
+          {maneuverDetailsNames?.length > 0 ? (
             <ul className="path-list">
               {maneuverDetailsPaths.map((path, index) => (
                 <li key={index}>
@@ -319,7 +319,7 @@ const ManeuverSelector = ({
                     <strong>Vehicle ID:</strong> {maneuverDetailsNames[index]}
                   </div>
                   <div>
-                    <strong>Points:</strong> {path.points.length}
+                    <strong>Points:</strong> {maneuverDetailsNames.length}
                   </div>
                   <button
                     onClick={() => handleDeletePathFromManeuver(path.vehicleID)}
