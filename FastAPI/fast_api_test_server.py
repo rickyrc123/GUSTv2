@@ -344,7 +344,7 @@ async def m_connect_close_connection(
 ):
     # Close the specified connection
     try:
-        dragon_link.close_connection(connections[connection_id])
+        print("Closing connection...")
         del connections[connection_id]
     except Exception as e:
         return {"Failure" : f"Failed to close connection {e}"}
@@ -368,7 +368,7 @@ async def m_connect_close_all_connections():
     # Close all connections
     for connection in connections:
         try:
-            dragon_link.close_connection(connection)
+            print("Closing connection...")
         except Exception as e:
             return {"Failure" : f"Failed to close connection {e}"}
     
@@ -381,8 +381,7 @@ async def m_connect_close_connection(
 ):
     # Close the specified connection
     try:
-        dragon_link.close_connection(connections[connection_id])
-        del connections[connection_id]
+        available_connections = ("0.0.0.0", "udp:10.223.168.1:14450")
     except Exception as e:
         return {"Failure" : f"Failed to close connection {e}"}
     
@@ -391,7 +390,7 @@ async def m_connect_close_connection(
 @app.get("/drones/m_connect/refresh_connections")
 async def m_connect_refresh_connections():
     # Scan for available UDP ports and return a list of available connections
-    available_connections = dragon_link.scan_for_available_connections()
+    available_connections = ("0.0.0.0", "udp:10.223.168.1:14450")
     return {"Available Connections": available_connections}
 
 @app.get("/drones/m_connect/take_off")
