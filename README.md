@@ -4,3 +4,7 @@
 <p> sudo apt install docker-compose |ONLY NEEDED ONCE|</p>
 <p> sudo docker compose up --build |In GUSTv2 directory
 </p>
+
+<h1> How to run the electron app </h1>
+<p> npm install in main directory, and maybe react</p>
+<p> npm start </p>

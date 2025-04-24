@@ -1,0 +1,17 @@
+{
+  "name": "electron",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\" \"npm run start-electron\"",
+    "start-backend": "docker compose up --build fastapi -d",
+    "start-frontend": "cd gust-react && npm run build && serve -s dist -l 5173",
+    "start-electron": "electron electron/main.cjs --no-sandbox"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "electron": "^35.2.1",
+    "serve": "^14.2.4"
+  }
+}
