@@ -15,7 +15,10 @@ import time
 from pymavlink import mavutil
 import argparse
 
-def connect_to_dragonlink(port="udp:10.223.168.1:14550", baudrate=115200):
+start_lon = None
+start_lat = None
+
+def connect_to_dragonlink(port="/dev/ttyUSB0", baudrate=115200):
     """ 
     Connect to the DragonLink system via serial port
     
@@ -34,9 +37,13 @@ def connect_to_dragonlink(port="udp:10.223.168.1:14550", baudrate=115200):
     connection.wait_heartbeat()
     print(f"Heartbeat from system (system {connection.target_system}, component {connection.target_component})")
     
-    msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=5)
-    print(f"Heartbeat: {msg}")
 
+    msg = connection.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=5)
+    start_lat = msg.lat / 1E7  # Convert to decimal degrees
+    start_lon = msg.lon / 1E7  # Convert to decimal degrees
+
+    print(f"Heartbeat: {msg}")
+    print(f"Start Position: {start_lat:.6f}, {start_lon:.6f}")
     return connection
 
 def set_flight_mode(connection, mode):
@@ -196,9 +203,9 @@ def execute_path(connection, path):
 def main():
 
     path = [
-        (1,2,3),
-        (1,2,3),
-        (1,2,3)
+        (33.18236,-87.51108,5),
+        (33.18236,-87.51108,10),
+        (33.18255,-87.51034,5)
     ]
 
     try:
@@ -215,7 +222,7 @@ def main():
         execute_path(dl, path)  # Execute the predefined path
 
         land(dl)  # Land the vehicle
-         
+
         
 
 
