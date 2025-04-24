@@ -59,9 +59,6 @@ class DroneCreateRequest(BaseModel):
             }
         }
 
-
-
-
 class MultiPositionResponse(BaseModel):
     id      : str
     data    : List[PositionResponse]

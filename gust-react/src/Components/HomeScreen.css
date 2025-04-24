@@ -1,0 +1,34 @@
+/* Base container */
+.HomeScreen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* All three containers share these styles */
+.drone-list-container,
+.gauges-container {
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    
+}
+
+/* Drone list (left) */
+.drone-list-container {
+    width: 15vw;
+    order: 1;
+    flex-shrink: 0;
+    justify-content: right;
+}
+
+
+/* Gauges (right) */
+.gauges-container {
+    width: 25vw;
+    order: 3;
+    justify-content: left;
+}

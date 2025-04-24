@@ -2,34 +2,26 @@ from .database import DatabaseServer
 from .setup import build
 from .schemas import (
   Drone,
-  DroneInSwarm,
   CreateDrone,
-  Swarm,
-  CreateSwarm,
+  Maneuver,
+  CreateManeuver,
   Waypoint,
   CreateWaypoint,
   Program,
-  CreateProgram,
-  DroneUpdate,
-  WaypointUpdate
+  CreateProgram
 )
 
 __all__ = [
   # Main database class
   'DatabaseServer',
-
-  'build',
   
   # Schemas (external data models)
   'Drone',
   'CreateDrone',
-  'DroneInSwarm',
-  'Swarm',
-  'CreateSwarm',
+  'Maneuver',
+  'CreateManeuver',
   'Waypoint',
   'CreateWaypoint',
   'Program',
-  'CreateProgram',
-  'DroneUpdate',
-  'WaypointUpdate'
+  'CreateProgram'
 ]

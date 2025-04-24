@@ -1,37 +1,4 @@
 services:
-  dev:
-    container_name: dev
-    build:
-      context: ./db
-      dockerfile: ../Dockerfile
-    depends_on:
-      - db
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
-    networks:
-      - backend
-    volumes:
-      - ./db:/db
-    init: true
-    stdin_open: true
-    tty: true
-  fastapi:
-    container_name: fastapi
-    build: 
-      context: ./TestSocket
-      dockerfile: ../Dockerfile
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - dev
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
-    networks:
-      - backend
-    volumes:
-      - ./db:/db
-    command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
   db:
     image: postgres
     container_name: postgres_db
@@ -43,10 +10,51 @@ services:
       PGDATA: /data/postgres_data
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
     ports:
       - "5432:5432"
     networks:
       - backend
+  dev:
+    container_name: dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+    networks:
+      - backend
+    volumes:
+      - .:/home/GUSTv2
+    init: true
+    stdin_open: true
+    tty: true
+  fastapi:
+    container_name: fastapi
+    build: 
+      context: ./FastAPI
+      dockerfile: ../Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+    networks:
+      - backend
+    volumes:
+      - ./db:/db
+    command: uvicorn fast_api_test_server:app --host 0.0.0.0 --port 8000
+
 
 networks:
   backend:

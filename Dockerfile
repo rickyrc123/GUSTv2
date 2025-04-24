@@ -16,9 +16,8 @@ RUN pip install \
     uvicorn \
     pydantic \
     psycopg2-binary \
-    sqlalchemy
-
-WORKDIR /workspace
-
+    sqlalchemy \
+    pymavlink
+    
 COPY . .
 
