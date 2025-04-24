@@ -7,14 +7,15 @@ const ManeuverSelector = ({
   selectedPathIndex,
   vehicleID,
   paths,
+  setPaths,
   refreshTrigger
 }) => {
   const [maneuvers, setManeuvers] = useState([]);
   const [newManeuverName, setNewManeuverName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [maneuverDetailsNames, setManeuverDetailsNames] = useState(null);
-  const [maneuverDetailsPaths, setManeuverDetailsPaths] = useState(null);
+  const [maneuverDetailsNames, setManeuverDetailsNames] = useState([]);
+  const [maneuverDetailsPaths, setManeuverDetailsPaths] = useState([]);
 
   // Fetch maneuvers from API
   useEffect(() => {
@@ -43,66 +44,76 @@ const ManeuverSelector = ({
 
   //Fetch details for selected maneuver
   useEffect(() => {
-    if (selectedManeuver) {
-      const fetchManeuverDetails = async () => {
-        console.log('Selected Man');
-        console.log(selectedManeuver);
-        console.log('-----');
-        try {
-          const response = await fetch(`http://localhost:8000/programs/manuevers/get_drones_in_maneuver?maneuver_name=${selectedManeuver}`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-          console.log('fetch worked');
-          if (!response.ok) throw new Error('Failed to fetch maneuver details');
-          const data = await response.json();
-          console.log(data);
-          console.log(Array.from(data['Drones']));
-          setManeuverDetailsNames(Array.from(data['Drones']));
-          console.log(maneuverDetailsNames);
-          console.log('after assign');
-
-          const fetchDronePath = async (droneName) => {
-            const resp = await fetch(`http://localhost:8000/programs/get_path_by_drone?drone_name=${droneName}`,
+    let isMounted = true; // Track component mount status
+    const controller = new AbortController(); // For aborting fetch
+  
+    const fetchManeuverDetails = async () => {
+      try {
+        if (!selectedManeuver || !isMounted) return;
+  
+        // 1. Fetch drones in maneuver
+        const dronesResponse = await fetch(
+          `http://localhost:8000/programs/manuevers/get_drones_in_maneuver?maneuver_name=${selectedManeuver}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal
+          }
+        );
+  
+        if (!dronesResponse.ok) throw new Error('Failed to fetch drones');
+        const dronesData = await dronesResponse.json();
+        
+        // Update drone names immediately
+        const newDroneNames = Array.from(dronesData.Drones);
+        if (isMounted) {
+          setManeuverDetailsNames(newDroneNames);
+        }
+  
+        // 2. Fetch paths for each drone
+        if (newDroneNames.length > 0) {
+          const pathsPromises = newDroneNames.map(async (droneName) => {
+            const pathResponse = await fetch(
+              `http://localhost:8000/programs/get_path_by_drone?drone_name=${droneName}`,
               {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                
+                headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal
               }
-            )
-            const path = await resp.json();
-            if (!resp.ok) throw new Error(`Failed to get path for ${droneName}`);
-            return path;
+            );
+            if (!pathResponse.ok) throw new Error(`Failed to fetch path for ${droneName}`);
+            return pathResponse.json();
+          });
+  
+          const pathsResults = await Promise.all(pathsPromises);
+          const formattedPaths = pathsResults.map(result => 
+            Array.from(result.Path?.path || [])
+          );
+  
+          if (isMounted) {
+            setManeuverDetailsPaths(formattedPaths);
           }
-          console.log('before eval');
-
-          if (maneuverDetailsNames?.length > 0 && maneuverDetailsNames !== null) {
-            paths = [];
-            for (const drone_name of maneuverDetailsNames) {
-              const d_path = await fetchDronePath(drone_name);
-              paths = [...paths, d_path["Path"]["path"]];
-            }
-            setManeuverDetailsPaths(paths);
-          }
-          else {
-            console.log('no drone so no path');
+        } else {
+          if (isMounted) {
             setManeuverDetailsPaths([]);
           }
-
-        } catch (err) {
-          console.log(err.message);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError' && isMounted) {
+          console.error('Fetch error:', err);
           setError(err.message);
         }
-      };
-      
-      fetchManeuverDetails();
-    }
+      }
+    };
+  
+    // Initial fetch
+    fetchManeuverDetails();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [selectedManeuver]);
 
   // Create new maneuver
@@ -255,7 +266,7 @@ const ManeuverSelector = ({
       setIsLoading(false);
     }
   };
-
+ 
   return (
     <div className="maneuver-selector">
       <h3>Maneuver Management</h3>
@@ -311,7 +322,7 @@ const ManeuverSelector = ({
           </button>
           
           <h5>Associated Paths:</h5>
-          {maneuverDetailsPaths?.length > 0 ? (
+          {maneuverDetailsNames?.length > 0 ? (
             <ul className="path-list">
               {maneuverDetailsPaths.map((path, index) => (
                 <li key={index}>
@@ -319,7 +330,7 @@ const ManeuverSelector = ({
                     <strong>Vehicle ID:</strong> {maneuverDetailsNames[index]}
                   </div>
                   <div>
-                    <strong>Points:</strong> {path.points.length}
+                    <strong>Points:</strong> {maneuverDetailsNames.length}
                   </div>
                   <button
                     onClick={() => handleDeletePathFromManeuver(path.vehicleID)}
