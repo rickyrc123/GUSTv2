@@ -61,7 +61,9 @@ const ManeuverSelector = ({
           if (!response.ok) throw new Error('Failed to fetch maneuver details');
           const data = await response.json();
           console.log(data);
+          console.log(Array.from(data['Drones']));
           setManeuverDetailsNames(Array.from(data['Drones']));
+          console.log(maneuverDetailsNames);
           console.log('after assign');
 
           const fetchDronePath = async (droneName) => {
@@ -84,7 +86,7 @@ const ManeuverSelector = ({
             paths = [];
             for (const drone_name of maneuverDetailsNames) {
               const d_path = await fetchDronePath(drone_name);
-              paths = [...paths, d_path];
+              paths = [...paths, d_path["Path"]["path"]];
             }
             setManeuverDetailsPaths(paths);
           }
@@ -314,7 +316,7 @@ const ManeuverSelector = ({
               {maneuverDetailsPaths.map((path, index) => (
                 <li key={index}>
                   <div>
-                    <strong>Vehicle ID:</strong> {path.vehicleID}
+                    <strong>Vehicle ID:</strong> {maneuverDetailsNames[index]}
                   </div>
                   <div>
                     <strong>Points:</strong> {path.points.length}
