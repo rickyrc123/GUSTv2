@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import VehicleList from './VehicleList';
 import UploadPathButton from './UploadPathButton';
 import ManeuverSelector from './ManeuverSelector';
-// import PathPointTable from './PathPointTable';
+import PathPointTable from './PathPointTable';
 import './PlanningWidget.css';
 
 const PlanningWidget = () => {
@@ -18,6 +18,7 @@ const PlanningWidget = () => {
   const [selectedManeuver, setSelectedManeuver] = useState(null);
   const [mapCenter] = useState([33.1823705, -87.5111005]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedPathIndex, setSelectedPathIndex] = useState(0);
 
   // Handle adding markers to the map
   const AddMarkerOnClick = () => {
@@ -57,13 +58,16 @@ const PlanningWidget = () => {
   // Add new path
   const handleAddNewPath = () => {
     setPaths([...paths, []]);
+    setSelectedPathIndex(paths.length - 1);
   };
 
   // Handle successful addition to maneuver
   const handleAddToManeuverSuccess = () => {
     setRefreshTrigger(prev => prev + 1);
   };
-
+  console.log("Paths!");
+  console.log(paths);
+  console.log("---");
   return (
     <div className="planning-widget">
       <div className="control-panel">
@@ -72,6 +76,7 @@ const PlanningWidget = () => {
           selectedManeuver={selectedManeuver}
           onSelectManeuver={setSelectedManeuver}
           onAddToManeuver={handleAddToManeuverSuccess}
+          selectedPathIndex={selectedPathIndex}
           vehicleID={selectedVehicleID}
           paths={paths}
           refreshTrigger={refreshTrigger}
@@ -110,7 +115,7 @@ const PlanningWidget = () => {
       </div>
       <div className="path-data-section">
         <h3>Path Point Editor</h3>
-        {/* <PathPointTable paths={paths} setPaths={setPaths} /> */}
+        <PathPointTable paths={paths} setPaths={setPaths} selectedPathIndex={selectedPathIndex} setSelectedPathIndex={setSelectedPathIndex} />
       </div>
     </div>
   );
