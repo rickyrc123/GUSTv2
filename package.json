@@ -6,8 +6,9 @@
   "scripts": {
     "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\" \"npm run start-electron\"",
     "start-backend": "docker compose up --build fastapi -d",
-    "start-frontend": "cd gust-react && npm run build && serve -s dist -l 5173",
-    "start-electron": "electron electron/main.cjs --no-sandbox"
+    "start-frontend": "cd gust-react serve -s dist -l 5173",
+    "start-electron": "electron electron/main.cjs --no-sandbox",
+    "build": "cd gust-react && npm install"
   },
   "dependencies": {
     "concurrently": "^9.1.2",
