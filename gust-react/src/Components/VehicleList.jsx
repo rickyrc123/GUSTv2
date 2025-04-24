@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-const VehicleList = ({ onSelectVehicle }) => {
+const VehicleList = ({ onSelectVehicle, selectedManeuver }) => {
+  const [isSelected, setIsSelected] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,12 +41,13 @@ const VehicleList = ({ onSelectVehicle }) => {
       {isLoading ? (
         <p>Loading vehicles...</p>
       ) : (
-        <ul>
+        <ul disabled={selectedManeuver == null}>
           {vehicles.map(vehicle => (
             <li
               key={vehicle.name}
               className={selectedVehicle?.name === vehicle.name ? 'selected' : ''}
               onClick={() => handleSelectVehicle(vehicle)}
+              
             >
               {vehicle.name} (ID: {vehicle.name})
               {vehicle.model && <span> - {vehicle.model}</span>}

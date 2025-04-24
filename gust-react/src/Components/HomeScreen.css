@@ -8,14 +8,7 @@
     align-items: center;
 }
 
-/* All three containers share these styles */
-.drone-list-container,
-.gauges-container {
-    height: 80vh;
-    display: flex;
-    align-items: center;
-    
-}
+
 
 /* Drone list (left) */
 .drone-list-container {
@@ -26,9 +19,3 @@
 }
 
 
-/* Gauges (right) */
-.gauges-container {
-    width: 25vw;
-    order: 3;
-    justify-content: left;
-}

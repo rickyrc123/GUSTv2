@@ -1,7 +1,8 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import PropTypes from "prop-types";
-
+import L from "leaflet";
+import droneIconPng from "./../assets/drone.png"
 
 const MapComponent = ({drones = [], selectedDrone }) => {
  
@@ -15,8 +16,12 @@ const MapComponent = ({drones = [], selectedDrone }) => {
 		center = [drones[0].current_lat, drones[0].current_long];
 	}
 
-  	console.log("Length:", drones.length);
-
+	const droneIcon = L.icon({
+		iconUrl: droneIconPng,
+		iconSize: [40, 40],
+		iconAnchor: [20, 20],
+		popupAnchor: [0, -20]
+	  });
   	//Returning the MapContainer with Open Street map cred and the positions mapped
   	return (
 		<MapContainer key={`${center[0]}-${center[1]}`} center={center} zoom={13} style={{ height: "575px", width: "40%" }}>
@@ -25,7 +30,7 @@ const MapComponent = ({drones = [], selectedDrone }) => {
 			attribution="&copy; OpenStreetMap contributors"
 		/>
 		{drones.map((drone, index) => (
-			<Marker key={index} position={[drone.current_lat, drone.current_long]}>
+			<Marker key={index} position={[drone.current_lat, drone.current_long]} icon={droneIcon}>
 			<Popup>
 				<strong>{drone.name}</strong> <br />
 				Lat: {drone.current_lat}, Lng: {drone.current_long}
