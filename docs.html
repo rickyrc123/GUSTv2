@@ -59,10 +59,11 @@
             <h1>Documentation</h1>
         </div>
         <div class="nav-buttons">
-            <a href="index.html">Home</a>
-            <a href="team.html">About Us</a>
-            <a href="guide.html">Start Guide</a>
-            <a href="page4.html">Page 4</a>
+          <a href="index.html">Home</a>
+          <a href="team.html">About Us</a>
+          <a href="deliverables">Deliverables</a>
+          <a href="docs.html">Docs</a>
+          <a href="guide.html">Start Guide</a>
         </div>
     </header>
     <main>
@@ -97,6 +98,48 @@
             <li>Install the required dependencies using the provided <code>environment.yml</code> file.</li>
             <li>Run the Docker container using <code>docker compose up --build</code>.</li>
         </ol>
+        
+        <h2 id="setup">WSL 2 Install</h2>
+        <p>To run the app, you will need to install WSL 2 on your Windows machine. Follow these steps:</p>
+        <ol>
+            <li>Open PowerShell as Administrator and run the following command:</li>
+            <pre><code>wsl --install</code></pre>
+            <li>Restart your computer when prompted.</li>
+            <li>After restarting, open PowerShell again and run:</li>
+            <pre><code>wsl --set-default-version 2</code></pre>
+            <li>Install Ubuntu 22.04 from the Microsoft Store.</li>
+        </ol>
+
+        <h2 id="setup">Docker Compose V2 Setup</h2>
+        <p>To set up Docker Compose V2, follow these steps:</p>
+        <ol>
+            <li>Open a terminal and run the following command to install Docker Compose V2:</li>
+            <pre><code>docker compose version</code></pre>
+            <li>Verify the installation by running:</li>
+            <pre><code>docker compose --version</code></pre>
+        </ol>
+
+        <h2 id="setup">Hardware Setup</h2>
+        <p> For single drone connections, using a Dragon Link radio is advised. For multiple, we used a Doodle Lab smart radio</p>
+        <h3>Dragon Link Setup</h3>
+        <ul>
+            <li>Download the dragon link drivers onto your computer from http://www.dragonlinkrc.com/instructions/v3equipment/v3downloads/ and follow the install guide</li>
+            <li>Connect the device via usb into your computer</li>
+            <li>Open a CMD window and type "mode" to find the COM port of the device</li>
+            <li>In an Admin CMD window, type "usbipd list" to display connected USB devices and get the busid, it is the one that says serial</li>
+            <li>Expose the busid to WSL "usbipd attach --wsl --busid 5-1"</li>
+            <li>In WSL, naviagate to /dev to view mounted devices, the device should show up as "/ttyUSB0 or /ttyACM0", this will be the connection string to the device for mavlink</li>
+        <ul>
+        <h3>Doodle Lab Setup</h3>
+        <ul>
+            <li>Connect the device via ethernet to your computer</li>
+            <li>Open CMD and type "ipconfig /all" to view all devices, find the ethernet adapter of the radio</li>
+            <li> In Windows Network Settings, Go to Advanced Network settings and locate the ethernet connection</li>
+            <li>Click on the ethernet connection and select "Properties"</li>
+            <li>Click on "Internet Protocol Version 4 (TCP/IPv4)" and enter 10.223.168.1 as the static IP</li>
+            <li>Navigate to 10.223.168.25 in a browser and the webUI should open, this is where you can configure the radio</li>
+        </ul>
+
 
         <h2 id="usage">How to contribute</h2>
         <p>The source code to this project can be found at: https://github.com/rickyrc123/GUSTv2.</p>
