@@ -87,6 +87,7 @@ const PlanningWidget = () => {
           paths={paths}
           setPaths={setPaths}
           refreshTrigger={refreshTrigger}
+          setRefreshTrigger={setRefreshTrigger}
         />
         <VehicleList onSelectVehicle={setSelectedVehicleID} selectedManeuver={selectedManeuver} />
         <div className="path-actions">
