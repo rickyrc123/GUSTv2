@@ -7,8 +7,8 @@ from .schemas import (
   CreateManeuver,
   Waypoint,
   CreateWaypoint,
-  Program,
-  CreateProgram
+  Path,
+  CreatePath
 )
 
 __all__ = [
@@ -22,6 +22,6 @@ __all__ = [
   'CreateManeuver',
   'Waypoint',
   'CreateWaypoint',
-  'Program',
-  'CreateProgram'
+  'Path',
+  'CreatePath'
 ]
