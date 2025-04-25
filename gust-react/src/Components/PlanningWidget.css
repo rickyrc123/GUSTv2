@@ -1,0 +1,213 @@
+.planning-widget {
+    display: flex;
+    height: 90vh;
+    width: 100vw;
+    font-family: Arial, sans-serif;
+  }
+  
+  .control-panel {
+    width: 350px;
+    padding: 20px;
+    background: #b0b0b0;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+  }
+  
+  .map-container {
+    flex: 1;
+    height: 100%;
+    width: 50%;
+  }
+  
+  .vehicle-list, .maneuver-selector {
+    margin-bottom: 20px;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  li {
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background: #2196f3;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  li.selected {
+    background: #78def7;
+    border-color: #2196f3;
+  }
+  
+  li:hover {
+    background: #78def7;
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  button {
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  button:hover:not(:disabled) {
+    background: #0d8bf2;
+  }
+  
+  .path-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .error-message {
+    color: #f44336;
+    margin: 10px 0;
+    padding: 8px;
+    background: #ffebee;
+    border-radius: 4px;
+  }
+  
+  .success-message {
+    color: #4caf50;
+    margin: 10px 0;
+    padding: 8px;
+    background: #e8f5e9;
+    border-radius: 4px;
+  }
+  .maneuver-details {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+  }
+  
+  .path-list {
+    margin-top: 10px;
+  }
+  
+  .path-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .path-list li div {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .delete-maneuver {
+    background: #f44336;
+    margin-bottom: 15px;
+  }
+  
+  .delete-maneuver:hover:not(:disabled) {
+    background: #d32f2f;
+  }
+
+  .path-point-editor {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+  }
+  
+  .ag-theme-alpine {
+    width: 100%;
+    height: 300px;
+    margin-top: 10px;
+  }
+  
+  .delete-point-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .delete-point-button:hover {
+    background: #cc0000;
+  }
+  
+  .path-data-section {
+    margin-top: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 30%;
+    height: 90%;
+  }
+  .ag-row-dragging {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+  
+  .ag-theme-alpine .ag-row-hover {
+    background-color: #f8f9fa !important;
+  }
+  
+  .delete-point-button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .delete-point-button:hover {
+    background: #cc0000;
+  }
+
+  .table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .export-csv-button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    height: fit-content;
+  }
+  
+  .export-csv-button:disabled {
+    background: #81C784;
+    cursor: not-allowed;
+  }
+  
+  .export-csv-button:not(:disabled):hover {
+    background: #45a049;
+  }
