@@ -9,3 +9,4 @@ gust-react/package.json
 *.tlog
 logs/
 *.mavlink
+node-modules/*
