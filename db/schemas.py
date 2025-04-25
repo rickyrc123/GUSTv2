@@ -67,42 +67,42 @@ class CreateWaypoint(Waypoint):
   """
   _id: int | None
 
-class Program(BaseModel):
-  """Represents a flight program consisting of waypoints and their associated speeds.
+class Path(BaseModel):
+  """Represents a flight path consisting of waypoints and their associated speeds.
   
   Attributes:
-    name (str): Display name of the program
+    name (str): Display name of the path
     content (List[Tuple[Waypoint, float]]): List of waypoint and speed pairs. Each tuple contains:
       - Waypoint: The target position
       - float: The speed to travel to this waypoint in meters/second
   """
   _id: Annotated[int, Field(description="Drone id (internal use only)")]
-  name: Annotated[str, Field(description="Display name of the program")]
-  content: Annotated[List[Tuple[Waypoint, float]], Field(description="List of waypoint and speed pairs. Each tuple contains a Waypoint and the speed to travel to this waypoint in meters/second")]
+  name: Annotated[str, Field(description="Display name of the path")]
+  content: Annotated[List[Waypoint], Field(description="List of waypoint and speed pairs. Each tuple contains a Waypoint and the speed to travel to this waypoint in meters/second")]
 
   class Config:
     from_attributes = True
 
-class CreateProgram(Program):
-  """Schema for creating a new program.
+class CreatePath(Path):
+  """Schema for creating a new path.
   
   Attributes:
-    name (Optional[str]): Display name of the program. If None, will be auto-generated as 'Program{id:06}'.
-    All other attributes inherited from Program.
+    name (Optional[str]): Display name of the path. If None, will be auto-generated as 'Path{id:06}'.
+    All other attributes inherited from Path.
   """
   _id: int | None
-  name: Annotated[str | None, Field(default=None, description="Display name of the program. If None, will be auto-generated as 'Program{id:06}'")]
+  name: Annotated[str | None, Field(default=None, description="Display name of the path. If None, will be auto-generated as 'Path{id:06}'")]
 
 class Maneuver(BaseModel):
   """Base Maneuver model representing a group of drones.
   
   Attributes:
     name (str): Display name of the maneuver
-    drones (List[(Drone, program)]): List of drones currently in the maneuver paired with their respective path
+    drones (List[(Drone, path)]): List of drones currently in the maneuver paired with their respective path
   """
   _id: Annotated[int, Field(description="Maneuver id (internal use only)")]
   name: Annotated[str, Field(description="Display name of the maneuver")]
-  drones: Annotated[List[Tuple[Drone, Program]], Field(default=[], description="List of drones currently in the maneuver by name")]
+  drones: Annotated[List[Tuple[Drone, Path]], Field(default=[], description="List of drones currently in the maneuver by name")]
 
   class Config:
     from_attributes = True

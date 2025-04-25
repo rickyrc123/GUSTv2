@@ -1,17 +1,18 @@
 .connection-screen {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     padding: 20px;
-    max-width: 100vw;
+    min-width: 100vw;
     margin: 0 auto;
+    height: 100vh; 
+    width: max-content;
+    align-self: center;
   }
   
   .header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    margin: 0;
   }
   
   .error-message {
@@ -31,7 +32,6 @@
   }
   
   .input-group {
-    display: flex;
     gap: 10px;
     margin-top: 10px;
   }
@@ -41,9 +41,7 @@
   }
   
   .port-inputs {
-    display: flex;
     gap: 10px;
-    align-items: center;
     margin-top: 10px;
   }
   
