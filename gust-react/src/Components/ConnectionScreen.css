@@ -10,6 +10,11 @@
     width: max-content;
     align-self: center;
   }
+  .manRow {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+  }
   
   .header-section {
     margin: 0;

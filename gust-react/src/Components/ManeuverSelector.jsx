@@ -374,7 +374,7 @@ const ManeuverSelector = ({
                     <strong>Vehicle ID:</strong> {maneuverDetailsNames[index]}
                   </div>
                   <div>
-                    <strong>Points:</strong> {maneuverDetailsNames.length}
+                    <strong>Points:</strong> {maneuverDetailsPaths[index].length}
                   </div>
                   <button
                     onClick={() => handleDeletePathFromManeuver(index)}
