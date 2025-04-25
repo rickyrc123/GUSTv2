@@ -1,0 +1,4 @@
+Decide whether get all returns the objects or just the names for listing
+then each could be gotten individually
+
+Once path implementation is more solid, make functions for the database

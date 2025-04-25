@@ -1,0 +1,21 @@
+/* Base container */
+.HomeScreen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
+
+/* Drone list (left) */
+.drone-list-container {
+    width: 15vw;
+    order: 1;
+    flex-shrink: 0;
+    justify-content: right;
+}
+
+
