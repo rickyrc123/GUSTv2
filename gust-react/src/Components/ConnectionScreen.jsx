@@ -101,48 +101,48 @@ const ConnectionScreen = () => {
       </div>
 
       {error && <div className="error-message">{error}</div>}
-
-      <div className="connection-list">
-        <h3>Available Connections</h3>
-        <List>
-          {connections.length > 0 ? (
-            connections.map(({ drone_id }, index) => (
-              <ListItem 
-                button 
-                key={index}
-                onClick={() => handleConnect(drone_id)}
-              >
-                <ListItemText primary={drone_id} />
+      <div className='manRow'>
+        <div className="connection-list">
+          <h3>Available Connections</h3>
+          <List>
+            {connections.length > 0 ? (
+              connections.map(({ drone_id }, index) => (
+                <ListItem 
+                  button 
+                  key={index}
+                  onClick={() => handleConnect(drone_id)}
+                >
+                  <ListItemText primary={drone_id} />
+                </ListItem>
+              ))
+            ) : (
+              <ListItem>
+                <ListItemText primary="No connections available" />
               </ListItem>
-            ))
-          ) : (
-            <ListItem>
-              <ListItemText primary="No connections available" />
-            </ListItem>
-          )}
-        </List>
-      </div>
+            )}
+          </List>
+        </div>
 
-      <div className="manual-connection">
-        <h3>Manual Connection</h3>
-        <div className="input-group">
-          <TextField
-            fullWidth
-            label="Enter Connection String"
-            value={manualConnection}
-            onChange={(e) => setManualConnection(e.target.value)}
-            variant="outlined"
-          />
-          <Button
-            variant="contained"
-            onClick={handleManualConnect}
-            disabled={!manualConnection.trim()}
-          >
-            Connect
-          </Button>
+        <div className="manual-connection">
+          <h3>Manual Connection</h3>
+          <div className="input-group">
+            <TextField
+              fullWidth
+              label="Enter Connection String"
+              value={manualConnection}
+              onChange={(e) => setManualConnection(e.target.value)}
+              variant="outlined"
+            />
+            <Button
+              variant="contained"
+              onClick={handleManualConnect}
+              disabled={!manualConnection.trim()}
+            >
+              Connect
+            </Button>
+          </div>
         </div>
       </div>
-
       <Accordion expanded={advancedOpen} onChange={() => setAdvancedOpen(!advancedOpen)}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography>Advanced Connection Settings</Typography>

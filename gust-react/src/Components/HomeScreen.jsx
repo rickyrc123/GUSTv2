@@ -79,7 +79,7 @@ function HomeScreen() {
                 padding: "20px",
                 borderRadius: "8px",
             }}>
-                <DroneList drones={drones} onDroneSelect={handleDroneSelect} selectedDrone={selectedDrone} maneuverDrones={maneuverDrones}/>
+                <ManeuverList maneuvers={maneuvers} onManeuverSelect={handleManeuverSelect} selectedManeuver={selectedManeuver}/>
             </div>
             <div style={{
                 position: "absolute",
@@ -128,7 +128,7 @@ function HomeScreen() {
                 padding: "20px",
                 borderRadius: "8px",
             }}>
-                <ManeuverList maneuvers={maneuvers} onManeuverSelect={handleManeuverSelect} selectedManeuver={selectedManeuver}/>
+                <DroneList drones={drones} onDroneSelect={handleDroneSelect} selectedDrone={selectedDrone} maneuverDrones={maneuverDrones}/>
             </div>
             
         </div>
