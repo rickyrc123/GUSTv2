@@ -1,0 +1,59 @@
+.connection-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    min-width: 100vw;
+    margin: 0 auto;
+    height: 100vh; 
+    width: max-content;
+    align-self: center;
+  }
+  
+  .header-section {
+    margin: 0;
+  }
+  
+  .error-message {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .connection-list {
+    margin-bottom: 30px;
+  }
+  
+  .manual-connection {
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .port-configuration {
+    width: 100%;
+  }
+  
+  .port-inputs {
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .MuiAccordion-root {
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .MuiListItem-root {
+    border-bottom: 1px solid #eee;
+  }
+  
+  .MuiListItem-button:hover {
+    background-color: #f5f5f5;
+  }

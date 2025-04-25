@@ -43,7 +43,7 @@
         }
         .team-container {
             display: flex;
-            justify-content: space-around;
+            flex-direction: column;
             flex-wrap: wrap;
             padding: 20px;
         }
@@ -68,17 +68,19 @@
     <header>
         <h1>Meet Our Team</h1>
         <div class="nav-buttons">
-            <a href="index.html">Home</a>
-            <a href="team.html">About</a>
-            <a href="docs.html">Docs</a>
-            <a href="guide.html">Start Guide</a>
+          <a href="index.html">Home</a>
+          <a href="team.html">About Us</a>
+          <a href="deliverables">Deliverables</a>
+          <a href="docs.html">Docs</a>
+          <a href="guide.html">Start Guide</a>
         </div>
     </header>
     <main>
         <div class="team-container">
             <div class="team-member">
                 <img src="images/nick.jpg" alt="Nick">
-                <p>Nicholas Warren</p>
+                <h3>Nicholas Warren</h3>
+                <p>Developed the FastAPI application and docker image. Created the docker compose for development. Worked with hardware to connect and control physical drones</p>
             </div>
             <div class="team-member">
                 <img src="images/jcob_Senior_Pic.jpg" alt="Jcob">
@@ -90,7 +92,8 @@
             </div>
             <div class="team-member">
                 <img src="images/james.jpg" alt="James">
-                <p>James Montgomory</p>
+                <h3>James Montgomery</h3>
+                <p>Designed the postgres database and linked the functions to the fastAPI calls</p>
             </div>
             <div class="team-member">
                 <img src="images/cameron.jpg" alt="Cameron">
