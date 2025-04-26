@@ -97,7 +97,7 @@
         <p>The second screen is the planning screen. On the left is the maneuver selector and vehicle selctor. Here you can create, delete, and select maneuvers. To plan a path for a vehicle, select a maneuver, select the vehicle you want to plan for, and click "start new path". Click on the new tab that appeared in the point editor on the right side of the screen to see the points as you select them. Next, click on the map to drop waypoints for you path. When you are finished, click "Add to maneuver". You should see the maneuver you selected now has a drone and path tied to it on the left side of the screen. You can only have one path per vehicle per maneuver. By selecting a path in the point editor on the right side of the screen, you can delete points from the path. When you select a path, you can press the export button to download a csv of the selected path.</p>
         <p>The third screen is the connection screen. This screen is not fully implemented yet and is still considered a WIP</p>
         <h2 id="setup">Front End Set Up</h2>
-        <p>The front end will be eventually compiled in a binary that can be installed and ran. However, for now, to run the front end simply navigate to the gust-react directory and run the command "npm run dev"</p>
+        <p>The front end will be eventually compiled in a binary that can be installed and ran. However, for now, to run the front end simply navigate to the gust-react directory and run the command "npm run dev". This is the best option if you would like to be able to easily modify the front end on the fly. Alternatively, you can uncomment the react-app commands from the docker compose to auto start the app when you run the container</p>
 
         <h2 id="setup">Fast API Backend</h2>
         <p>The app runs on a fastAPI backend written in python 3 and run in a Ubuntu 22.04 docker container for development purposes. The app itself runs as an electron app.</p>
@@ -160,8 +160,48 @@
         </ul>
         
 
+        <h2 id="extend"></h2>
+        <p>GUST was written in React and python to make it easy to modify and extend. To add to the front end create your react components and store them in src/components. We store our stylesheets in the same directory as our components. To create a new api call, modify "FastAPI/fast_api_test_server.py". All new api endpoints can be accessed and tested by opening a browser and going to "http://localhost:8000/docs". Here you can test out new api calls using FastAPI's build in documentation.</p>
+        <p>Our backlog can be viewed on the deliverables page. You can check the sprint3 backlog to see the latest goals and completed tasks.</p>
+        <p>There are a few major issues that need to be resolved</p>
+        <ul>
+            <li>
+                GUST currently runs fully in a docker container. The front end should be migrated to an electron app and the container should be started using an electron startup script
+            </li>
+            <li>
+                GUST currently is only compatible with docker-compose v2. A version of the container should be written to support v1.
+            </li>
+            <li>
+                The connection screen is currently only finished on the front end. In order for the app to be fully functional
+            </li>
+            <li>
+                Incorporate offline mapping tiles so the user is not reliant on internet connection
+            </li>
+        </ul>
         <h2 id="faq">FAQ</h2>
-        <p>If you have any questions, refer to the FAQ section or contact the development team for assistance.</p>
+        <p>Commonly asked questions:</p>
+        <ul>
+            <li>
+                <h4>Front end started but is blank</h4>
+                This commonly happens when dependencies have not been installed. If you are running the front end from the container your dependecies should already be installed. If you are running on your machine using npm and encountering this issue, navigate to the gust-react directory and run "npm install". Ensure that you have @mui/material installed and @emotion/styled.
+            </li>
+            <li>
+                <h4>I created a new component but it is not getting data from the backend</h4>
+                First check to make sure the backend is running. If it is go to the FastAPI docs page and test your enpoint. Additionally, ensure that your fetch request uses "http://localhost:8000/yourendpoint".
+            </li>
+            <li>
+                <h4>The docker container errors when running</h4>
+                Ensure you have docker-compose v2 installed instead of v1.
+            </li>
+            <li>
+                <h4>I have planned a path but it is not getting added to my maneuver</h4>
+                Ensure you have the path planned selected in the point selector before you click add to path.
+            </li>
+            <li>
+                <h4>The application is started but neither maps are working</h4>
+                The mapping comes from an online api called openstreet map so check you internet connection.
+            </li>
+        </ul>
     </main>
 </body>
 </html>
